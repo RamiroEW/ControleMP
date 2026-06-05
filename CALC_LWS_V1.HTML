@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lean Way Solution - Calculadora de Proporções para Reparos Eólicos">
+    <meta name="theme-color" content="#004aad">
+    <title>Lean Way Solution | Calculadora</title>
+    <!-- Configurações para virar App (PWA) -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Configurações para iPhones (iOS) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Lean Way">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Reset e Configurações Gerais */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary-color: #004aad;
+            --secondary-color: #2ecc71;
+            --accent-color: #3498db;
+            --danger-color: #e74c3c;
+            --light-color: #f8f9fa;
+            --dark-color: #333333;
+            --gray-color: #6c757d;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 10px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding-bottom: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #0066cc);
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .logo h1:nth-child(1) { color: white; }
+        .logo h1:nth-child(2) { color: #a8e6cf; }
+        .logo h1:nth-child(3) { color: #ffd3b6; }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* Banner de Identificação Ativa */
+        .active-id-banner {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            box-shadow: var(--shadow);
+        }
+
+        .edit-id-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .edit-id-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* Notificação */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        }
+
+        .notification.show { transform: translateX(0); }
+
+        /* Cards */
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .card-header:hover { background-color: #003a8c; }
+
+        .card-header h2 {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-icon { transition: transform 0.3s; font-size: 1.2rem; }
+
+        .card-content { padding: 20px; display: none; }
+        .card-content.active { display: block; }
+
+        /* Material Info & Inputs */
+        .material-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .material-info p { margin-bottom: 8px; font-size: 0.95rem; }
+        .material-info p:last-child { margin-bottom: 0; }
+
+        .input-group { display: flex; flex-direction: column; gap: 15px; }
+        .input-section { display: flex; flex-direction: column; gap: 8px; }
+
+        label { font-weight: 600; color: var(--dark-color); font-size: 0.95rem; }
+
+        input[type="number"], input[type="text"], .form-select {
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* Checkboxes e Grade de Tecidos */
+        .checkbox-group {
+            display: flex; align-items: center; gap: 10px; margin: 10px 0;
+        }
+        input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary-color); }
+
+        .fabric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .fabric-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: normal;
+            cursor: pointer;
+            color: var(--dark-color);
+        }
+
+        /* Botões */
+        .calculate-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        .calculate-btn:hover { background-color: #27ae60; }
+
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-primary:hover { background-color: #003a8c; }
+
+        .history-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+            flex: 1;
+        }
+        .history-btn:hover { background-color: #2980b9; }
+        .history-btn:first-child { background-color: var(--danger-color); }
+        .history-btn:first-child:hover { background-color: #c0392b; }
+
+        /* Resultados */
+        .result-container {
+            margin-top: 20px; padding: 20px; background-color: #f0f7ff;
+            border-radius: var(--border-radius); border-left: 4px solid var(--secondary-color);
+            display: none;
+        }
+        .result-container.active { display: block; }
+        .result-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .result-item { background-color: white; padding: 15px; border-radius: var(--border-radius); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
+        .result-item strong { color: var(--primary-color); font-size: 0.9rem; }
+        .result-value { font-size: 1.5rem; font-weight: 700; color: var(--dark-color); margin-top: 5px; }
+        .result-unit { font-size: 0.9rem; color: var(--gray-color); margin-left: 2px; }
+
+        .save-btn {
+            background-color: var(--primary-color); color: white; border: none; padding: 12px 20px;
+            border-radius: var(--border-radius); font-weight: 600; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; gap: 8px; transition: background-color 0.3s;
+            width: 100%; margin-top: 15px;
+        }
+        .save-btn:hover { background-color: #003a8c; }
+
+        /* Histórico */
+        .history-container { background-color: white; border-radius: var(--border-radius); margin-top: 20px; overflow: hidden; box-shadow: var(--shadow); }
+        .history-header { background-color: var(--dark-color); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .history-header h3 { font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        .history-content { padding: 20px; display: none; }
+        .history-content.active { display: block; }
+        #history-list { max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
+        .history-item { background-color: #f8f9fa; padding: 15px; border-radius: var(--border-radius); margin-bottom: 10px; border-left: 4px solid var(--accent-color); }
+        .history-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .history-type { font-weight: 700; color: var(--primary-color); font-size: 0.95rem; }
+        .history-date { font-size: 0.85rem; color: var(--gray-color); }
+        .history-details { font-size: 0.9rem; color: var(--dark-color); }
+        .history-actions { display: flex; gap: 10px; }
+        .footer { text-align: center; color: var(--gray-color); padding: 20px; margin-top: 20px; font-size: 0.9rem; }
+        .footer-info { font-size: 0.8rem; margin-top: 5px; color: var(--gray-color); }
+
+        /* Responsividade e Animações */
+        @media (max-width: 600px) {
+            .logo h1 { font-size: 2rem; }
+            .card-header h2 { font-size: 1.1rem; }
+            .result-grid { grid-template-columns: 1fr; }
+            .history-actions { flex-direction: column; }
+            .fabric-grid { grid-template-columns: 1fr; } /* Coluna única no celular para os tecidos */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.3s ease; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <h1>Lean</h1>
+                <h1>Way</h1>
+                <h1>Solution</h1>
+            </div>
+            <p class="subtitle">Calculadora de Proporções</p>
+        </header>
+
+        <div id="notification" class="notification"></div>
+
+        <main class="main-content">
+            
+            <div id="tela-identificacao" class="fade-in">
+                <div class="card">
+                    <div class="card-header" style="justify-content: center; cursor: default;">
+                        <h2><i class="fas fa-clipboard-list"></i> 1. Identificação do Reparo</h2>
+                    </div>
+                    <div class="card-content active">
+                        <div class="input-group">
+                            <div class="input-section">
+                                <label for="projeto-input">Projeto / Parque Eólico:</label>
+                                <input type="text" id="projeto-input" placeholder="Ex: Ventos do Sul">
+                            </div>
+                            <div class="input-section">
+                                <label for="wtg-input">WTG (Aerogerador):</label>
+                                <input type="text" id="wtg-input" placeholder="Ex: WTG-01">
+                            </div>
+                            <div class="input-section">
+                                <label for="blade-input">Blade:</label>
+                                <input type="text" id="blade-input" placeholder="EX: 00360, 0058, 0017">
+                            </div>
+                            
+                            <button class="calculate-btn btn-primary" onclick="avancarParaEstimativa()" style="margin-top: 20px;">
+                                Avançar <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tela-estimativa" style="display: none;" class="fade-in">
+                <div class="active-id-banner">
+                    <div>
+                        <i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong> | 
+                        WTG: <span class="display-wtg"></span> | 
+                        <span class="display-blade"></span>
+                    </div>
+                    <button onclick="voltarParaIdentificacao()" class="edit-id-btn" title="Editar Local">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" style="justify-content: center; cursor: default;">
+                        <h2><i class="fas fa-bullseye"></i> 2. Estimativa Teórica</h2>
+                    </div>
+                    <div class="card-content active">
+                        <p style="color: var(--gray-color); margin-bottom: 15px; font-size: 0.9rem;">
+                            Insira os valores estimados para este reparo (Opcional).
+                        </p>
+                        <div class="input-group">
+                            <div class="input-section">
+                                <label for="est-tecido">Tecido Estimado (kg):</label>
+                                <input type="text" id="est-tecido" placeholder="Ex: 5,000">
+                            </div>
+                            <div class="input-section">
+                                <label for="est-resina">Resina Estimada (kg):</label>
+                                <input type="text" id="est-resina" placeholder="Ex: 5,000">
+                            </div>
+                            <div class="input-section">
+                                <label for="est-endurecedor">Endurecedor Estimado (kg):</label>
+                                <input type="text" id="est-endurecedor" placeholder="Ex: 1,500">
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button class="history-btn" onclick="voltarParaIdentificacao()" style="background-color: var(--gray-color);">
+                                    <i class="fas fa-arrow-left"></i> Voltar
+                                </button>
+                                <button class="calculate-btn btn-primary" onclick="avancarParaCalculadora()" style="margin-top: 0; flex: 2;">
+                                    Ir para Materiais <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tela-calculadora" style="display: none;" class="fade-in">
+                
+                <div class="active-id-banner">
+                    <div>
+                        <i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong> | 
+                        WTG: <span class="display-wtg"></span> | 
+                        <span class="display-blade"></span>
+                    </div>
+                    <button onclick="voltarParaEstimativa()" class="edit-id-btn" title="Voltar">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" onclick="toggleCard('reparo')">
+                        <h2><i class="fas fa-hard-hat"></i> Reparo Estrutural</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div id="reparo-content" class="card-content">
+                        
+                        <div class="input-group">
+                            <div class="input-section">
+                                <label>1. Tecidos Utilizados (Selecione os aplicados):</label>
+                                <div class="fabric-grid">
+                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Triax 1200"> Triax 1200</label>
+                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 830"> Tecido Biax 830</label>
+                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 750"> Tecido Biax 750</label>
+                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 450"> Tecido Biax 450</label>
+                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 1000"> Tecido UD 1000</label>
+                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 661"> Tecido UD 661</label>
+                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Bizero 750"> Tecido Bizero 750</label>
+                                </div>
+                            </div>
+
+                            <hr style="border: 0; height: 1px; background: #eee; margin: 5px 0;">
+
+                            <div class="material-info">
+                                <p><strong>Resina:</strong> HEXION LR635</p>
+                                <p><strong>Endurecedores:</strong> HEXION LH635 ou LH637</p>
+                                <p><strong>Proporção:</strong> 100:30</p>
+                                <p><strong>Nota:</strong> Peso do tecido = peso da resina (1:1)</p>
+                            </div>
+
+                            <div class="input-section">
+                                <label for="resina-input">2. Quantidade de Resina Gasta (kg):</label>
+                                <input type="text" id="resina-input" placeholder="Ex: 10,500">
+                            </div>
+                            <button class="calculate-btn" onclick="calcularReparo()">
+                                <i class="fas fa-calculator"></i> Calcular Mistura
+                            </button>
+                        </div>
+                        <div id="result-reparo" class="result-container"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" onclick="toggleCard('adesivo')">
+                        <h2><i class="fas fa-glue"></i> Adesivo G3</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div id="adesivo-content" class="card-content">
+                        <div class="material-info">
+                            <p><strong>Resina:</strong> MGS BPR 135G</p>
+                            <p><strong>Endurecedor:</strong> MGS BPH 1355G</p>
+                            <p><strong>Proporção:</strong> 100:45</p>
+                        </div>
+                        <div class="input-group">
+                            <label for="adesivo-resina">Quantidade de Resina (kg):</label>
+                            <input type="text" id="adesivo-resina" placeholder="Ex: 5,000">
+                            <button class="calculate-btn" onclick="calcularAdesivo()">
+                                <i class="fas fa-calculator"></i> Calcular
+                            </button>
+                        </div>
+                        <div id="result-adesivo" class="result-container"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" onclick="toggleCard('preenchimento')">
+                        <h2><i class="fas fa-fill-drip"></i> Acabamento - Preenchimento</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div id="preenchimento-content" class="card-content">
+                        <div class="input-group">
+                            <div class="material-info">
+                                <p><strong>Base:</strong> BladeRep Profile Filler 3</p>
+                                <p><strong>Endurecedor:</strong> BladeRep Hardener Filler 3</p>
+                                <p><strong>Proporção:</strong> 6:1</p>
+                            </div>
+                            <label for="filler-base">Quantidade de Base (kg):</label>
+                            <input type="text" id="filler-base" placeholder="Ex: 6,000">
+                            <button class="calculate-btn" onclick="calcularFiller()">
+                                <i class="fas fa-calculator"></i> Calcular
+                            </button>
+                        </div>
+                        <div id="result-filler" class="result-container"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" onclick="toggleCard('pintura')">
+                        <h2><i class="fas fa-paint-roller"></i> Acabamento - Pintura</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div id="pintura-content" class="card-content">
+                        <div class="material-info">
+                            <p><strong>Base:</strong> BladeRep Topcoat 12</p>
+                            <p><strong>Endurecedor:</strong> BladeRep Hardener 12</p>
+                            <p><strong>Proporção:</strong> 4:1</p>
+                            <p><strong>Diluidor:</strong> 10% da base (opcional)</p>
+                        </div>
+                        <div class="input-group">
+                            <label for="pintura-base">Quantidade de Base (kg):</label>
+                            <input type="text" id="pintura-base" placeholder="Ex: 4,000">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="diluidor-check">
+                                <label for="diluidor-check">Adicionar diluidor (Thinner 12)</label>
+                            </div>
+                            <button class="calculate-btn" onclick="calcularPintura()">
+                                <i class="fas fa-calculator"></i> Calcular
+                            </button>
+                        </div>
+                        <div id="result-pintura" class="result-container"></div>
+                    </div>
+                </div>
+
+                <div class="history-container">
+                    <div class="history-header" onclick="toggleHistory()">
+                        <h3><i class="fas fa-history"></i> Histórico (Últimos 30)</h3>
+                        <span id="history-toggle" class="toggle-icon">▼</span>
+                    </div>
+                    <div id="history-content" class="history-content">
+                        <div id="history-list"></div>
+                        <div class="history-actions">
+                            <button class="history-btn" onclick="limparHistorico()">
+                                <i class="fas fa-trash"></i> Limpar Histórico
+                            </button>
+                            <button class="history-btn" onclick="exportarHistorico()">
+                                <i class="fas fa-download"></i> Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div> </main>
+
+        <footer class="footer">
+            <p>Lean Way Solution &copy; <span id="current-year"></span> | Uso Interno</p>
+            <p class="footer-info">App otimizado para uso offline em parques eólicos</p>
+        </footer>
+    </div>
+
+    <script>
+        // CONFIGURAÇÃO DA PLANILHA 
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnGGqqI8edzQXtSq5VP4HMwH0ui_4A-XwuQr3reA3y35oapZbRdaPp9Rm09BsnDf3v/exec';
+
+        let history = JSON.parse(localStorage.getItem('leanway_history')) || [];
+        let syncQueue = JSON.parse(localStorage.getItem('leanway_sync_queue')) || [];
+        let isHistoryVisible = false;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            carregarHistorico();
+            tentarSincronizar();
+
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    const CACHE_NAME = 'leanway-cache-v1';
+                    const urlsToCache = ['./', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'];
+                    self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))); });
+                    self.addEventListener('activate', event => { event.waitUntil(caches.keys().then(cacheNames => Promise.all(cacheNames.map(cacheName => { if (cacheName !== CACHE_NAME) return caches.delete(cacheName); } )))); });
+                    self.addEventListener('fetch', event => { event.respondWith(caches.match(event.request).then(response => { if (response) return response; return fetch(event.request).then(response => { if (!response || response.status !== 200 || response.type !== 'basic') return response; const responseToCache = response.clone(); caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache)); return response; }); }).catch(() => { if (event.request.mode === 'navigate') return caches.match('./'); }) ); });
+                `;
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW Error:', err));
+            }
+        });
+
+        window.addEventListener('online', () => {
+            if (syncQueue.length > 0) {
+                showNotification('Internet reconectada. Sincronizando dados...', 'accent');
+                tentarSincronizar();
+            }
+        });
+
+        // NAVEGAÇÃO DE TELAS
+        function avancarParaEstimativa() {
+            const projeto = document.getElementById('projeto-input').value.trim();
+            const wtg = document.getElementById('wtg-input').value.trim();
+            const blade = document.getElementById('blade-input').value.trim();
+
+            if(!projeto || !wtg || !blade) {
+                showNotification('Por favor, preencha Projeto, WTG e Blade.', 'error');
+                return;
+            }
+
+            document.querySelectorAll('.display-projeto').forEach(el => el.textContent = projeto);
+            document.querySelectorAll('.display-wtg').forEach(el => el.textContent = wtg);
+            document.querySelectorAll('.display-blade').forEach(el => el.textContent = blade);
+
+            document.getElementById('tela-identificacao').style.display = 'none';
+            document.getElementById('tela-estimativa').style.display = 'block';
+        }
+
+        function avancarParaCalculadora() {
+            document.getElementById('tela-estimativa').style.display = 'none';
+            document.getElementById('tela-calculadora').style.display = 'block';
+            
+            if(!document.getElementById('reparo-content').classList.contains('active')) {
+                toggleCard('reparo');
+            }
+        }
+
+        function voltarParaIdentificacao() {
+            document.getElementById('tela-calculadora').style.display = 'none';
+            document.getElementById('tela-estimativa').style.display = 'none';
+            document.getElementById('tela-identificacao').style.display = 'block';
+        }
+
+        function voltarParaEstimativa() {
+            document.getElementById('tela-calculadora').style.display = 'none';
+            document.getElementById('tela-estimativa').style.display = 'block';
+        }
+
+        // UI Functions
+        function toggleCard(cardId) {
+            const content = document.getElementById(`${cardId}-content`);
+            const icon = content.previousElementSibling.querySelector('.toggle-icon');
+            
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                icon.textContent = '▼';
+            } else {
+                document.querySelectorAll('#tela-calculadora .card-content').forEach(el => {
+                    if(el.id !== 'history-content') {
+                        el.classList.remove('active');
+                        el.previousElementSibling.querySelector('.toggle-icon').textContent = '▼';
+                    }
+                });
+                content.classList.add('active');
+                icon.textContent = '▲';
+            }
+        }
+
+        function toggleHistory() {
+            const content = document.getElementById('history-content');
+            const toggleIcon = document.getElementById('history-toggle');
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                toggleIcon.textContent = '▼';
+                isHistoryVisible = false;
+            } else {
+                content.classList.add('active');
+                toggleIcon.textContent = '▲';
+                isHistoryVisible = true;
+                carregarHistorico();
+            }
+        }
+
+        // Calculation Functions
+        function calcularReparo() {
+            const resina = parseFloat(document.getElementById('resina-input').value.replace(',', '.'));
+            if (isNaN(resina) || resina <= 0) return showNotification('Insira uma quantidade válida', 'error');
+            
+            // Pega os tecidos selecionados
+            const checkboxes = document.querySelectorAll('input[name="tecido-reparo"]:checked');
+            let tecidosSelecionados = Array.from(checkboxes).map(cb => cb.value).join(' + ');
+            if (tecidosSelecionados === '') tecidosSelecionados = 'Nenhum informado';
+
+            const endurecedor = resina * 0.30;
+            const total = resina + endurecedor;
+            
+            // Passamos a string de tecidos para o gerador de HTML
+            document.getElementById('result-reparo').innerHTML = gerarHTMLResultado('Reparo Estrutural', resina, endurecedor, 0, total, resina, tecidosSelecionados);
+            document.getElementById('result-reparo').classList.add('active');
+        }
+
+        function calcularAdesivo() {
+            const resina = parseFloat(document.getElementById('adesivo-resina').value.replace(',', '.'));
+            if (isNaN(resina) || resina <= 0) return showNotification('Insira uma quantidade válida', 'error');
+            
+            const endurecedor = resina * 0.45;
+            const total = resina + endurecedor;
+            
+            document.getElementById('result-adesivo').innerHTML = gerarHTMLResultado('Adesivo G3', resina, endurecedor, 0, total);
+            document.getElementById('result-adesivo').classList.add('active');
+        }
+
+        function calcularFiller() {
+            const base = parseFloat(document.getElementById('filler-base').value.replace(',', '.'));
+            if (isNaN(base) || base <= 0) return showNotification('Insira uma quantidade válida', 'error');
+            
+            const endurecedor = base / 6;
+            const total = base + endurecedor;
+            
+            document.getElementById('result-filler').innerHTML = gerarHTMLResultado('Acabamento Filler 3', base, endurecedor, 0, total);
+            document.getElementById('result-filler').classList.add('active');
+        }
+
+        function calcularPintura() {
+            const base = parseFloat(document.getElementById('pintura-base').value.replace(',', '.'));
+            const usarDiluidor = document.getElementById('diluidor-check').checked;
+            if (isNaN(base) || base <= 0) return showNotification('Insira uma quantidade válida', 'error');
+            
+            const endurecedor = base / 4;
+            const diluidor = usarDiluidor ? base * 0.1 : 0;
+            const total = base + endurecedor + diluidor;
+            
+            document.getElementById('result-pintura').innerHTML = gerarHTMLResultado('Acabamento Pintura', base, endurecedor, diluidor, total);
+            document.getElementById('result-pintura').classList.add('active');
+        }
+
+        // Geração de Resultados
+        function gerarHTMLResultado(tipo, base, endurecedor, adicional, total, tecido = 0, nomesTecidos = '') {
+            let adicionalHTML = '';
+            if (adicional > 0) adicionalHTML = `<div class="result-item"><strong>Diluidor</strong><div class="result-value">${adicional.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>`;
+            if (tecido > 0) adicionalHTML = `<div class="result-item"><strong>Tecido Estimado</strong><div class="result-value">${tecido.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>`;
+
+            let tecidosInfoHTML = '';
+            if (nomesTecidos !== '') {
+                tecidosInfoHTML = `<div style="grid-column: 1 / -1; background: #e3f2fd; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: var(--primary-color);"><strong>Tecidos Utilizados:</strong> ${nomesTecidos}</div>`;
+            }
+
+            return `
+                <div class="result-title"><i class="fas fa-calculator"></i> Resultado</div>
+                <div class="result-grid">
+                    ${tecidosInfoHTML}
+                    <div class="result-item"><strong>Base/Resina</strong><div class="result-value">${base.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>
+                    <div class="result-item"><strong>Endurecedor</strong><div class="result-value">${endurecedor.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>
+                    ${adicionalHTML}
+                    <div class="result-item"><strong>Mistura Total</strong><div class="result-value">${total.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>
+                </div>
+                <button class="save-btn" onclick="salvarCalculo('${tipo}', ${base}, ${endurecedor}, ${adicional > 0 ? adicional : tecido}, ${total}, '${nomesTecidos}')">
+                    <i class="fas fa-save"></i> Salvar e Sincronizar
+                </button>
+            `;
+        }
+
+        // Logic & Storage
+        function salvarCalculo(tipo, base, endurecedor, adicional, total, nomesTecidos = '') {
+            const projeto = document.getElementById('projeto-input').value.trim();
+            const wtg = document.getElementById('wtg-input').value.trim();
+            const blade = document.getElementById('blade-input').value.trim();
+            
+            const estTecido = parseFloat(document.getElementById('est-tecido').value.replace(',', '.')) || 0;
+            const estResina = parseFloat(document.getElementById('est-resina').value.replace(',', '.')) || 0;
+            const estEndurecedor = parseFloat(document.getElementById('est-endurecedor').value.replace(',', '.')) || 0;
+
+            if(!projeto || !wtg || !blade) {
+                showNotification('Erro interno: Dados de identificação perdidos.', 'error');
+                voltarParaIdentificacao(); 
+                return; 
+            }
+
+            const calculo = {
+                id: Date.now(),
+                projeto: projeto,
+                wtg: wtg,
+                blade: blade,
+                tecidosUsados: nomesTecidos, // NOVA INFORMAÇÃO
+                estTecido: estTecido,
+                estResina: estResina,
+                estEndurecedor: estEndurecedor,
+                tipo: tipo,
+                base: base,
+                endurecedor: endurecedor,
+                adicional: adicional,
+                total: total,
+                data: new Date().toLocaleString('pt-BR')
+            };
+            
+            history.unshift(calculo);
+            if (history.length > 30) history = history.slice(0, 30);
+            localStorage.setItem('leanway_history', JSON.stringify(history));
+            
+            syncQueue.push(calculo);
+            localStorage.setItem('leanway_sync_queue', JSON.stringify(syncQueue));
+            
+            showNotification('Cálculo salvo localmente!', 'success');
+            if (isHistoryVisible) carregarHistorico();
+            
+            tentarSincronizar();
+        }
+
+        async function tentarSincronizar() {
+            if (!navigator.onLine || syncQueue.length === 0 || GOOGLE_APPS_SCRIPT_URL === '') return;
+
+            try {
+                const resposta = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(syncQueue),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+
+                syncQueue = [];
+                localStorage.setItem('leanway_sync_queue', JSON.stringify(syncQueue));
+                showNotification('Dados enviados para a planilha!', 'success');
+            } catch (erro) {
+                console.log('Sem conexão com o servidor. Envio pendente.');
+            }
+        }
+
+        function carregarHistorico() {
+            const historyList = document.getElementById('history-list');
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="text-align: center; color: var(--gray-color); padding: 20px;">Nenhum cálculo no histórico</p>';
+                return;
+            }
+            
+            let html = '';
+            history.forEach(item => {
+                let detalhes = `Base: ${item.base.toFixed(3).replace('.', ',')}kg | Endurecedor: ${item.endurecedor.toFixed(3).replace('.', ',')}kg`;
+                if (item.adicional > 0) detalhes += ` | Adicional: ${item.adicional.toFixed(3).replace('.', ',')}kg`;
+                
+                // Mostra os tecidos no histórico se existirem
+                if (item.tecidosUsados && item.tecidosUsados !== '') {
+                    detalhes += `<br><span style="color: var(--primary-color); font-size: 0.85rem;"><strong>Tecidos:</strong> ${item.tecidosUsados}</span>`;
+                }
+                
+                html += `
+                    <div class="history-item">
+                        <div class="history-item-header">
+                            <span class="history-type">${item.tipo}</span>
+                            <span class="history-date">${item.data}</span>
+                        </div>
+                        <div class="history-details" style="margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                            <strong>Local:</strong> ${item.projeto || 'N/A'} | <strong>WTG:</strong> ${item.wtg || 'N/A'} | <strong>${item.blade || 'N/A'}</strong>
+                        </div>
+                        <div class="history-details">
+                            ${detalhes}<br>
+                            <strong style="color: var(--primary-color);">Total Gasto: ${item.total.toFixed(3).replace('.', ',')}kg</strong>
+                        </div>
+                    </div>
+                `;
+            });
+            historyList.innerHTML = html;
+        }
+
+        function limparHistorico() {
+            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+                history = [];
+                localStorage.removeItem('leanway_history');
+                carregarHistorico();
+                showNotification('Histórico limpo', 'success');
+            }
+        }
+
+        function exportarHistorico() {
+            if (history.length === 0) return showNotification('Não há dados para exportar', 'error');
+            
+            let csv = 'Projeto;WTG;Blade;Tecidos Usados;Est. Tecido;Est. Resina;Est. Endurecedor;Tipo;Base;Endurecedor;Adicional;Total;Data\n';
+            history.forEach(item => {
+                csv += `"${item.projeto || ''}";"${item.wtg || ''}";"${item.blade || ''}";"${item.tecidosUsados || ''}";"${(item.estTecido || 0).toFixed(3).replace('.', ',')}";"${(item.estResina || 0).toFixed(3).replace('.', ',')}";"${(item.estEndurecedor || 0).toFixed(3).replace('.', ',')}";"${item.tipo}";"${item.base.toFixed(3).replace('.', ',')}";"${item.endurecedor.toFixed(3).replace('.', ',')}";"${item.adicional.toFixed(3).replace('.', ',')}";"${item.total.toFixed(3).replace('.', ',')}";"${item.data}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `leanway_historico_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            showNotification('Download concluído!', 'success');
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.style.backgroundColor = type === 'error' ? 'var(--danger-color)' : 'var(--secondary-color)';
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>
