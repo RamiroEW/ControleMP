@@ -1,888 +1,1343 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Lean Way Solution - Calculadora de Proporções para Reparos Eólicos">
-    <meta name="theme-color" content="#004aad">
-    <title>Lean Way Solution | Calculadora</title>
-    <!-- Configurações para virar App (PWA) -->
-    <link rel="manifest" href="manifest.json">
-    
-    <!-- Configurações para iPhones (iOS) -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Lean Way">
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        /* Reset e Configurações Gerais */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Lean Way Solution - Calculadora de Proporções para Reparos Eólicos">
+  <meta name="theme-color" content="#004aad">
+  <title>Lean Way Solution | Calculadora</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Lean Way">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --primary:#004aad;--primary-dark:#003a8c;--secondary:#2ecc71;--secondary-dark:#27ae60;
+      --accent:#3498db;--danger:#e74c3c;--warning:#f39c12;--light:#f8f9fa;--dark:#333;
+      --gray:#6c757d;--border:#dee2e6;--shadow:0 4px 6px rgba(0,0,0,.1);--radius:10px;
+    }
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f5f7fa;color:var(--dark);line-height:1.6;padding-bottom:30px}
+    .container{max-width:820px;margin:0 auto;padding:0 14px}
 
-        :root {
-            --primary-color: #004aad;
-            --secondary-color: #2ecc71;
-            --accent-color: #3498db;
-            --danger-color: #e74c3c;
-            --light-color: #f8f9fa;
-            --dark-color: #333333;
-            --gray-color: #6c757d;
-            --border-color: #dee2e6;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --border-radius: 10px;
-        }
+    /* HEADER */
+    .header{background:linear-gradient(135deg,var(--primary),#0066cc);color:#fff;padding:18px 20px;
+      border-radius:0 0 var(--radius) var(--radius);text-align:center;margin-bottom:16px;box-shadow:var(--shadow)}
+    .logo{display:flex;flex-direction:column;align-items:center;margin-bottom:6px}
+    .logo h1{font-size:2.4rem;font-weight:700;line-height:1;margin:0;letter-spacing:1px}
+    .logo h1:nth-child(1){color:#fff}
+    .logo h1:nth-child(2){color:#a8e6cf}
+    .logo h1:nth-child(3){color:#ffd3b6}
+    .subtitle{font-size:1.05rem;opacity:.9;margin-top:4px}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
-            color: var(--dark-color);
-            line-height: 1.6;
-            padding-bottom: 20px;
-        }
+    /* NOTIFICATION */
+    .notification{position:fixed;top:16px;right:16px;background:var(--secondary);color:#fff;
+      padding:13px 18px;border-radius:var(--radius);box-shadow:var(--shadow);z-index:1000;
+      transform:translateX(160%);transition:transform .3s ease;max-width:300px;font-size:.9rem}
+    .notification.show{transform:translateX(0)}
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
+    /* BANNER */
+    .active-id-banner{background:var(--primary);color:#fff;padding:10px 14px;
+      border-radius:var(--radius);margin-bottom:14px;display:flex;justify-content:space-between;
+      align-items:center;font-size:.88rem;box-shadow:var(--shadow);flex-wrap:wrap;gap:6px}
+    .active-id-banner .info{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+    .badge{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:.82rem;font-weight:600}
+    .edit-id-btn{background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 11px;
+      border-radius:5px;cursor:pointer;font-size:.85rem;transition:background .3s;display:flex;align-items:center;gap:5px}
+    .edit-id-btn:hover{background:rgba(255,255,255,.35)}
 
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, var(--primary-color), #0066cc);
-            color: white;
-            padding: 20px;
-            border-radius: 0 0 var(--border-radius) var(--border-radius);
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
+    /* CARDS */
+    .card{background:#fff;border-radius:var(--radius);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+    .card-header{background:var(--primary);color:#fff;padding:13px 18px;display:flex;
+      justify-content:space-between;align-items:center;cursor:pointer;transition:background .3s}
+    .card-header:hover{background:var(--primary-dark)}
+    .card-header.no-toggle{cursor:default}
+    .card-header.no-toggle:hover{background:var(--primary)}
+    .card-header h2{font-size:1.1rem;display:flex;align-items:center;gap:9px}
+    .toggle-icon{transition:transform .3s;font-size:1.1rem;flex-shrink:0}
+    .card-content{padding:18px;display:none}
+    .card-content.active{display:block}
 
-        .logo {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 10px;
-        }
+    /* STEP INDICATOR */
+    .step-bar{display:flex;justify-content:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .step{display:flex;align-items:center;gap:5px;font-size:.8rem;color:var(--gray)}
+    .step-num{width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--gray);
+      display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem}
+    .step.active .step-num{background:var(--primary);color:#fff}
+    .step.done .step-num{background:var(--secondary);color:#fff}
+    .step-arrow{color:var(--border);font-size:.7rem}
 
-        .logo h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            line-height: 1;
-            margin: 0;
-            letter-spacing: 1px;
-        }
+    /* INPUTS */
+    .input-group{display:flex;flex-direction:column;gap:13px}
+    .input-section{display:flex;flex-direction:column;gap:6px}
+    .input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    label{font-weight:600;color:var(--dark);font-size:.92rem}
+    .label-hint{font-size:.78rem;font-weight:400;color:var(--gray);margin-left:4px}
+    input[type="number"],input[type="text"],select{
+      padding:11px 14px;border:2px solid var(--border);border-radius:var(--radius);
+      font-size:.97rem;transition:border-color .3s;width:100%;font-family:inherit;background:#fff}
+    input:focus,select:focus{border-color:var(--primary);outline:none}
+    input.error,select.error{border-color:var(--danger)}
 
-        .logo h1:nth-child(1) { color: white; }
-        .logo h1:nth-child(2) { color: #a8e6cf; }
-        .logo h1:nth-child(3) { color: #ffd3b6; }
+    /* RADIO TOGGLE (PS/SS) */
+    .toggle-group{display:flex;border-radius:var(--radius);overflow:hidden;border:2px solid var(--border)}
+    .toggle-group input{display:none}
+    .toggle-group label{flex:1;text-align:center;padding:11px;cursor:pointer;font-weight:600;
+      font-size:.95rem;transition:all .2s;background:#fff;color:var(--gray)}
+    .toggle-group input:checked+label{background:var(--primary);color:#fff;border:none}
 
-        .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin-top: 5px;
-        }
+    /* CHECKBOXES */
+    .checkbox-group{display:flex;align-items:center;gap:10px;margin:8px 0;cursor:pointer}
+    .checkbox-group input[type="checkbox"]{width:20px;height:20px;accent-color:var(--primary);cursor:pointer;flex-shrink:0}
+    .fabric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f8f9fa;
+      padding:13px;border-radius:var(--radius);border:1px solid var(--border)}
+    .fabric-checkbox{display:flex;align-items:center;gap:8px;font-size:.88rem;cursor:pointer;color:var(--dark);font-weight:normal}
 
-        /* Banner de Identificação Ativa */
-        .active-id-banner {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 15px;
-            border-radius: var(--border-radius);
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.95rem;
-            box-shadow: var(--shadow);
-        }
+    /* INFO BOX */
+    .info-box{background:#f0f7ff;padding:13px 15px;border-radius:var(--radius);
+      border-left:4px solid var(--primary);margin-bottom:14px}
+    .info-box p{margin-bottom:6px;font-size:.9rem}
+    .info-box p:last-child{margin-bottom:0}
+    .info-box.warning{background:#fff8e1;border-left-color:var(--warning)}
+    .info-box.danger{background:#fff5f5;border-left-color:var(--danger)}
+    .info-box.success{background:#f0fdf4;border-left-color:var(--secondary)}
 
-        .edit-id-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+    /* BUTTONS */
+    .btn{border:none;padding:13px 18px;border-radius:var(--radius);font-weight:600;font-size:.97rem;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .2s;width:100%;margin-top:8px}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{background:var(--primary-dark)}
+    .btn-success{background:var(--secondary);color:#fff}
+    .btn-success:hover{background:var(--secondary-dark)}
+    .btn-accent{background:var(--accent);color:#fff}
+    .btn-accent:hover{background:#2980b9}
+    .btn-danger{background:var(--danger);color:#fff}
+    .btn-danger:hover{background:#c0392b}
+    .btn-gray{background:var(--gray);color:#fff}
+    .btn-gray:hover{background:#5a6268}
+    .btn-sm{padding:8px 13px;font-size:.85rem;margin-top:0}
+    .btn-row{display:flex;gap:10px;margin-top:8px}
+    .btn-row .btn{margin-top:0}
 
-        .edit-id-btn:hover { background: rgba(255, 255, 255, 0.3); }
+    /* LAYER TABLE */
+    .layer-table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:10px}
+    .layer-table th{background:var(--primary);color:#fff;padding:8px 10px;text-align:left;font-weight:600}
+    .layer-table td{padding:7px 10px;border-bottom:1px solid var(--border)}
+    .layer-table tr:nth-child(even) td{background:#f8f9fa}
+    .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.75rem;font-weight:700}
+    .tag-tx{background:#e3f2fd;color:#1565c0}
+    .tag-bx{background:#e8f5e9;color:#2e7d32}
+    .tag-bz{background:#fff8e1;color:#e65100}
+    .tag-ud{background:#fce4ec;color:#880e4f}
 
-        /* Notificação */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 15px 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            transform: translateX(150%);
-            transition: transform 0.3s ease;
-            max-width: 300px;
-        }
+    /* RESULTS */
+    .result-container{margin-top:16px;padding:18px;background:#f0f7ff;border-radius:var(--radius);
+      border-left:4px solid var(--secondary);display:none}
+    .result-container.active{display:block}
+    .result-title{font-size:1.05rem;font-weight:700;color:var(--primary);margin-bottom:13px;
+      display:flex;align-items:center;gap:9px}
+    .result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+    .result-item{background:#fff;padding:13px;border-radius:var(--radius);
+      box-shadow:0 2px 4px rgba(0,0,0,.06)}
+    .result-item strong{color:var(--primary);font-size:.82rem;display:block}
+    .result-value{font-size:1.35rem;font-weight:700;color:var(--dark);margin-top:4px}
+    .result-unit{font-size:.82rem;color:var(--gray);margin-left:2px}
+    .save-btn{background:var(--primary);color:#fff;border:none;padding:11px 18px;
+      border-radius:var(--radius);font-weight:600;cursor:pointer;display:flex;align-items:center;
+      justify-content:center;gap:8px;transition:background .3s;width:100%;margin-top:13px;font-size:.95rem}
+    .save-btn:hover{background:var(--primary-dark)}
 
-        .notification.show { transform: translateX(0); }
+    /* ESTIMATE PANEL */
+    .est-panel{background:#fff;border-radius:var(--radius);padding:16px;border:2px solid var(--primary);margin-bottom:14px}
+    .est-panel-title{font-weight:700;color:var(--primary);font-size:1rem;margin-bottom:12px;
+      display:flex;align-items:center;gap:8px}
+    .est-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.9rem}
+    .est-row:last-child{border-bottom:none}
+    .est-label{color:var(--gray)}
+    .est-value{font-weight:700;color:var(--dark)}
+    .layers-detected{background:#e8f4fd;border-radius:var(--radius);padding:12px;margin-top:10px}
+    .layers-detected-title{font-size:.82rem;font-weight:700;color:var(--primary);margin-bottom:8px}
 
-        /* Cards */
-        .card {
-            background-color: white;
-            border-radius: var(--border-radius);
-            margin-bottom: 15px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-        }
+    /* HISTORY */
+    .history-container{background:#fff;border-radius:var(--radius);margin-top:14px;overflow:hidden;box-shadow:var(--shadow)}
+    .history-header{background:var(--dark);color:#fff;padding:13px 18px;display:flex;
+      justify-content:space-between;align-items:center;cursor:pointer}
+    .history-header h3{font-size:1rem;display:flex;align-items:center;gap:9px}
+    .history-content{padding:18px;display:none}
+    .history-content.active{display:block}
+    #history-list{max-height:320px;overflow-y:auto;margin-bottom:16px}
+    .history-item{background:#f8f9fa;padding:13px;border-radius:var(--radius);
+      margin-bottom:10px;border-left:4px solid var(--accent)}
+    .history-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:4px}
+    .history-type{font-weight:700;color:var(--primary);font-size:.9rem}
+    .history-date{font-size:.8rem;color:var(--gray)}
+    .history-details{font-size:.87rem;color:var(--dark)}
+    .history-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .history-btn{background:var(--accent);color:#fff;border:none;padding:9px 13px;
+      border-radius:var(--radius);font-weight:600;font-size:.85rem;cursor:pointer;
+      display:flex;align-items:center;gap:7px;transition:background .3s;flex:1;justify-content:center}
+    .history-btn:hover{background:#2980b9}
+    .history-btn.danger{background:var(--danger)}
+    .history-btn.danger:hover{background:#c0392b}
 
-        .card-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    /* FOOTER */
+    .footer{text-align:center;color:var(--gray);padding:18px;margin-top:16px;font-size:.87rem}
+    .footer-info{font-size:.78rem;margin-top:4px}
 
-        .card-header:hover { background-color: #003a8c; }
+    /* FADE ANIMATION */
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .fade-in{animation:fadeIn .3s ease}
 
-        .card-header h2 {
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .toggle-icon { transition: transform 0.3s; font-size: 1.2rem; }
-
-        .card-content { padding: 20px; display: none; }
-        .card-content.active { display: block; }
-
-        /* Material Info & Inputs */
-        .material-info {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .material-info p { margin-bottom: 8px; font-size: 0.95rem; }
-        .material-info p:last-child { margin-bottom: 0; }
-
-        .input-group { display: flex; flex-direction: column; gap: 15px; }
-        .input-section { display: flex; flex-direction: column; gap: 8px; }
-
-        label { font-weight: 600; color: var(--dark-color); font-size: 0.95rem; }
-
-        input[type="number"], input[type="text"], .form-select {
-            padding: 12px 15px;
-            border: 2px solid var(--border-color);
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: border-color 0.3s;
-            width: 100%;
-            font-family: inherit;
-        }
-
-        input[type="number"]:focus, input[type="text"]:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-
-        /* Checkboxes e Grade de Tecidos */
-        .checkbox-group {
-            display: flex; align-items: center; gap: 10px; margin: 10px 0;
-        }
-        input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary-color); }
-
-        .fabric-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-        }
-
-        .fabric-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-            font-weight: normal;
-            cursor: pointer;
-            color: var(--dark-color);
-        }
-
-        /* Botões */
-        .calculate-btn {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: background-color 0.3s;
-            margin-top: 10px;
-        }
-        .calculate-btn:hover { background-color: #27ae60; }
-
-        .btn-primary { background-color: var(--primary-color); }
-        .btn-primary:hover { background-color: #003a8c; }
-
-        .history-btn {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: background-color 0.3s;
-            flex: 1;
-        }
-        .history-btn:hover { background-color: #2980b9; }
-        .history-btn:first-child { background-color: var(--danger-color); }
-        .history-btn:first-child:hover { background-color: #c0392b; }
-
-        /* Resultados */
-        .result-container {
-            margin-top: 20px; padding: 20px; background-color: #f0f7ff;
-            border-radius: var(--border-radius); border-left: 4px solid var(--secondary-color);
-            display: none;
-        }
-        .result-container.active { display: block; }
-        .result-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .result-item { background-color: white; padding: 15px; border-radius: var(--border-radius); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
-        .result-item strong { color: var(--primary-color); font-size: 0.9rem; }
-        .result-value { font-size: 1.5rem; font-weight: 700; color: var(--dark-color); margin-top: 5px; }
-        .result-unit { font-size: 0.9rem; color: var(--gray-color); margin-left: 2px; }
-
-        .save-btn {
-            background-color: var(--primary-color); color: white; border: none; padding: 12px 20px;
-            border-radius: var(--border-radius); font-weight: 600; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; gap: 8px; transition: background-color 0.3s;
-            width: 100%; margin-top: 15px;
-        }
-        .save-btn:hover { background-color: #003a8c; }
-
-        /* Histórico */
-        .history-container { background-color: white; border-radius: var(--border-radius); margin-top: 20px; overflow: hidden; box-shadow: var(--shadow); }
-        .history-header { background-color: var(--dark-color); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .history-header h3 { font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-        .history-content { padding: 20px; display: none; }
-        .history-content.active { display: block; }
-        #history-list { max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
-        .history-item { background-color: #f8f9fa; padding: 15px; border-radius: var(--border-radius); margin-bottom: 10px; border-left: 4px solid var(--accent-color); }
-        .history-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .history-type { font-weight: 700; color: var(--primary-color); font-size: 0.95rem; }
-        .history-date { font-size: 0.85rem; color: var(--gray-color); }
-        .history-details { font-size: 0.9rem; color: var(--dark-color); }
-        .history-actions { display: flex; gap: 10px; }
-        .footer { text-align: center; color: var(--gray-color); padding: 20px; margin-top: 20px; font-size: 0.9rem; }
-        .footer-info { font-size: 0.8rem; margin-top: 5px; color: var(--gray-color); }
-
-        /* Responsividade e Animações */
-        @media (max-width: 600px) {
-            .logo h1 { font-size: 2rem; }
-            .card-header h2 { font-size: 1.1rem; }
-            .result-grid { grid-template-columns: 1fr; }
-            .history-actions { flex-direction: column; }
-            .fabric-grid { grid-template-columns: 1fr; } /* Coluna única no celular para os tecidos */
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.3s ease; }
-    </style>
+    /* RESPONSIVE */
+    @media(max-width:600px){
+      .logo h1{font-size:2rem}
+      .input-row{grid-template-columns:1fr}
+      .result-grid{grid-template-columns:1fr 1fr}
+      .history-actions{flex-direction:column}
+      .fabric-grid{grid-template-columns:1fr}
+      .step{font-size:.72rem}
+      .step span:not(.step-num){display:none}
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">
-                <h1>Lean</h1>
-                <h1>Way</h1>
-                <h1>Solution</h1>
+<div class="container">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo"><h1>Lean</h1><h1>Way</h1><h1>Solution</h1></div>
+    <p class="subtitle">Calculadora de Reparos em Pás Eólicas</p>
+  </header>
+
+  <div id="notification" class="notification"></div>
+
+  <main>
+
+    <!-- ═══════════════════════════════════════════════
+         TELA 1 — IDENTIFICAÇÃO
+    ═══════════════════════════════════════════════ -->
+    <div id="tela-identificacao" class="fade-in">
+      <div class="step-bar">
+        <div class="step active"><span class="step-num">1</span><span>Identificação</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step"><span class="step-num">2</span><span>Dano</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step"><span class="step-num">3</span><span>Estimativa</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step"><span class="step-num">4</span><span>Cálculo</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header no-toggle" style="cursor:default">
+          <h2><i class="fas fa-clipboard-list"></i> Identificação do Reparo</h2>
+        </div>
+        <div class="card-content active">
+          <div class="input-group">
+            <div class="input-section">
+              <label for="projeto-input">Projeto / Parque Eólico:</label>
+              <input type="text" id="projeto-input" placeholder="Ex: Ventos do Sul">
             </div>
-            <p class="subtitle">Calculadora de Proporções</p>
-        </header>
+            <div class="input-row">
+              <div class="input-section">
+                <label for="wtg-input">WTG (Aerogerador):</label>
+                <input type="text" id="wtg-input" placeholder="Ex: WTG-01">
+              </div>
+              <div class="input-section">
+                <label for="blade-input">N° da Pá (Blade):</label>
+                <input type="text" id="blade-input" placeholder="Ex: 00360">
+              </div>
+            </div>
+            <div class="input-section">
+              <label for="tipo-pa">Tipo de Pá: <span class="label-hint">(modelo)</span></label>
+              <select id="tipo-pa">
+                <option value="">— Selecione o modelo —</option>
+                <option value="AW56.7">AW 56.7</option>
+                <option value="AW61.2">AW 61.2 (inclui -1 e -2)</option>
+                <option value="AW64.7">AW 64.7</option>
+                <option value="NR81.5">NR 81.5</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="avancarParaDano()">
+              Avançar <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tela-identificacao -->
 
-        <div id="notification" class="notification"></div>
 
-        <main class="main-content">
-            
-            <div id="tela-identificacao" class="fade-in">
-                <div class="card">
-                    <div class="card-header" style="justify-content: center; cursor: default;">
-                        <h2><i class="fas fa-clipboard-list"></i> 1. Identificação do Reparo</h2>
-                    </div>
-                    <div class="card-content active">
-                        <div class="input-group">
-                            <div class="input-section">
-                                <label for="projeto-input">Projeto / Parque Eólico:</label>
-                                <input type="text" id="projeto-input" placeholder="Ex: Ventos do Sul">
-                            </div>
-                            <div class="input-section">
-                                <label for="wtg-input">WTG (Aerogerador):</label>
-                                <input type="text" id="wtg-input" placeholder="Ex: WTG-01">
-                            </div>
-                            <div class="input-section">
-                                <label for="blade-input">Blade:</label>
-                                <input type="text" id="blade-input" placeholder="EX: 00360, 0058, 0017">
-                            </div>
-                            
-                            <button class="calculate-btn btn-primary" onclick="avancarParaEstimativa()" style="margin-top: 20px;">
-                                Avançar <i class="fas fa-arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <!-- ═══════════════════════════════════════════════
+         TELA 2 — LOCALIZAÇÃO E DIMENSÕES DO DANO
+    ═══════════════════════════════════════════════ -->
+    <div id="tela-dano" style="display:none" class="fade-in">
+      <div class="step-bar">
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Identificação</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step active"><span class="step-num">2</span><span>Dano</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step"><span class="step-num">3</span><span>Estimativa</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step"><span class="step-num">4</span><span>Cálculo</span></div>
+      </div>
+
+      <div id="banner-dano" class="active-id-banner">
+        <div class="info">
+          <span><i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong></span>
+          <span class="badge">WTG: <span class="display-wtg"></span></span>
+          <span class="badge">Pá: <span class="display-blade"></span></span>
+          <span class="badge display-tipo" style="background:rgba(255,255,255,.3)"></span>
+        </div>
+        <button onclick="voltarParaIdentificacao()" class="edit-id-btn"><i class="fas fa-edit"></i> Editar</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header no-toggle" style="cursor:default">
+          <h2><i class="fas fa-map-pin"></i> Localização e Dimensões do Dano</h2>
+        </div>
+        <div class="card-content active">
+
+          <div class="info-box">
+            <p><strong><i class="fas fa-info-circle"></i> Regra de marcação (PR-20-ENG&CQ):</strong></p>
+            <p>• Deixar <strong>≥ 50 mm</strong> entre os lados do retângulo e as extremidades do defeito.</p>
+            <p>• Os lados do retângulo devem ser <strong>paralelos à corda e ao comprimento</strong> da pá. Diagonal <strong>NÃO é permitida</strong>.</p>
+          </div>
+
+          <div class="input-group">
+            <!-- Lado da Pá -->
+            <div class="input-section">
+              <label>Lado da Pá:</label>
+              <div class="toggle-group">
+                <input type="radio" name="lado-pa" id="lado-ps" value="PS">
+                <label for="lado-ps"><i class="fas fa-circle" style="font-size:.7rem"></i> PS — Pressão</label>
+                <input type="radio" name="lado-pa" id="lado-ss" value="SS">
+                <label for="lado-ss"><i class="fas fa-circle-notch" style="font-size:.7rem"></i> SS — Sucção</label>
+              </div>
             </div>
 
-            <div id="tela-estimativa" style="display: none;" class="fade-in">
-                <div class="active-id-banner">
-                    <div>
-                        <i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong> | 
-                        WTG: <span class="display-wtg"></span> | 
-                        <span class="display-blade"></span>
-                    </div>
-                    <button onclick="voltarParaIdentificacao()" class="edit-id-btn" title="Editar Local">
-                        <i class="fas fa-edit"></i> Editar
-                    </button>
-                </div>
-
-                <div class="card">
-                    <div class="card-header" style="justify-content: center; cursor: default;">
-                        <h2><i class="fas fa-bullseye"></i> 2. Estimativa Teórica</h2>
-                    </div>
-                    <div class="card-content active">
-                        <p style="color: var(--gray-color); margin-bottom: 15px; font-size: 0.9rem;">
-                            Insira os valores estimados para este reparo (Opcional).
-                        </p>
-                        <div class="input-group">
-                            <div class="input-section">
-                                <label for="est-tecido">Tecido Estimado (kg):</label>
-                                <input type="text" id="est-tecido" placeholder="Ex: 5,000">
-                            </div>
-                            <div class="input-section">
-                                <label for="est-resina">Resina Estimada (kg):</label>
-                                <input type="text" id="est-resina" placeholder="Ex: 5,000">
-                            </div>
-                            <div class="input-section">
-                                <label for="est-endurecedor">Endurecedor Estimado (kg):</label>
-                                <input type="text" id="est-endurecedor" placeholder="Ex: 1,500">
-                            </div>
-                            
-                            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                                <button class="history-btn" onclick="voltarParaIdentificacao()" style="background-color: var(--gray-color);">
-                                    <i class="fas fa-arrow-left"></i> Voltar
-                                </button>
-                                <button class="calculate-btn btn-primary" onclick="avancarParaCalculadora()" style="margin-top: 0; flex: 2;">
-                                    Ir para Materiais <i class="fas fa-arrow-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Posição Z -->
+            <div class="input-row">
+              <div class="input-section">
+                <label for="zi-input">Zi — Início do dano <span class="label-hint">(mm a partir da flange)</span></label>
+                <input type="number" id="zi-input" placeholder="Ex: 5000" min="0">
+              </div>
+              <div class="input-section">
+                <label for="zf-input">Zf — Fim do dano <span class="label-hint">(mm)</span></label>
+                <input type="number" id="zf-input" placeholder="Ex: 6200" min="0">
+              </div>
             </div>
 
-            <div id="tela-calculadora" style="display: none;" class="fade-in">
-                
-                <div class="active-id-banner">
-                    <div>
-                        <i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong> | 
-                        WTG: <span class="display-wtg"></span> | 
-                        <span class="display-blade"></span>
-                    </div>
-                    <button onclick="voltarParaEstimativa()" class="edit-id-btn" title="Voltar">
-                        <i class="fas fa-arrow-left"></i> Voltar
-                    </button>
+            <!-- Dimensões do dano -->
+            <div class="input-row">
+              <div class="input-section">
+                <label for="comp-dano">Comprimento do dano <span class="label-hint">(mm, direção span)</span></label>
+                <input type="number" id="comp-dano" placeholder="Ex: 1200" min="0">
+              </div>
+              <div class="input-section">
+                <label for="larg-dano">Largura do dano <span class="label-hint">(mm, direção corda)</span></label>
+                <input type="number" id="larg-dano" placeholder="Ex: 300" min="0">
+              </div>
+            </div>
+
+            <!-- Atingiu o núcleo? -->
+            <div class="input-section">
+              <label>O dano atingiu o Núcleo?</label>
+              <div class="toggle-group">
+                <input type="radio" name="nucleo" id="nucleo-nao" value="nao" checked>
+                <label for="nucleo-nao"><i class="fas fa-times"></i> Não</label>
+                <input type="radio" name="nucleo" id="nucleo-sim" value="sim">
+                <label for="nucleo-sim"><i class="fas fa-check"></i> Sim — Atingiu o Núcleo</label>
+              </div>
+            </div>
+
+            <!-- Material do núcleo (aparece se atingiu) -->
+            <div id="secao-nucleo" style="display:none">
+              <div class="info-box warning">
+                <p><strong><i class="fas fa-exclamation-triangle"></i> Atenção — Consumo extra com Núcleo:</strong></p>
+                <p>• Adesivo G3 necessário para colagem: camada de <strong>5–7 mm</strong> de espessura nas superfícies de colagem (laminado inferior + contorno do núcleo).</p>
+                <p>• Folga (Gap) máxima entre o núcleo e o laminado: <strong>7 mm</strong> — impacta a quantidade de adesivo.</p>
+                <p>• Todas as faces do núcleo devem estar impregnadas de resina — inclua esse volume na estimativa.</p>
+              </div>
+              <div class="input-section">
+                <label for="material-nucleo">Material do Núcleo a Utilizar:</label>
+                <select id="material-nucleo">
+                  <option value="">— Selecione o material —</option>
+                  <option value="BALSA CORE 15mm">BALSA CORE 15 mm</option>
+                  <option value="BALSA CORE 20mm">BALSA CORE 20 mm</option>
+                  <option value="BALSA CORE 32mm">BALSA CORE 32 mm</option>
+                  <option value="ESPUMA PVC 20mm">ESPUMA PVC 20 mm</option>
+                  <option value="ESPUMA FLEX PVC H60 20mm">ESPUMA FLEXÍVEL PVC H60 GS 20 mm</option>
+                  <option value="ESPUMA FLEX PET FOAM 50mm">ESPUMA FLEXÍVEL PET FOAM 50 mm</option>
+                </select>
+              </div>
+              <div class="input-row" style="margin-top:6px">
+                <div class="input-section">
+                  <label for="comp-nucleo">Comprimento do núcleo a repor <span class="label-hint">(mm)</span></label>
+                  <input type="number" id="comp-nucleo" placeholder="Ex: 1200" min="0">
                 </div>
-
-                <div class="card">
-                    <div class="card-header" onclick="toggleCard('reparo')">
-                        <h2><i class="fas fa-hard-hat"></i> Reparo Estrutural</h2>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div id="reparo-content" class="card-content">
-                        
-                        <div class="input-group">
-                            <div class="input-section">
-                                <label>1. Tecidos Utilizados (Selecione os aplicados):</label>
-                                <div class="fabric-grid">
-                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Triax 1200"> Triax 1200</label>
-                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 830"> Tecido Biax 830</label>
-                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 750"> Tecido Biax 750</label>
-                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 450"> Tecido Biax 450</label>
-                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 1000"> Tecido UD 1000</label>
-                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 661"> Tecido UD 661</label>
-                                    <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Bizero 750"> Tecido Bizero 750</label>
-                                </div>
-                            </div>
-
-                            <hr style="border: 0; height: 1px; background: #eee; margin: 5px 0;">
-
-                            <div class="material-info">
-                                <p><strong>Resina:</strong> HEXION LR635</p>
-                                <p><strong>Endurecedores:</strong> HEXION LH635 ou LH637</p>
-                                <p><strong>Proporção:</strong> 100:30</p>
-                                <p><strong>Nota:</strong> Peso do tecido = peso da resina (1:1)</p>
-                            </div>
-
-                            <div class="input-section">
-                                <label for="resina-input">2. Quantidade de Resina Gasta (kg):</label>
-                                <input type="text" id="resina-input" placeholder="Ex: 10,500">
-                            </div>
-                            <button class="calculate-btn" onclick="calcularReparo()">
-                                <i class="fas fa-calculator"></i> Calcular Mistura
-                            </button>
-                        </div>
-                        <div id="result-reparo" class="result-container"></div>
-                    </div>
+                <div class="input-section">
+                  <label for="larg-nucleo">Largura do núcleo <span class="label-hint">(mm)</span></label>
+                  <input type="number" id="larg-nucleo" placeholder="Ex: 300" min="0">
                 </div>
+              </div>
+            </div>
 
-                <div class="card">
-                    <div class="card-header" onclick="toggleCard('adesivo')">
-                        <h2><i class="fas fa-glue"></i> Adesivo G3</h2>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div id="adesivo-content" class="card-content">
-                        <div class="material-info">
-                            <p><strong>Resina:</strong> MGS BPR 135G</p>
-                            <p><strong>Endurecedor:</strong> MGS BPH 1355G</p>
-                            <p><strong>Proporção:</strong> 100:45</p>
-                        </div>
-                        <div class="input-group">
-                            <label for="adesivo-resina">Quantidade de Resina (kg):</label>
-                            <input type="text" id="adesivo-resina" placeholder="Ex: 5,000">
-                            <button class="calculate-btn" onclick="calcularAdesivo()">
-                                <i class="fas fa-calculator"></i> Calcular
-                            </button>
-                        </div>
-                        <div id="result-adesivo" class="result-container"></div>
-                    </div>
-                </div>
+            <div class="btn-row">
+              <button class="btn btn-gray" onclick="voltarParaIdentificacao()"><i class="fas fa-arrow-left"></i> Voltar</button>
+              <button class="btn btn-primary" onclick="avancarParaEstimativa()" style="flex:2">
+                Ver Estimativa <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tela-dano -->
 
-                <div class="card">
-                    <div class="card-header" onclick="toggleCard('preenchimento')">
-                        <h2><i class="fas fa-fill-drip"></i> Acabamento - Preenchimento</h2>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div id="preenchimento-content" class="card-content">
-                        <div class="input-group">
-                            <div class="material-info">
-                                <p><strong>Base:</strong> BladeRep Profile Filler 3</p>
-                                <p><strong>Endurecedor:</strong> BladeRep Hardener Filler 3</p>
-                                <p><strong>Proporção:</strong> 6:1</p>
-                            </div>
-                            <label for="filler-base">Quantidade de Base (kg):</label>
-                            <input type="text" id="filler-base" placeholder="Ex: 6,000">
-                            <button class="calculate-btn" onclick="calcularFiller()">
-                                <i class="fas fa-calculator"></i> Calcular
-                            </button>
-                        </div>
-                        <div id="result-filler" class="result-container"></div>
-                    </div>
-                </div>
 
-                <div class="card">
-                    <div class="card-header" onclick="toggleCard('pintura')">
-                        <h2><i class="fas fa-paint-roller"></i> Acabamento - Pintura</h2>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div id="pintura-content" class="card-content">
-                        <div class="material-info">
-                            <p><strong>Base:</strong> BladeRep Topcoat 12</p>
-                            <p><strong>Endurecedor:</strong> BladeRep Hardener 12</p>
-                            <p><strong>Proporção:</strong> 4:1</p>
-                            <p><strong>Diluidor:</strong> 10% da base (opcional)</p>
-                        </div>
-                        <div class="input-group">
-                            <label for="pintura-base">Quantidade de Base (kg):</label>
-                            <input type="text" id="pintura-base" placeholder="Ex: 4,000">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="diluidor-check">
-                                <label for="diluidor-check">Adicionar diluidor (Thinner 12)</label>
-                            </div>
-                            <button class="calculate-btn" onclick="calcularPintura()">
-                                <i class="fas fa-calculator"></i> Calcular
-                            </button>
-                        </div>
-                        <div id="result-pintura" class="result-container"></div>
-                    </div>
-                </div>
+    <!-- ═══════════════════════════════════════════════
+         TELA 3 — ESTIMATIVA TEÓRICA
+    ═══════════════════════════════════════════════ -->
+    <div id="tela-estimativa" style="display:none" class="fade-in">
+      <div class="step-bar">
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Identificação</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Dano</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step active"><span class="step-num">3</span><span>Estimativa</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step"><span class="step-num">4</span><span>Cálculo</span></div>
+      </div>
 
-                <div class="history-container">
-                    <div class="history-header" onclick="toggleHistory()">
-                        <h3><i class="fas fa-history"></i> Histórico (Últimos 30)</h3>
-                        <span id="history-toggle" class="toggle-icon">▼</span>
-                    </div>
-                    <div id="history-content" class="history-content">
-                        <div id="history-list"></div>
-                        <div class="history-actions">
-                            <button class="history-btn" onclick="limparHistorico()">
-                                <i class="fas fa-trash"></i> Limpar Histórico
-                            </button>
-                            <button class="history-btn" onclick="exportarHistorico()">
-                                <i class="fas fa-download"></i> Exportar CSV
-                            </button>
-                        </div>
-                    </div>
-                </div>
+      <div id="banner-est" class="active-id-banner">
+        <div class="info">
+          <span><i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong></span>
+          <span class="badge">WTG: <span class="display-wtg"></span></span>
+          <span class="badge">Pá: <span class="display-blade"></span></span>
+          <span class="badge display-tipo" style="background:rgba(255,255,255,.3)"></span>
+        </div>
+        <button onclick="voltarParaDano()" class="edit-id-btn"><i class="fas fa-edit"></i> Editar</button>
+      </div>
 
-            </div> </main>
+      <!-- Painel de estimativa calculada -->
+      <div id="est-resultado" class="est-panel"></div>
 
-        <footer class="footer">
-            <p>Lean Way Solution &copy; <span id="current-year"></span> | Uso Interno</p>
-            <p class="footer-info">App otimizado para uso offline em parques eólicos</p>
-        </footer>
+      <!-- Campos manuais de comparação -->
+      <div class="card">
+        <div class="card-header" onclick="toggleCard('est-manual')">
+          <h2><i class="fas fa-sliders-h"></i> Ajuste Manual da Estimativa</h2>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div id="est-manual-content" class="card-content">
+          <p style="color:var(--gray);font-size:.88rem;margin-bottom:12px">
+            Os valores abaixo são pré-calculados. Ajuste se necessário antes de prosseguir.
+          </p>
+          <div class="input-group">
+            <div class="input-row">
+              <div class="input-section">
+                <label for="est-tecido">Tecido Estimado <span class="label-hint">(kg)</span></label>
+                <input type="text" id="est-tecido" placeholder="0,000">
+              </div>
+              <div class="input-section">
+                <label for="est-resina">Resina Estimada <span class="label-hint">(kg)</span></label>
+                <input type="text" id="est-resina" placeholder="0,000">
+              </div>
+            </div>
+            <div class="input-section">
+              <label for="est-endurecedor">Endurecedor Estimado <span class="label-hint">(kg)</span></label>
+              <input type="text" id="est-endurecedor" placeholder="0,000">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-gray" onclick="voltarParaDano()"><i class="fas fa-arrow-left"></i> Voltar</button>
+        <button class="btn btn-primary" onclick="avancarParaCalculadora()" style="flex:2">
+          Ir para Calculadora <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div><!-- /tela-estimativa -->
+
+
+    <!-- ═══════════════════════════════════════════════
+         TELA 4 — CALCULADORA DE MATERIAIS
+    ═══════════════════════════════════════════════ -->
+    <div id="tela-calculadora" style="display:none" class="fade-in">
+      <div class="step-bar">
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Identificação</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Dano</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Estimativa</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step active"><span class="step-num">4</span><span>Cálculo</span></div>
+      </div>
+
+      <div id="banner-calc" class="active-id-banner">
+        <div class="info">
+          <span><i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong></span>
+          <span class="badge">WTG: <span class="display-wtg"></span></span>
+          <span class="badge">Pá: <span class="display-blade"></span></span>
+          <span class="badge display-tipo" style="background:rgba(255,255,255,.3)"></span>
+          <span class="badge display-lado" style="background:rgba(46,204,113,.35)"></span>
+        </div>
+        <button onclick="voltarParaEstimativa()" class="edit-id-btn"><i class="fas fa-arrow-left"></i> Voltar</button>
+      </div>
+
+      <!-- Reparo Estrutural -->
+      <div class="card">
+        <div class="card-header" onclick="toggleCard('reparo')">
+          <h2><i class="fas fa-hard-hat"></i> Reparo Estrutural (Laminação)</h2>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div id="reparo-content" class="card-content">
+          <div class="info-box">
+            <p><strong>Resina:</strong> Hexion LR635 &nbsp;|&nbsp; <strong>Endurecedores:</strong> Hexion LH635 ou LH637</p>
+            <p><strong>Proporção:</strong> 100 : 30 &nbsp;|&nbsp; <strong>Nota:</strong> Peso do tecido ≈ Peso da resina (1:1)</p>
+          </div>
+
+          <div class="input-group">
+            <div class="input-section">
+              <label>1. Tecidos Utilizados <span class="label-hint">(marque os aplicados)</span></label>
+              <div class="fabric-grid">
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Triax 1200"> Triax 1200</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 830"> Biax 830</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 1200"> Biax 1200</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 450"> Biax 450</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 1000"> UD 1000</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 661"> UD 661</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Bizero 750"> BiZero 750</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Triax 1800"> Triax 1800</label>
+              </div>
+            </div>
+            <div class="input-section">
+              <label for="resina-input">2. Quantidade de Resina Gasta <span class="label-hint">(kg)</span></label>
+              <input type="text" id="resina-input" placeholder="Ex: 10,500">
+            </div>
+            <button class="btn btn-success" onclick="calcularReparo()">
+              <i class="fas fa-calculator"></i> Calcular Mistura
+            </button>
+          </div>
+          <div id="result-reparo" class="result-container"></div>
+        </div>
+      </div>
+
+      <!-- Adesivo G3 -->
+      <div class="card">
+        <div class="card-header" onclick="toggleCard('adesivo')">
+          <h2><i class="fas fa-fill"></i> Adesivo Estrutural G3</h2>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div id="adesivo-content" class="card-content">
+          <div class="info-box">
+            <p><strong>Resina:</strong> Epikote MGS BPR 135G3 &nbsp;|&nbsp; <strong>Endurecedor:</strong> Epikure MGS BPH 137GF</p>
+            <p><strong>Proporção:</strong> 100 : 45</p>
+            <p id="adesivo-nucleo-hint" style="display:none;color:var(--warning)"><i class="fas fa-exclamation-triangle"></i> <strong>Reparo com núcleo:</strong> Considere a camada de colagem de <strong>5–7 mm</strong> no volume de adesivo (laminado inferior + contorno do núcleo).</p>
+          </div>
+          <div class="input-group">
+            <label for="adesivo-resina">Quantidade de Resina <span class="label-hint">(kg)</span></label>
+            <input type="text" id="adesivo-resina" placeholder="Ex: 5,000">
+            <button class="btn btn-success" onclick="calcularAdesivo()">
+              <i class="fas fa-calculator"></i> Calcular
+            </button>
+          </div>
+          <div id="result-adesivo" class="result-container"></div>
+        </div>
+      </div>
+
+      <!-- Preenchimento -->
+      <div class="card">
+        <div class="card-header" onclick="toggleCard('preenchimento')">
+          <h2><i class="fas fa-fill-drip"></i> Acabamento — Preenchimento (Filler)</h2>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div id="preenchimento-content" class="card-content">
+          <div class="info-box">
+            <p><strong>Base:</strong> BladeRep Profile Filler 3 &nbsp;|&nbsp; <strong>Endurecedor:</strong> BladeRep Hardener Filler 3</p>
+            <p><strong>Proporção:</strong> 6 : 1</p>
+          </div>
+          <div class="input-group">
+            <label for="filler-base">Quantidade de Base <span class="label-hint">(kg)</span></label>
+            <input type="text" id="filler-base" placeholder="Ex: 6,000">
+            <button class="btn btn-success" onclick="calcularFiller()">
+              <i class="fas fa-calculator"></i> Calcular
+            </button>
+          </div>
+          <div id="result-filler" class="result-container"></div>
+        </div>
+      </div>
+
+      <!-- Pintura -->
+      <div class="card">
+        <div class="card-header" onclick="toggleCard('pintura')">
+          <h2><i class="fas fa-paint-roller"></i> Acabamento — Pintura (Top Coat)</h2>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div id="pintura-content" class="card-content">
+          <div class="info-box">
+            <p><strong>Base:</strong> BladeRep TopCoat 12 &nbsp;|&nbsp; <strong>Endurecedor:</strong> BladeRep Hardener 12</p>
+            <p><strong>Proporção:</strong> 4 : 1 &nbsp;|&nbsp; <strong>Diluidor (opcional):</strong> Thinner 12 — 10% da base</p>
+          </div>
+          <div class="input-group">
+            <label for="pintura-base">Quantidade de Base <span class="label-hint">(kg)</span></label>
+            <input type="text" id="pintura-base" placeholder="Ex: 4,000">
+            <label class="checkbox-group">
+              <input type="checkbox" id="diluidor-check">
+              <span>Adicionar diluidor (Thinner 12)</span>
+            </label>
+            <button class="btn btn-success" onclick="calcularPintura()">
+              <i class="fas fa-calculator"></i> Calcular
+            </button>
+          </div>
+          <div id="result-pintura" class="result-container"></div>
+        </div>
+      </div>
+
+      <!-- Histórico -->
+      <div class="history-container">
+        <div class="history-header" onclick="toggleHistory()">
+          <h3><i class="fas fa-history"></i> Histórico (Últimos 30 Cálculos)</h3>
+          <span id="history-toggle" class="toggle-icon">▼</span>
+        </div>
+        <div id="history-content" class="history-content">
+          <div id="history-list"></div>
+          <div class="history-actions">
+            <button class="history-btn danger" onclick="limparHistorico()">
+              <i class="fas fa-trash"></i> Limpar
+            </button>
+            <button class="history-btn" onclick="exportarHistorico()">
+              <i class="fas fa-download"></i> Exportar CSV
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tela-calculadora -->
+  </main>
+
+  <footer class="footer">
+    <p>Lean Way Solution &copy; <span id="current-year"></span> | Uso Interno — Extreme Wind</p>
+    <p class="footer-info">PR-20-ENG&CQ | App otimizado para uso offline em parques eólicos</p>
+  </footer>
+</div><!-- /container -->
+
+<!-- ===================================================================
+     JAVASCRIPT
+=================================================================== -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────────────────────────
+   TABELAS DE LAMINADO POR MODELO DE PÁ
+   Fonte: PR-20-ENG&CQ, AWP03_RI_10467_03, E0005458743 (NR81.5)
+   Zi/Zf em mm a partir da flange (DF)
+   ───────────────────────────────────────────────────────────── */
+const BLADE_LAYUP = {
+
+  'AW56.7': {
+    maxLength: 56700,
+    layers: {
+      PS: buildAW567Layers(),
+      SS: buildAW567Layers()
+    },
+    core: {
+      SS: [{ mat:'PVC 20mm', Zi:1500,  Zf:10000 }, { mat:'PVC 15mm', Zi:10000, Zf:30000 }],
+      PS: [{ mat:'PVC 20mm', Zi:1500,  Zf:10000 }, { mat:'PVC 15mm', Zi:10000, Zf:30000 }]
+    }
+  },
+
+  'AW61.2': {
+    maxLength: 61200,
+    layers: {
+      PS: buildAW612Layers(),
+      SS: buildAW612Layers()
+    },
+    core: {
+      SS: [{ mat:'PVC 20mm', Zi:1500,  Zf:10000 }, { mat:'PVC 15mm', Zi:10000, Zf:42000 }],
+      PS: [{ mat:'PVC 20mm', Zi:1500,  Zf:10000 }, { mat:'PVC 15mm', Zi:10000, Zf:42000 }]
+    }
+  },
+
+  'AW64.7': {
+    maxLength: 64700,
+    layers: {
+      PS: buildAW647Layers(),
+      SS: buildAW647Layers()
+    },
+    core: {
+      SS: [
+        { mat:'PVC 25mm', Zi:1500,  Zf:6000  },
+        { mat:'PVC 30mm', Zi:6000,  Zf:8000  },
+        { mat:'PVC 40mm', Zi:8000,  Zf:18000 }
+      ],
+      PS: [
+        { mat:'PVC 20mm', Zi:1500,  Zf:16000 },
+        { mat:'PVC 10mm', Zi:16000, Zf:38000 }
+      ]
+    }
+  },
+
+  'NR81.5': {
+    maxLength: 81500,
+    layers: {
+      PS: buildNR815Layers_PS(),
+      SS: buildNR815Layers_SS()
+    },
+    core: {
+      PS: [{ mat:'Balsa/PVC (ver mapa de núcleo)', Zi:3300, Zf:79600 }],
+      SS: [{ mat:'Balsa/PVC (ver mapa de núcleo)', Zi:3300, Zf:79600 }]
+    }
+  }
+};
+
+/* ── BUILDERS DE CAMADAS ── */
+
+function buildAW567Layers(){
+  const layers = [];
+  // 20 camadas TX1200 de reforço de raiz — Zf decrescente de 120mm em 120mm
+  // Ref: Tabela 27, AWP03_RI_10467_03 (AW56.7-1 / AW56.7-2)
+  const txZf = [7500,6500,5140,5020,4900,4780,4660,4540,4420,4300,
+                4180,4060,3940,3820,3700,3580,3460,3340,3220,3100];
+  txZf.forEach((zf,i) => layers.push({ type:'TX1200', Zi:0, Zf:zf, label:`TX-R${i+1}` }));
+  // Pele interna: 5 camadas BiZero 750
+  layers.push({ type:'BZ750', Zi:0,     Zf:56400, label:'PeleInt-1' });
+  layers.push({ type:'BZ750', Zi:0,     Zf:56400, label:'PeleInt-2' });
+  layers.push({ type:'BZ750', Zi:13500, Zf:51000, label:'PeleInt-3' });
+  layers.push({ type:'BZ750', Zi:16000, Zf:50000, label:'PeleInt-4' });
+  layers.push({ type:'BZ750', Zi:17000, Zf:38000, label:'PeleInt-5' });
+  // Pele externa: 5 camadas BiZero 750 (espelho da interna)
+  layers.push({ type:'BZ750', Zi:17000, Zf:38000, label:'PeleExt-1' });
+  layers.push({ type:'BZ750', Zi:16000, Zf:50000, label:'PeleExt-2' });
+  layers.push({ type:'BZ750', Zi:13500, Zf:51000, label:'PeleExt-3' });
+  layers.push({ type:'BZ750', Zi:0,     Zf:56400, label:'PeleExt-4' });
+  layers.push({ type:'BZ750', Zi:0,     Zf:56400, label:'PeleExt-5' });
+  return layers;
+}
+
+function buildAW612Layers(){
+  const layers = [];
+  // Mesmas 20 camadas TX1200 de raiz (iguais AW56.7)
+  const txZf = [7500,6500,5140,5020,4900,4780,4660,4540,4420,4300,
+                4180,4060,3940,3820,3700,3580,3460,3340,3220,3100];
+  txZf.forEach((zf,i) => layers.push({ type:'TX1200', Zi:0, Zf:zf, label:`TX-R${i+1}` }));
+  // Pele interna BiZero 750 — pá mais longa (Zf máx = 60890mm)
+  layers.push({ type:'BZ750', Zi:0,     Zf:60890, label:'PeleInt-1' });
+  layers.push({ type:'BZ750', Zi:0,     Zf:60890, label:'PeleInt-2' });
+  layers.push({ type:'BZ750', Zi:13500, Zf:55000, label:'PeleInt-3' });
+  layers.push({ type:'BZ750', Zi:16000, Zf:50000, label:'PeleInt-4' });
+  layers.push({ type:'BZ750', Zi:17000, Zf:38000, label:'PeleInt-5' });
+  // Pele externa (espelho)
+  layers.push({ type:'BZ750', Zi:17000, Zf:38000, label:'PeleExt-1' });
+  layers.push({ type:'BZ750', Zi:16000, Zf:50000, label:'PeleExt-2' });
+  layers.push({ type:'BZ750', Zi:13500, Zf:55000, label:'PeleExt-3' });
+  layers.push({ type:'BZ750', Zi:0,     Zf:60890, label:'PeleExt-4' });
+  layers.push({ type:'BZ750', Zi:0,     Zf:60890, label:'PeleExt-5' });
+  return layers;
+}
+
+function buildAW647Layers(){
+  const layers = [];
+  // Ref: Tabela 19, AWP03_RI_10467_03 (AW64.7-2)
+  // Pele interna BX1200
+  layers.push({ type:'BX1200', Zi:0,     Zf:64452, label:'PeleInt-1' });
+  layers.push({ type:'BX1200', Zi:14500, Zf:51500, label:'PeleInt-2' });
+  // Camadas estruturais de raiz — UD1800 e TX1800 (layers 6–15), da mais interna p/ fora
+  layers.push({ type:'UD1800', Zi:0, Zf:3120, label:'UD-15' });
+  layers.push({ type:'TX1800', Zi:0, Zf:3340, label:'TX-14' });
+  layers.push({ type:'TX1800', Zi:0, Zf:3560, label:'TX-13' });
+  layers.push({ type:'TX1800', Zi:0, Zf:3780, label:'TX-12' });
+  layers.push({ type:'TX1800', Zi:0, Zf:4000, label:'TX-11' });
+  layers.push({ type:'UD1800', Zi:0, Zf:4220, label:'UD-10' });
+  layers.push({ type:'TX1800', Zi:0, Zf:4440, label:'TX-9'  });
+  layers.push({ type:'TX1800', Zi:0, Zf:4660, label:'TX-8'  });
+  layers.push({ type:'TX1800', Zi:0, Zf:5500, label:'TX-7'  });
+  layers.push({ type:'TX1800', Zi:0, Zf:6500, label:'TX-6'  });
+  // TX1200 zona intermediária (layers 1–4)
+  layers.push({ type:'TX1200', Zi:1500,  Zf:7500,  label:'TX-4' });
+  layers.push({ type:'TX1200', Zi:6000,  Zf:8000,  label:'TX-3' });
+  layers.push({ type:'TX1200', Zi:8000,  Zf:18000, label:'TX-2' });
+  layers.push({ type:'TX1200', Zi:10000, Zf:22000, label:'TX-1' });
+  // Pele externa BX1200 (espelho da interna)
+  layers.push({ type:'BX1200', Zi:14500, Zf:51500, label:'PeleExt-1' });
+  layers.push({ type:'BX1200', Zi:0,     Zf:64452, label:'PeleExt-2' });
+  return layers;
+}
+
+function buildNR815Layers_PS(){
+  // Ref: Drawing E0005458743 — NR81.5 PS-2
+  return [
+    // Casca externa (outer shell)
+    { type:'BX1010', Zi:3300,  Zf:79450, label:'CascaExt-1' },
+    { type:'BX443',  Zi:39800, Zf:79600, label:'CascaExt-2' },
+    // Longarina principal (spar cap UD)
+    { type:'UD1200', Zi:4000,  Zf:66000, label:'Longar-PS1' },
+    { type:'UD1200', Zi:3500,  Zf:68000, label:'Longar-PS2' },
+    // Casca interna (inner shell)
+    { type:'BX1010', Zi:250,   Zf:79600, label:'CascaInt-1' },
+    { type:'BX1010', Zi:4100,  Zf:65900, label:'CascaInt-2' },
+    // Reforços de raiz — Root View 3 (6 BX1010 + 4 UD1200)
+    { type:'BX1010', Zi:875,   Zf:22460, label:'Raiz-R1' },
+    { type:'BX1010', Zi:800,   Zf:21190, label:'Raiz-R2' },
+    { type:'BX1010', Zi:725,   Zf:21115, label:'Raiz-R3' },
+    { type:'BX1010', Zi:650,   Zf:19845, label:'Raiz-R4' },
+    { type:'BX1010', Zi:575,   Zf:18575, label:'Raiz-R5' },
+    { type:'BX1010', Zi:500,   Zf:18500, label:'Raiz-R6' },
+    { type:'UD1200', Zi:425,   Zf:20800, label:'Raiz-UD1' },
+    { type:'UD1200', Zi:350,   Zf:19500, label:'Raiz-UD2' },
+    { type:'UD1200', Zi:275,   Zf:18200, label:'Raiz-UD3' },
+    { type:'UD1200', Zi:200,   Zf:18100, label:'Raiz-UD4' },
+  ];
+}
+
+function buildNR815Layers_SS(){
+  // SS com simetria estrutural em relação ao PS (NR81.5-2 SS)
+  return [
+    { type:'BX1010', Zi:3300,  Zf:79450, label:'CascaExt-1' },
+    { type:'BX443',  Zi:39800, Zf:79600, label:'CascaExt-2' },
+    { type:'UD1200', Zi:4000,  Zf:66000, label:'Longar-SS1' },
+    { type:'UD1200', Zi:3500,  Zf:68000, label:'Longar-SS2' },
+    { type:'BX1010', Zi:250,   Zf:79600, label:'CascaInt-1' },
+    { type:'BX1010', Zi:4100,  Zf:65900, label:'CascaInt-2' },
+    { type:'BX1010', Zi:875,   Zf:22460, label:'Raiz-R1' },
+    { type:'BX1010', Zi:800,   Zf:21190, label:'Raiz-R2' },
+    { type:'BX1010', Zi:725,   Zf:21115, label:'Raiz-R3' },
+    { type:'BX1010', Zi:650,   Zf:19845, label:'Raiz-R4' },
+    { type:'BX1010', Zi:575,   Zf:18575, label:'Raiz-R5' },
+    { type:'BX1010', Zi:500,   Zf:18500, label:'Raiz-R6' },
+    { type:'UD1200', Zi:425,   Zf:20800, label:'Raiz-UD1' },
+    { type:'UD1200', Zi:350,   Zf:19500, label:'Raiz-UD2' },
+    { type:'UD1200', Zi:275,   Zf:18200, label:'Raiz-UD3' },
+    { type:'UD1200', Zi:200,   Zf:18100, label:'Raiz-UD4' },
+  ];
+}
+
+/* ─────────────────────────────────────────────────────────────
+   PROPRIEDADES DOS TECIDOS
+   weight: kg/m²  |  span: escalonamento spanwise (mm/camada)
+   chord: escalonamento chordwise (mm/camada)
+   Ref: Tabela 01, PR-20-ENG&CQ
+     • TRIAX  → 100mm span / 50mm corda por camada
+     • BIAX / BZ / UD → 50mm span / 50mm corda por camada
+   ───────────────────────────────────────────────────────────── */
+const FABRIC_PROPS = {
+  'TX1200': { weight:1.200, span:100, chord:50, label:'Triax 1200',  tag:'tag-tx' },
+  'TX1800': { weight:1.800, span:100, chord:50, label:'Triax 1800',  tag:'tag-tx' },
+  'BX800':  { weight:0.830, span:50,  chord:50, label:'Biax 830',    tag:'tag-bx' },
+  'BX1010': { weight:1.010, span:50,  chord:50, label:'Biax 1010',   tag:'tag-bx' },
+  'BX1200': { weight:1.200, span:50,  chord:50, label:'Biax 1200',   tag:'tag-bx' },
+  'BX443':  { weight:0.443, span:50,  chord:50, label:'Biax 443',    tag:'tag-bx' },
+  'BZ750':  { weight:0.750, span:50,  chord:50, label:'BiZero 750',  tag:'tag-bz' },
+  'UD661':  { weight:0.661, span:50,  chord:50, label:'UD 661',      tag:'tag-ud' },
+  'UD1000': { weight:1.000, span:50,  chord:50, label:'UD 1000',     tag:'tag-ud' },
+  'UD1200': { weight:1.200, span:50,  chord:50, label:'UD 1200 HM',  tag:'tag-ud' },
+  'UD1800': { weight:1.800, span:50,  chord:50, label:'UD 1800 HM',  tag:'tag-ud' },
+};
+
+/* ─────────────────────────────────────────────────────────────
+   ESTADO GLOBAL
+   ───────────────────────────────────────────────────────────── */
+let history    = JSON.parse(localStorage.getItem('leanway_history')    || '[]');
+let syncQueue  = JSON.parse(localStorage.getItem('leanway_sync_queue') || '[]');
+let isHistoryVisible = false;
+const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnGGqqI8edzQXtSq5VP4HMwH0ui_4A-XwuQr3reA3y35oapZbRdaPp9Rm09BsnDf3v/exec';
+
+/* ─────────────────────────────────────────────────────────────
+   INIT
+   ───────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('current-year').textContent = new Date().getFullYear();
+  carregarHistorico();
+  tentarSincronizar();
+
+  // Mostrar/ocultar seção de núcleo ao alternar o toggle
+  document.querySelectorAll('input[name="nucleo"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const sim = document.getElementById('nucleo-sim').checked;
+      document.getElementById('secao-nucleo').style.display = sim ? 'block' : 'none';
+    });
+  });
+});
+
+window.addEventListener('online', () => {
+  if(syncQueue.length > 0){
+    showNotification('Reconectado — sincronizando dados...', 'info');
+    tentarSincronizar();
+  }
+});
+
+/* ─────────────────────────────────────────────────────────────
+   NAVEGAÇÃO ENTRE TELAS
+   ───────────────────────────────────────────────────────────── */
+function avancarParaDano(){
+  const p = v('projeto-input'), w = v('wtg-input'), b = v('blade-input'), t = v('tipo-pa');
+  if(!p){ showNotification('Informe o Projeto / Parque Eólico', 'error'); return; }
+  if(!w){ showNotification('Informe a WTG (Aerogerador)', 'error'); return; }
+  if(!b){ showNotification('Informe o número da Pá', 'error'); return; }
+  if(!t){ showNotification('Selecione o Tipo de Pá', 'error'); return; }
+  updateBanners(p, w, b, t);
+  showScreen('tela-dano');
+}
+
+function avancarParaEstimativa(){
+  const lado = document.querySelector('input[name="lado-pa"]:checked');
+  const zi   = parseFloat(v('zi-input'));
+  const zf   = parseFloat(v('zf-input'));
+  const L    = parseFloat(v('comp-dano'));
+  const W    = parseFloat(v('larg-dano'));
+  if(!lado){         showNotification('Selecione o Lado da Pá (PS ou SS)', 'error'); return; }
+  if(isNaN(zi)||zi<0){ showNotification('Informe um Zi válido (≥ 0)', 'error'); return; }
+  if(isNaN(zf)||zf<=zi){ showNotification('Zf deve ser maior que Zi', 'error'); return; }
+  if(isNaN(L)||L<=0){  showNotification('Informe o Comprimento do dano (> 0)', 'error'); return; }
+  if(isNaN(W)||W<=0){  showNotification('Informe a Largura do dano (> 0)', 'error'); return; }
+  const nucSim = document.getElementById('nucleo-sim').checked;
+  if(nucSim && !v('material-nucleo')){ showNotification('Selecione o Material do Núcleo', 'error'); return; }
+
+  gerarEstimativa();
+  showScreen('tela-estimativa');
+}
+
+function avancarParaCalculadora(){
+  showScreen('tela-calculadora');
+  // Exibe hint de núcleo no card de Adesivo G3 se houver reparo com núcleo
+  const temNucleo = document.getElementById('nucleo-sim').checked;
+  document.getElementById('adesivo-nucleo-hint').style.display = temNucleo ? 'block' : 'none';
+  // Abre o primeiro card automaticamente
+  const repaContentEl = document.getElementById('reparo-content');
+  if(!repaContentEl.classList.contains('active')) toggleCard('reparo');
+}
+
+function voltarParaIdentificacao(){ showScreen('tela-identificacao'); }
+function voltarParaDano()         { showScreen('tela-dano'); }
+function voltarParaEstimativa()   { showScreen('tela-estimativa'); }
+
+function showScreen(id){
+  ['tela-identificacao','tela-dano','tela-estimativa','tela-calculadora'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = (s === id) ? 'block' : 'none';
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateBanners(p, w, b, t){
+  document.querySelectorAll('.display-projeto').forEach(el => el.textContent = p);
+  document.querySelectorAll('.display-wtg').forEach(el => el.textContent = w);
+  document.querySelectorAll('.display-blade').forEach(el => el.textContent = b);
+  document.querySelectorAll('.display-tipo').forEach(el => el.textContent = t);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CÁLCULO DA ESTIMATIVA TEÓRICA
+   Regras aplicadas (PR-20-ENG&CQ + AWP03_RI_10467):
+   ① Borda mínima: +50mm em CADA lado do retângulo → baseL = L+100, baseW = W+100
+   ② Camada presente se: layer.Zi < Zf_dano  AND  layer.Zf > Zi_dano
+   ③ Escalonamento acumula de dentro p/ fora (ordem TX → BX/BZ → UD):
+        staggerL += 2 × props.span  (após cada camada)
+        staggerW += 2 × props.chord
+   ④ Peso tecido = Resina (1:1)  |  Endurecedor = Resina × 0,30
+   ───────────────────────────────────────────────────────────── */
+function gerarEstimativa(){
+  const tipo   = v('tipo-pa');
+  const lado   = document.querySelector('input[name="lado-pa"]:checked').value;
+  const zi     = parseFloat(v('zi-input'));
+  const zf     = parseFloat(v('zf-input'));
+  const L      = parseFloat(v('comp-dano'));
+  const W      = parseFloat(v('larg-dano'));
+  const nucleo = document.getElementById('nucleo-sim').checked;
+
+  // Detecta camadas presentes na zona do dano
+  const bladeData = BLADE_LAYUP[tipo];
+  const allLayers = bladeData ? (bladeData.layers[lado] || []) : [];
+  const presentLayers = allLayers.filter(ly => ly.Zi < zf && ly.Zf > zi);
+
+  // Agrega por tipo de tecido
+  const byType = {};
+  presentLayers.forEach(ly => { byType[ly.type] = (byType[ly.type] || 0) + 1; });
+
+  // Ordem de escalonamento: TX mais fundo → BX/BZ → UD mais externo
+  const ORDER = ['TX1800','TX1200','BX1010','BX1200','BX800','BX443','BZ750','UD1800','UD1200','UD1000','UD661'];
+
+  const baseL = L + 100; // borda 50mm cada lado
+  const baseW = W + 100;
+
+  let staggerL = 0, staggerW = 0;
+  let totalFabricKg = 0;
+  const layerCalc = [];
+
+  ORDER.forEach(tp => {
+    const count = byType[tp] || 0;
+    if(count === 0) return;
+    const props = FABRIC_PROPS[tp];
+    if(!props) return;
+    for(let k = 0; k < count; k++){
+      const pL = baseL + staggerL;
+      const pW = baseW + staggerW;
+      const areaM2 = (pL * pW) / 1e6;
+      const kg = areaM2 * props.weight;
+      totalFabricKg += kg;
+      layerCalc.push({ type:tp, props, pL, pW, areaM2, kg, staggerL, staggerW });
+      staggerL += 2 * props.span;
+      staggerW += 2 * props.chord;
+    }
+  });
+
+  const resina      = totalFabricKg;          // 1:1 (Peso tecido = Peso resina)
+  const endurecedor = resina * 0.30;           // 100:30 (LR635/LH635)
+  const totalMix    = resina + endurecedor;
+
+  // Preenche campos de ajuste manual
+  document.getElementById('est-tecido').value      = fmt(totalFabricKg);
+  document.getElementById('est-resina').value       = fmt(resina);
+  document.getElementById('est-endurecedor').value  = fmt(endurecedor);
+
+  // ── Tabela de camadas detectadas ──
+  let layerRowsHtml = '';
+  ORDER.forEach(tp => {
+    if(!byType[tp]) return;
+    const p   = FABRIC_PROPS[tp];
+    const tag = p ? p.tag : 'tag-bx';
+    const lbl = p ? p.label : tp;
+    const calcItem = layerCalc.filter(c => c.type === tp);
+    const kgTotal  = calcItem.reduce((s, c) => s + c.kg, 0);
+    layerRowsHtml += `<tr>
+      <td><span class="tag ${tag}">${lbl}</span></td>
+      <td style="text-align:center">${byType[tp]}</td>
+      <td style="text-align:center">${p ? p.span : '-'}&nbsp;/&nbsp;${p ? p.chord : '-'} mm</td>
+      <td style="text-align:right">${fmt(kgTotal)} kg</td>
+    </tr>`;
+  });
+
+  if(!layerRowsHtml){
+    layerRowsHtml = `<tr><td colspan="4" style="color:var(--gray);text-align:center;padding:14px">
+      <i class="fas fa-exclamation-circle"></i> Nenhuma camada detectada nessa zona.<br>
+      <small>Verifique Zi/Zf e o modelo de pá selecionado.</small></td></tr>`;
+  }
+
+  // ── Núcleo presente nessa zona ──
+  let coreHtml = '';
+  if(bladeData && bladeData.core[lado]){
+    const coreInZone = bladeData.core[lado].filter(c => c.Zi < zf && c.Zf > zi);
+    if(coreInZone.length > 0){
+      coreHtml = `<div class="info-box warning" style="margin-top:12px">
+        <p><strong><i class="fas fa-layer-group"></i> Núcleo presente nesta zona (${lado}):</strong></p>
+        ${coreInZone.map(c => `<p>• <strong>${c.mat}</strong> de Z = ${c.Zi} mm até Z = ${c.Zf} mm</p>`).join('')}
+        ${nucleo
+          ? `<p style="margin-top:6px"><strong style="color:var(--warning)">✔ Reparo com núcleo selecionado —</strong>
+             inclua o consumo de <strong>Adesivo G3</strong> na Tela 4 (5–7 mm de espessura, gap ≤ 7 mm).</p>`
+          : ''}
+      </div>`;
+    }
+  }
+
+  // ── Monta painel ──
+  const panel = document.getElementById('est-resultado');
+  panel.innerHTML = `
+    <div class="est-panel-title"><i class="fas fa-flask"></i> Estimativa Teórica Calculada</div>
+
+    <div style="background:#e8f4fd;border-radius:8px;padding:12px;margin-bottom:14px;font-size:.85rem;line-height:1.7">
+      <strong>Pá:</strong> ${tipo} &nbsp;|&nbsp;
+      <strong>Lado:</strong> ${lado} &nbsp;|&nbsp;
+      <strong>Zona:</strong> Z = ${zi} – ${zf} mm<br>
+      <strong>Dano:</strong> ${L} × ${W} mm &nbsp;|&nbsp;
+      <strong>Área base (c/ borda 50 mm):</strong> ${baseL} × ${baseW} mm
     </div>
 
-    <script>
-        // CONFIGURAÇÃO DA PLANILHA 
-        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnGGqqI8edzQXtSq5VP4HMwH0ui_4A-XwuQr3reA3y35oapZbRdaPp9Rm09BsnDf3v/exec';
+    <p style="font-size:.82rem;color:var(--gray);margin-bottom:8px">
+      <i class="fas fa-info-circle"></i> Camadas detectadas na zona de reparo:
+    </p>
+    <table class="layer-table">
+      <thead>
+        <tr>
+          <th>Tecido</th>
+          <th style="text-align:center">Camadas</th>
+          <th style="text-align:center">Escal. Span/Corda</th>
+          <th style="text-align:right">Tecido (kg)</th>
+        </tr>
+      </thead>
+      <tbody>${layerRowsHtml}</tbody>
+    </table>
+    ${coreHtml}
 
-        let history = JSON.parse(localStorage.getItem('leanway_history')) || [];
-        let syncQueue = JSON.parse(localStorage.getItem('leanway_sync_queue')) || [];
-        let isHistoryVisible = false;
+    <div class="result-grid" style="margin-top:16px">
+      <div class="result-item">
+        <strong>Total Tecido</strong>
+        <div class="result-value">${fmt(totalFabricKg)}<span class="result-unit">kg</span></div>
+      </div>
+      <div class="result-item">
+        <strong>Resina LR635</strong>
+        <div class="result-value">${fmt(resina)}<span class="result-unit">kg</span></div>
+      </div>
+      <div class="result-item">
+        <strong>Endurecedor LH635 (30%)</strong>
+        <div class="result-value">${fmt(endurecedor)}<span class="result-unit">kg</span></div>
+      </div>
+      <div class="result-item" style="grid-column:1/-1;border-left:4px solid var(--secondary)">
+        <strong>Mistura Total Estimada</strong>
+        <div class="result-value">${fmt(totalMix)}<span class="result-unit">kg</span></div>
+      </div>
+    </div>
+    <p style="font-size:.78rem;color:var(--gray);margin-top:12px">
+      * Estimativa teórica com base no lay-up de projeto. Ajuste conforme profundidade real e condições do dano.
+    </p>
+  `;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('current-year').textContent = new Date().getFullYear();
-            carregarHistorico();
-            tentarSincronizar();
+  // Atualiza badge de lado nos banners da calculadora
+  document.querySelectorAll('.display-lado').forEach(el => el.textContent = lado);
+}
 
-            if ('serviceWorker' in navigator) {
-                const swCode = `
-                    const CACHE_NAME = 'leanway-cache-v1';
-                    const urlsToCache = ['./', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'];
-                    self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))); });
-                    self.addEventListener('activate', event => { event.waitUntil(caches.keys().then(cacheNames => Promise.all(cacheNames.map(cacheName => { if (cacheName !== CACHE_NAME) return caches.delete(cacheName); } )))); });
-                    self.addEventListener('fetch', event => { event.respondWith(caches.match(event.request).then(response => { if (response) return response; return fetch(event.request).then(response => { if (!response || response.status !== 200 || response.type !== 'basic') return response; const responseToCache = response.clone(); caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache)); return response; }); }).catch(() => { if (event.request.mode === 'navigate') return caches.match('./'); }) ); });
-                `;
-                const blob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(blob);
-                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW Error:', err));
-            }
-        });
+/* ─────────────────────────────────────────────────────────────
+   CÁLCULOS DE MATERIAIS (Tela 4)
+   ───────────────────────────────────────────────────────────── */
 
-        window.addEventListener('online', () => {
-            if (syncQueue.length > 0) {
-                showNotification('Internet reconectada. Sincronizando dados...', 'accent');
-                tentarSincronizar();
-            }
-        });
+/* Reparo Estrutural — Hexion LR635 / LH635  →  100 : 30 */
+function calcularReparo(){
+  const resina = parsePt(v('resina-input'));
+  if(!resina || resina <= 0){ showNotification('Insira a quantidade de resina (kg)', 'error'); return; }
+  const checks  = document.querySelectorAll('input[name="tecido-reparo"]:checked');
+  const tecidos = Array.from(checks).map(c => c.value).join(' + ') || 'Não informado';
+  const endur   = resina * 0.30;
+  const total   = resina + endur;
+  document.getElementById('result-reparo').innerHTML =
+    buildResultHTML('Reparo Estrutural', resina, endur, 0, total, resina, tecidos);
+  document.getElementById('result-reparo').classList.add('active');
+}
 
-        // NAVEGAÇÃO DE TELAS
-        function avancarParaEstimativa() {
-            const projeto = document.getElementById('projeto-input').value.trim();
-            const wtg = document.getElementById('wtg-input').value.trim();
-            const blade = document.getElementById('blade-input').value.trim();
+/* Adesivo G3 — BPR 135G3 / BPH 137GF  →  100 : 45 */
+function calcularAdesivo(){
+  const resina = parsePt(v('adesivo-resina'));
+  if(!resina || resina <= 0){ showNotification('Insira a quantidade de resina (kg)', 'error'); return; }
+  const endur = resina * 0.45;
+  const total = resina + endur;
+  document.getElementById('result-adesivo').innerHTML =
+    buildResultHTML('Adesivo G3', resina, endur, 0, total);
+  document.getElementById('result-adesivo').classList.add('active');
+}
 
-            if(!projeto || !wtg || !blade) {
-                showNotification('Por favor, preencha Projeto, WTG e Blade.', 'error');
-                return;
-            }
+/* Filler — BladeRep Profile Filler 3 / Hardener Filler 3  →  6 : 1 */
+function calcularFiller(){
+  const base = parsePt(v('filler-base'));
+  if(!base || base <= 0){ showNotification('Insira a quantidade de base (kg)', 'error'); return; }
+  const endur = base / 6;
+  const total = base + endur;
+  document.getElementById('result-filler').innerHTML =
+    buildResultHTML('Filler 3', base, endur, 0, total);
+  document.getElementById('result-filler').classList.add('active');
+}
 
-            document.querySelectorAll('.display-projeto').forEach(el => el.textContent = projeto);
-            document.querySelectorAll('.display-wtg').forEach(el => el.textContent = wtg);
-            document.querySelectorAll('.display-blade').forEach(el => el.textContent = blade);
+/* TopCoat — BladeRep TopCoat 12 / Hardener 12  →  4 : 1  (+Thinner 10% opcional) */
+function calcularPintura(){
+  const base     = parsePt(v('pintura-base'));
+  const diluidor = document.getElementById('diluidor-check').checked;
+  if(!base || base <= 0){ showNotification('Insira a quantidade de base (kg)', 'error'); return; }
+  const endur = base / 4;
+  const dilui = diluidor ? base * 0.10 : 0;
+  const total = base + endur + dilui;
+  document.getElementById('result-pintura').innerHTML =
+    buildResultHTML('TopCoat 12', base, endur, dilui, total);
+  document.getElementById('result-pintura').classList.add('active');
+}
 
-            document.getElementById('tela-identificacao').style.display = 'none';
-            document.getElementById('tela-estimativa').style.display = 'block';
-        }
+function buildResultHTML(tipo, base, endur, adicional, total, tecido=0, nomeTecidos=''){
+  let extras = '';
+  if(adicional > 0)
+    extras = `<div class="result-item"><strong>Diluidor</strong>
+      <div class="result-value">${fmt(adicional)}<span class="result-unit">kg</span></div></div>`;
+  if(tecido > 0)
+    extras = `<div class="result-item"><strong>Tecido Estimado</strong>
+      <div class="result-value">${fmt(tecido)}<span class="result-unit">kg</span></div></div>`;
+  let tecHtml = '';
+  if(nomeTecidos)
+    tecHtml = `<div style="grid-column:1/-1;background:#e3f2fd;padding:10px;border-radius:8px;
+      font-size:.88rem;color:var(--primary)"><strong>Tecidos Utilizados:</strong> ${nomeTecidos}</div>`;
 
-        function avancarParaCalculadora() {
-            document.getElementById('tela-estimativa').style.display = 'none';
-            document.getElementById('tela-calculadora').style.display = 'block';
-            
-            if(!document.getElementById('reparo-content').classList.contains('active')) {
-                toggleCard('reparo');
-            }
-        }
+  return `
+    <div class="result-title"><i class="fas fa-calculator"></i> Resultado — ${tipo}</div>
+    <div class="result-grid">
+      ${tecHtml}
+      <div class="result-item"><strong>Base / Resina</strong>
+        <div class="result-value">${fmt(base)}<span class="result-unit">kg</span></div></div>
+      <div class="result-item"><strong>Endurecedor</strong>
+        <div class="result-value">${fmt(endur)}<span class="result-unit">kg</span></div></div>
+      ${extras}
+      <div class="result-item" style="grid-column:1/-1;border-left:4px solid var(--secondary)">
+        <strong>Mistura Total</strong>
+        <div class="result-value">${fmt(total)}<span class="result-unit">kg</span></div></div>
+    </div>
+    <button class="save-btn" onclick="salvarCalculo('${tipo}',${base},${endur},${adicional>0?adicional:tecido},${total},'${nomeTecidos.replace(/'/g,"\\'")}')">
+      <i class="fas fa-save"></i> Salvar e Sincronizar
+    </button>`;
+}
 
-        function voltarParaIdentificacao() {
-            document.getElementById('tela-calculadora').style.display = 'none';
-            document.getElementById('tela-estimativa').style.display = 'none';
-            document.getElementById('tela-identificacao').style.display = 'block';
-        }
+/* ─────────────────────────────────────────────────────────────
+   HISTÓRICO E SINCRONIZAÇÃO
+   ───────────────────────────────────────────────────────────── */
+function salvarCalculo(tipo, base, endur, adicional, total, nomeTecidos=''){
+  const projeto   = v('projeto-input');
+  const wtg       = v('wtg-input');
+  const blade     = v('blade-input');
+  const tipoPa    = v('tipo-pa');
+  const lado      = (document.querySelector('input[name="lado-pa"]:checked') || {}).value || '';
+  const zi        = v('zi-input')   || '';
+  const zf        = v('zf-input')   || '';
+  const compDano  = v('comp-dano')  || '';
+  const largDano  = v('larg-dano')  || '';
+  const nucleo    = document.getElementById('nucleo-sim').checked;
+  const matNucleo = v('material-nucleo') || '';
+  const estTec    = parsePt(v('est-tecido'))      || 0;
+  const estRes    = parsePt(v('est-resina'))       || 0;
+  const estEnd    = parsePt(v('est-endurecedor'))  || 0;
 
-        function voltarParaEstimativa() {
-            document.getElementById('tela-calculadora').style.display = 'none';
-            document.getElementById('tela-estimativa').style.display = 'block';
-        }
+  if(!projeto || !wtg || !blade){
+    showNotification('Dados de identificação incompletos', 'error');
+    voltarParaIdentificacao();
+    return;
+  }
 
-        // UI Functions
-        function toggleCard(cardId) {
-            const content = document.getElementById(`${cardId}-content`);
-            const icon = content.previousElementSibling.querySelector('.toggle-icon');
-            
-            if (content.classList.contains('active')) {
-                content.classList.remove('active');
-                icon.textContent = '▼';
-            } else {
-                document.querySelectorAll('#tela-calculadora .card-content').forEach(el => {
-                    if(el.id !== 'history-content') {
-                        el.classList.remove('active');
-                        el.previousElementSibling.querySelector('.toggle-icon').textContent = '▼';
-                    }
-                });
-                content.classList.add('active');
-                icon.textContent = '▲';
-            }
-        }
+  const calculo = {
+    id: Date.now(), projeto, wtg, blade, tipoPa, lado,
+    zi, zf, compDano, largDano, nucleo, matNucleo,
+    tecidosUsados: nomeTecidos,
+    estTecido: estTec, estResina: estRes, estEndurecedor: estEnd,
+    tipo, base, endurecedor: endur, adicional, total,
+    data: new Date().toLocaleString('pt-BR')
+  };
 
-        function toggleHistory() {
-            const content = document.getElementById('history-content');
-            const toggleIcon = document.getElementById('history-toggle');
-            if (content.classList.contains('active')) {
-                content.classList.remove('active');
-                toggleIcon.textContent = '▼';
-                isHistoryVisible = false;
-            } else {
-                content.classList.add('active');
-                toggleIcon.textContent = '▲';
-                isHistoryVisible = true;
-                carregarHistorico();
-            }
-        }
+  history.unshift(calculo);
+  if(history.length > 30) history = history.slice(0, 30);
+  localStorage.setItem('leanway_history', JSON.stringify(history));
 
-        // Calculation Functions
-        function calcularReparo() {
-            const resina = parseFloat(document.getElementById('resina-input').value.replace(',', '.'));
-            if (isNaN(resina) || resina <= 0) return showNotification('Insira uma quantidade válida', 'error');
-            
-            // Pega os tecidos selecionados
-            const checkboxes = document.querySelectorAll('input[name="tecido-reparo"]:checked');
-            let tecidosSelecionados = Array.from(checkboxes).map(cb => cb.value).join(' + ');
-            if (tecidosSelecionados === '') tecidosSelecionados = 'Nenhum informado';
+  syncQueue.push(calculo);
+  localStorage.setItem('leanway_sync_queue', JSON.stringify(syncQueue));
 
-            const endurecedor = resina * 0.30;
-            const total = resina + endurecedor;
-            
-            // Passamos a string de tecidos para o gerador de HTML
-            document.getElementById('result-reparo').innerHTML = gerarHTMLResultado('Reparo Estrutural', resina, endurecedor, 0, total, resina, tecidosSelecionados);
-            document.getElementById('result-reparo').classList.add('active');
-        }
+  showNotification('Cálculo salvo!', 'success');
+  if(isHistoryVisible) carregarHistorico();
+  tentarSincronizar();
+}
 
-        function calcularAdesivo() {
-            const resina = parseFloat(document.getElementById('adesivo-resina').value.replace(',', '.'));
-            if (isNaN(resina) || resina <= 0) return showNotification('Insira uma quantidade válida', 'error');
-            
-            const endurecedor = resina * 0.45;
-            const total = resina + endurecedor;
-            
-            document.getElementById('result-adesivo').innerHTML = gerarHTMLResultado('Adesivo G3', resina, endurecedor, 0, total);
-            document.getElementById('result-adesivo').classList.add('active');
-        }
+async function tentarSincronizar(){
+  if(!navigator.onLine || syncQueue.length === 0 || !GOOGLE_APPS_SCRIPT_URL) return;
+  try {
+    await fetch(GOOGLE_APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(syncQueue),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+    });
+    syncQueue = [];
+    localStorage.setItem('leanway_sync_queue', JSON.stringify(syncQueue));
+    showNotification('Dados enviados para a planilha!', 'success');
+  } catch(e) {
+    console.log('Sem conexão — envio pendente ao reconectar.');
+  }
+}
 
-        function calcularFiller() {
-            const base = parseFloat(document.getElementById('filler-base').value.replace(',', '.'));
-            if (isNaN(base) || base <= 0) return showNotification('Insira uma quantidade válida', 'error');
-            
-            const endurecedor = base / 6;
-            const total = base + endurecedor;
-            
-            document.getElementById('result-filler').innerHTML = gerarHTMLResultado('Acabamento Filler 3', base, endurecedor, 0, total);
-            document.getElementById('result-filler').classList.add('active');
-        }
+function carregarHistorico(){
+  const list = document.getElementById('history-list');
+  if(history.length === 0){
+    list.innerHTML = '<p style="text-align:center;color:var(--gray);padding:16px">Nenhum cálculo no histórico</p>';
+    return;
+  }
+  list.innerHTML = history.map(item => {
+    let det = `Base: ${fmt(item.base)} kg | Endur.: ${fmt(item.endurecedor)} kg`;
+    if(item.adicional > 0) det += ` | Adic.: ${fmt(item.adicional)} kg`;
+    if(item.tecidosUsados)
+      det += `<br><span style="color:var(--primary);font-size:.82rem"><strong>Tecidos:</strong> ${item.tecidosUsados}</span>`;
+    let zoneInfo = '';
+    if(item.zi || item.zf)
+      zoneInfo = `<span style="font-size:.8rem;color:var(--gray)">Z: ${item.zi||'?'}–${item.zf||'?'} mm${item.lado?' | '+item.lado:''} | ${item.compDano||'?'}×${item.largDano||'?'} mm</span><br>`;
+    return `<div class="history-item">
+      <div class="history-item-header">
+        <span class="history-type">${item.tipo}</span>
+        <span class="history-date">${item.data}</span>
+      </div>
+      <div class="history-details" style="margin-bottom:6px;border-bottom:1px solid #eee;padding-bottom:6px;font-size:.85rem">
+        <strong>${item.projeto||'N/A'}</strong> | WTG: ${item.wtg||'N/A'} | Pá: ${item.blade||'N/A'}${item.tipoPa?' ('+item.tipoPa+')':''}
+      </div>
+      <div class="history-details">
+        ${zoneInfo}${det}<br>
+        <strong style="color:var(--primary)">Total: ${fmt(item.total)} kg</strong>
+        ${item.nucleo ? `<span style="margin-left:10px;color:var(--warning);font-size:.8rem"><i class="fas fa-layer-group"></i> ${item.matNucleo||'Núcleo'}</span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
 
-        function calcularPintura() {
-            const base = parseFloat(document.getElementById('pintura-base').value.replace(',', '.'));
-            const usarDiluidor = document.getElementById('diluidor-check').checked;
-            if (isNaN(base) || base <= 0) return showNotification('Insira uma quantidade válida', 'error');
-            
-            const endurecedor = base / 4;
-            const diluidor = usarDiluidor ? base * 0.1 : 0;
-            const total = base + endurecedor + diluidor;
-            
-            document.getElementById('result-pintura').innerHTML = gerarHTMLResultado('Acabamento Pintura', base, endurecedor, diluidor, total);
-            document.getElementById('result-pintura').classList.add('active');
-        }
+function toggleHistory(){
+  const c = document.getElementById('history-content');
+  const i = document.getElementById('history-toggle');
+  isHistoryVisible = !c.classList.contains('active');
+  c.classList.toggle('active');
+  i.textContent = isHistoryVisible ? '▲' : '▼';
+  if(isHistoryVisible) carregarHistorico();
+}
 
-        // Geração de Resultados
-        function gerarHTMLResultado(tipo, base, endurecedor, adicional, total, tecido = 0, nomesTecidos = '') {
-            let adicionalHTML = '';
-            if (adicional > 0) adicionalHTML = `<div class="result-item"><strong>Diluidor</strong><div class="result-value">${adicional.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>`;
-            if (tecido > 0) adicionalHTML = `<div class="result-item"><strong>Tecido Estimado</strong><div class="result-value">${tecido.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>`;
+function limparHistorico(){
+  if(!confirm('Apagar todo o histórico salvo?')) return;
+  history = [];
+  localStorage.removeItem('leanway_history');
+  carregarHistorico();
+  showNotification('Histórico apagado', 'success');
+}
 
-            let tecidosInfoHTML = '';
-            if (nomesTecidos !== '') {
-                tecidosInfoHTML = `<div style="grid-column: 1 / -1; background: #e3f2fd; padding: 10px; border-radius: 8px; font-size: 0.9rem; color: var(--primary-color);"><strong>Tecidos Utilizados:</strong> ${nomesTecidos}</div>`;
-            }
+function exportarHistorico(){
+  if(history.length === 0){ showNotification('Sem dados para exportar', 'error'); return; }
+  const cab = 'Projeto;WTG;Blade;TipoPa;Lado;Zi(mm);Zf(mm);CompDano(mm);LargDano(mm);Nucleo;MatNucleo;' +
+              'TecidosUsados;Est.Tecido(kg);Est.Resina(kg);Est.Endur(kg);Tipo;Base(kg);Endurecedor(kg);Adicional(kg);Total(kg);Data\n';
+  const linhas = history.map(i =>
+    `"${i.projeto||''}";"${i.wtg||''}";"${i.blade||''}";"${i.tipoPa||''}";"${i.lado||''}";` +
+    `"${i.zi||''}";"${i.zf||''}";"${i.compDano||''}";"${i.largDano||''}";"${i.nucleo?'Sim':'Não'}";"${i.matNucleo||''}";` +
+    `"${i.tecidosUsados||''}";"${fmt(i.estTecido||0)}";"${fmt(i.estResina||0)}";"${fmt(i.estEndurecedor||0)}";` +
+    `"${i.tipo}";"${fmt(i.base)}";"${fmt(i.endurecedor)}";"${fmt(i.adicional)}";"${fmt(i.total)}";"${i.data}"`
+  ).join('\n');
+  const blob = new Blob(['\uFEFF' + cab + linhas], { type: 'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `leanway_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showNotification('Download iniciado!', 'success');
+}
 
-            return `
-                <div class="result-title"><i class="fas fa-calculator"></i> Resultado</div>
-                <div class="result-grid">
-                    ${tecidosInfoHTML}
-                    <div class="result-item"><strong>Base/Resina</strong><div class="result-value">${base.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>
-                    <div class="result-item"><strong>Endurecedor</strong><div class="result-value">${endurecedor.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>
-                    ${adicionalHTML}
-                    <div class="result-item"><strong>Mistura Total</strong><div class="result-value">${total.toFixed(3).replace('.', ',')}<span class="result-unit">kg</span></div></div>
-                </div>
-                <button class="save-btn" onclick="salvarCalculo('${tipo}', ${base}, ${endurecedor}, ${adicional > 0 ? adicional : tecido}, ${total}, '${nomesTecidos}')">
-                    <i class="fas fa-save"></i> Salvar e Sincronizar
-                </button>
-            `;
-        }
+/* ─────────────────────────────────────────────────────────────
+   UI HELPERS
+   ───────────────────────────────────────────────────────────── */
+function toggleCard(id){
+  const c   = document.getElementById(`${id}-content`);
+  const hdr = c.previousElementSibling;
+  const ico = hdr ? hdr.querySelector('.toggle-icon') : null;
+  if(c.classList.contains('active')){
+    c.classList.remove('active');
+    if(ico) ico.textContent = '▼';
+  } else {
+    // fecha os demais cards da tela atual (exceto history)
+    document.querySelectorAll('#tela-calculadora .card-content, #tela-estimativa .card-content').forEach(el => {
+      if(el.id && el.id !== 'history-content'){
+        el.classList.remove('active');
+        const h = el.previousElementSibling;
+        if(h){ const ig = h.querySelector('.toggle-icon'); if(ig) ig.textContent = '▼'; }
+      }
+    });
+    c.classList.add('active');
+    if(ico) ico.textContent = '▲';
+  }
+}
 
-        // Logic & Storage
-        function salvarCalculo(tipo, base, endurecedor, adicional, total, nomesTecidos = '') {
-            const projeto = document.getElementById('projeto-input').value.trim();
-            const wtg = document.getElementById('wtg-input').value.trim();
-            const blade = document.getElementById('blade-input').value.trim();
-            
-            const estTecido = parseFloat(document.getElementById('est-tecido').value.replace(',', '.')) || 0;
-            const estResina = parseFloat(document.getElementById('est-resina').value.replace(',', '.')) || 0;
-            const estEndurecedor = parseFloat(document.getElementById('est-endurecedor').value.replace(',', '.')) || 0;
+function showNotification(msg, type){
+  const n = document.getElementById('notification');
+  const colors = {
+    success: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim(),
+    error:   getComputedStyle(document.documentElement).getPropertyValue('--danger').trim(),
+    info:    getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
+  };
+  n.style.background = colors[type] || colors.info;
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 3400);
+}
 
-            if(!projeto || !wtg || !blade) {
-                showNotification('Erro interno: Dados de identificação perdidos.', 'error');
-                voltarParaIdentificacao(); 
-                return; 
-            }
-
-            const calculo = {
-                id: Date.now(),
-                projeto: projeto,
-                wtg: wtg,
-                blade: blade,
-                tecidosUsados: nomesTecidos, // NOVA INFORMAÇÃO
-                estTecido: estTecido,
-                estResina: estResina,
-                estEndurecedor: estEndurecedor,
-                tipo: tipo,
-                base: base,
-                endurecedor: endurecedor,
-                adicional: adicional,
-                total: total,
-                data: new Date().toLocaleString('pt-BR')
-            };
-            
-            history.unshift(calculo);
-            if (history.length > 30) history = history.slice(0, 30);
-            localStorage.setItem('leanway_history', JSON.stringify(history));
-            
-            syncQueue.push(calculo);
-            localStorage.setItem('leanway_sync_queue', JSON.stringify(syncQueue));
-            
-            showNotification('Cálculo salvo localmente!', 'success');
-            if (isHistoryVisible) carregarHistorico();
-            
-            tentarSincronizar();
-        }
-
-        async function tentarSincronizar() {
-            if (!navigator.onLine || syncQueue.length === 0 || GOOGLE_APPS_SCRIPT_URL === '') return;
-
-            try {
-                const resposta = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(syncQueue),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-
-                syncQueue = [];
-                localStorage.setItem('leanway_sync_queue', JSON.stringify(syncQueue));
-                showNotification('Dados enviados para a planilha!', 'success');
-            } catch (erro) {
-                console.log('Sem conexão com o servidor. Envio pendente.');
-            }
-        }
-
-        function carregarHistorico() {
-            const historyList = document.getElementById('history-list');
-            if (history.length === 0) {
-                historyList.innerHTML = '<p style="text-align: center; color: var(--gray-color); padding: 20px;">Nenhum cálculo no histórico</p>';
-                return;
-            }
-            
-            let html = '';
-            history.forEach(item => {
-                let detalhes = `Base: ${item.base.toFixed(3).replace('.', ',')}kg | Endurecedor: ${item.endurecedor.toFixed(3).replace('.', ',')}kg`;
-                if (item.adicional > 0) detalhes += ` | Adicional: ${item.adicional.toFixed(3).replace('.', ',')}kg`;
-                
-                // Mostra os tecidos no histórico se existirem
-                if (item.tecidosUsados && item.tecidosUsados !== '') {
-                    detalhes += `<br><span style="color: var(--primary-color); font-size: 0.85rem;"><strong>Tecidos:</strong> ${item.tecidosUsados}</span>`;
-                }
-                
-                html += `
-                    <div class="history-item">
-                        <div class="history-item-header">
-                            <span class="history-type">${item.tipo}</span>
-                            <span class="history-date">${item.data}</span>
-                        </div>
-                        <div class="history-details" style="margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-                            <strong>Local:</strong> ${item.projeto || 'N/A'} | <strong>WTG:</strong> ${item.wtg || 'N/A'} | <strong>${item.blade || 'N/A'}</strong>
-                        </div>
-                        <div class="history-details">
-                            ${detalhes}<br>
-                            <strong style="color: var(--primary-color);">Total Gasto: ${item.total.toFixed(3).replace('.', ',')}kg</strong>
-                        </div>
-                    </div>
-                `;
-            });
-            historyList.innerHTML = html;
-        }
-
-        function limparHistorico() {
-            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
-                history = [];
-                localStorage.removeItem('leanway_history');
-                carregarHistorico();
-                showNotification('Histórico limpo', 'success');
-            }
-        }
-
-        function exportarHistorico() {
-            if (history.length === 0) return showNotification('Não há dados para exportar', 'error');
-            
-            let csv = 'Projeto;WTG;Blade;Tecidos Usados;Est. Tecido;Est. Resina;Est. Endurecedor;Tipo;Base;Endurecedor;Adicional;Total;Data\n';
-            history.forEach(item => {
-                csv += `"${item.projeto || ''}";"${item.wtg || ''}";"${item.blade || ''}";"${item.tecidosUsados || ''}";"${(item.estTecido || 0).toFixed(3).replace('.', ',')}";"${(item.estResina || 0).toFixed(3).replace('.', ',')}";"${(item.estEndurecedor || 0).toFixed(3).replace('.', ',')}";"${item.tipo}";"${item.base.toFixed(3).replace('.', ',')}";"${item.endurecedor.toFixed(3).replace('.', ',')}";"${item.adicional.toFixed(3).replace('.', ',')}";"${item.total.toFixed(3).replace('.', ',')}";"${item.data}"\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `leanway_historico_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-            showNotification('Download concluído!', 'success');
-        }
-
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            notification.style.backgroundColor = type === 'error' ? 'var(--danger-color)' : 'var(--secondary-color)';
-            notification.textContent = message;
-            notification.classList.add('show');
-            setTimeout(() => notification.classList.remove('show'), 3000);
-        }
-    </script>
+function v(id)      { return (document.getElementById(id) || {}).value || ''; }
+function fmt(n)     { return (isNaN(n) ? 0 : n).toFixed(3).replace('.', ','); }
+function parsePt(s) { return parseFloat((s || '').toString().replace(',', '.')); }
+</script>
 </body>
 </html>
