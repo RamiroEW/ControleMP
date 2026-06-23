@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Lean Way">
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
@@ -44,6 +44,7 @@
       align-items:center;font-size:.88rem;box-shadow:var(--shadow);flex-wrap:wrap;gap:6px}
     .active-id-banner .info{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
     .badge{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px;font-size:.82rem;font-weight:600}
+    .badge-lado{background:rgba(46,204,113,.35);padding:2px 8px;border-radius:20px;font-size:.82rem;font-weight:700}
     .edit-id-btn{background:rgba(255,255,255,.2);border:none;color:#fff;padding:5px 11px;
       border-radius:5px;cursor:pointer;font-size:.85rem;transition:background .3s;display:flex;align-items:center;gap:5px}
     .edit-id-btn:hover{background:rgba(255,255,255,.35)}
@@ -81,12 +82,12 @@
     input:focus,select:focus{border-color:var(--primary);outline:none}
     input.error,select.error{border-color:var(--danger)}
 
-    /* RADIO TOGGLE (PS/SS) */
+    /* RADIO TOGGLE */
     .toggle-group{display:flex;border-radius:var(--radius);overflow:hidden;border:2px solid var(--border)}
     .toggle-group input{display:none}
     .toggle-group label{flex:1;text-align:center;padding:11px;cursor:pointer;font-weight:600;
       font-size:.95rem;transition:all .2s;background:#fff;color:var(--gray)}
-    .toggle-group input:checked+label{background:var(--primary);color:#fff;border:none}
+    .toggle-group input:checked+label{background:var(--primary);color:#fff}
 
     /* CHECKBOXES */
     .checkbox-group{display:flex;align-items:center;gap:10px;margin:8px 0;cursor:pointer}
@@ -104,22 +105,24 @@
     .info-box.danger{background:#fff5f5;border-left-color:var(--danger)}
     .info-box.success{background:#f0fdf4;border-left-color:var(--secondary)}
 
-    /* BUTTONS */
-    .btn{border:none;padding:13px 18px;border-radius:var(--radius);font-weight:600;font-size:.97rem;
-      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .2s;width:100%;margin-top:8px}
-    .btn-primary{background:var(--primary);color:#fff}
-    .btn-primary:hover{background:var(--primary-dark)}
-    .btn-success{background:var(--secondary);color:#fff}
-    .btn-success:hover{background:var(--secondary-dark)}
-    .btn-accent{background:var(--accent);color:#fff}
-    .btn-accent:hover{background:#2980b9}
-    .btn-danger{background:var(--danger);color:#fff}
-    .btn-danger:hover{background:#c0392b}
-    .btn-gray{background:var(--gray);color:#fff}
-    .btn-gray:hover{background:#5a6268}
-    .btn-sm{padding:8px 13px;font-size:.85rem;margin-top:0}
-    .btn-row{display:flex;gap:10px;margin-top:8px}
-    .btn-row .btn{margin-top:0}
+    /* COMP CALCULADO — display ao vivo em Tela 2 */
+    .comp-auto-box{background:linear-gradient(135deg,#f0fdf4,#e8f8f0);border:2px solid var(--secondary);
+      border-radius:var(--radius);padding:12px 16px;display:none;align-items:center;gap:12px}
+    .comp-auto-box.visible{display:flex}
+    .comp-auto-icon{font-size:1.6rem;color:var(--secondary-dark)}
+    .comp-auto-label{font-size:.8rem;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    .comp-auto-value{font-size:1.4rem;font-weight:700;color:var(--secondary-dark);line-height:1.2}
+    .comp-auto-sub{font-size:.8rem;color:var(--gray)}
+
+    /* LAYER PREVIEW em Tela 2 (mini resultado ao vivo) */
+    .live-preview{background:#fff;border-radius:var(--radius);border:2px solid var(--primary);
+      padding:14px;display:none;margin-top:4px}
+    .live-preview.visible{display:block}
+    .live-preview-title{font-size:.85rem;font-weight:700;color:var(--primary);margin-bottom:10px;
+      display:flex;align-items:center;gap:6px}
+    .layer-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+    .layer-chip{padding:4px 10px;border-radius:20px;font-size:.78rem;font-weight:700;
+      display:flex;align-items:center;gap:4px}
 
     /* LAYER TABLE */
     .layer-table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:10px}
@@ -139,8 +142,7 @@
     .result-title{font-size:1.05rem;font-weight:700;color:var(--primary);margin-bottom:13px;
       display:flex;align-items:center;gap:9px}
     .result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
-    .result-item{background:#fff;padding:13px;border-radius:var(--radius);
-      box-shadow:0 2px 4px rgba(0,0,0,.06)}
+    .result-item{background:#fff;padding:13px;border-radius:var(--radius);box-shadow:0 2px 4px rgba(0,0,0,.06)}
     .result-item strong{color:var(--primary);font-size:.82rem;display:block}
     .result-value{font-size:1.35rem;font-weight:700;color:var(--dark);margin-top:4px}
     .result-unit{font-size:.82rem;color:var(--gray);margin-left:2px}
@@ -153,12 +155,20 @@
     .est-panel{background:#fff;border-radius:var(--radius);padding:16px;border:2px solid var(--primary);margin-bottom:14px}
     .est-panel-title{font-weight:700;color:var(--primary);font-size:1rem;margin-bottom:12px;
       display:flex;align-items:center;gap:8px}
-    .est-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.9rem}
-    .est-row:last-child{border-bottom:none}
-    .est-label{color:var(--gray)}
-    .est-value{font-weight:700;color:var(--dark)}
-    .layers-detected{background:#e8f4fd;border-radius:var(--radius);padding:12px;margin-top:10px}
-    .layers-detected-title{font-size:.82rem;font-weight:700;color:var(--primary);margin-bottom:8px}
+
+    /* BUTTONS */
+    .btn{border:none;padding:13px 18px;border-radius:var(--radius);font-weight:600;font-size:.97rem;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .2s;width:100%;margin-top:8px}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{background:var(--primary-dark)}
+    .btn-success{background:var(--secondary);color:#fff}
+    .btn-success:hover{background:var(--secondary-dark)}
+    .btn-gray{background:var(--gray);color:#fff}
+    .btn-gray:hover{background:#5a6268}
+    .btn-danger{background:var(--danger);color:#fff}
+    .btn-danger:hover{background:#c0392b}
+    .btn-row{display:flex;gap:10px;margin-top:8px}
+    .btn-row .btn{margin-top:0}
 
     /* HISTORY */
     .history-container{background:#fff;border-radius:var(--radius);margin-top:14px;overflow:hidden;box-shadow:var(--shadow)}
@@ -181,12 +191,22 @@
     .history-btn:hover{background:#2980b9}
     .history-btn.danger{background:var(--danger)}
     .history-btn.danger:hover{background:#c0392b}
+    .sync-badge{font-size:.74rem;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+    .sync-badge.ok{background:rgba(255,255,255,.22);color:#fff}
+    .sync-badge.pending{background:var(--warning);color:#fff}
+    .history-item-actions{display:flex;gap:8px;margin-top:10px}
+    .history-item-actions button{flex:1;border:none;border-radius:6px;padding:7px 8px;font-size:.78rem;
+      font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:filter .2s}
+    .history-item-actions button:hover{filter:brightness(.95)}
+    .hi-reuse{background:#e3f2fd;color:#1565c0}
+    .hi-del{background:#fdecea;color:#c0392b}
+    .ply-check{width:17px;height:17px;accent-color:var(--secondary);cursor:pointer}
 
     /* FOOTER */
     .footer{text-align:center;color:var(--gray);padding:18px;margin-top:16px;font-size:.87rem}
     .footer-info{font-size:.78rem;margin-top:4px}
 
-    /* FADE ANIMATION */
+    /* FADE */
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
     .fade-in{animation:fadeIn .3s ease}
 
@@ -205,7 +225,6 @@
 <body>
 <div class="container">
 
-  <!-- HEADER -->
   <header class="header">
     <div class="logo"><h1>Lean</h1><h1>Way</h1><h1>Solution</h1></div>
     <p class="subtitle">Calculadora de Reparos em Pás Eólicas</p>
@@ -216,13 +235,13 @@
   <main>
 
     <!-- ═══════════════════════════════════════════════
-         TELA 1 — IDENTIFICAÇÃO
+         TELA 1 — IDENTIFICAÇÃO + MODELO + LADO
     ═══════════════════════════════════════════════ -->
     <div id="tela-identificacao" class="fade-in">
       <div class="step-bar">
-        <div class="step active"><span class="step-num">1</span><span>Identificação</span></div>
+        <div class="step active"><span class="step-num">1</span><span>Modelo + Lado</span></div>
         <span class="step-arrow">›</span>
-        <div class="step"><span class="step-num">2</span><span>Dano</span></div>
+        <div class="step"><span class="step-num">2</span><span>Zona do Dano</span></div>
         <span class="step-arrow">›</span>
         <div class="step"><span class="step-num">3</span><span>Estimativa</span></div>
         <span class="step-arrow">›</span>
@@ -230,11 +249,13 @@
       </div>
 
       <div class="card">
-        <div class="card-header no-toggle" style="cursor:default">
+        <div class="card-header no-toggle">
           <h2><i class="fas fa-clipboard-list"></i> Identificação do Reparo</h2>
         </div>
         <div class="card-content active">
           <div class="input-group">
+
+            <!-- Dados de campo -->
             <div class="input-section">
               <label for="projeto-input">Projeto / Parque Eólico:</label>
               <input type="text" id="projeto-input" placeholder="Ex: Ventos do Sul">
@@ -249,18 +270,53 @@
                 <input type="text" id="blade-input" placeholder="Ex: 00360">
               </div>
             </div>
-            <div class="input-section">
-              <label for="tipo-pa">Tipo de Pá: <span class="label-hint">(modelo)</span></label>
-              <select id="tipo-pa">
-                <option value="">— Selecione o modelo —</option>
-                <option value="AW56.7">AW 56.7</option>
-                <option value="AW61.2">AW 61.2 (inclui -1 e -2)</option>
-                <option value="AW64.7">AW 64.7</option>
-                <option value="NR81.5">NR 81.5</option>
-              </select>
+            <div class="input-row">
+              <div class="input-section">
+                <label for="tecnico-input">Técnico Responsável:</label>
+                <input type="text" id="tecnico-input" placeholder="Ex: João Silva">
+              </div>
+              <div class="input-section">
+                <label for="data-inspecao">Data da Inspeção:</label>
+                <input type="date" id="data-inspecao">
+              </div>
             </div>
+
+            <!-- ─── DADOS TÉCNICOS — definem o lay-up ─── -->
+            <div style="border-top:2px solid var(--border);margin:4px 0 2px;padding-top:12px">
+              <p style="font-size:.8rem;font-weight:700;color:var(--primary);text-transform:uppercase;
+                letter-spacing:.5px;margin-bottom:10px">
+                <i class="fas fa-layer-group"></i> Dados técnicos da pá
+              </p>
+
+              <div class="input-section" style="margin-bottom:10px">
+                <label for="tipo-pa">Tipo de Pá <span class="label-hint">(define as tabelas de laminado)</span></label>
+                <select id="tipo-pa" onchange="onTipoOuLadoChange()">
+                  <option value="AW64.7" selected>AW 64.7</option>
+                </select>
+              </div>
+
+              <div class="input-section">
+                <label>Lado da Pá <span class="label-hint">(estrutura de laminado diferente por lado)</span></label>
+                <div class="toggle-group">
+                  <input type="radio" name="lado-pa" id="lado-ps" value="PS" onchange="onTipoOuLadoChange()">
+                  <label for="lado-ps"><i class="fas fa-arrow-circle-down" style="font-size:.75rem"></i> PS — Pressão</label>
+                  <input type="radio" name="lado-pa" id="lado-ss" value="SS" onchange="onTipoOuLadoChange()">
+                  <label for="lado-ss"><i class="fas fa-arrow-circle-up" style="font-size:.75rem"></i> SS — Sucção</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview das camadas (aparece ao selecionar modelo + lado) -->
+            <div id="layup-preview" class="live-preview">
+              <div class="live-preview-title">
+                <i class="fas fa-table"></i> Laminado desta pá (resumo)
+              </div>
+              <div id="layup-chips" class="layer-chips"></div>
+              <p id="layup-note" style="font-size:.78rem;color:var(--gray)"></p>
+            </div>
+
             <button class="btn btn-primary" onclick="avancarParaDano()">
-              Avançar <i class="fas fa-arrow-right"></i>
+              Definir Zona do Dano <i class="fas fa-arrow-right"></i>
             </button>
           </div>
         </div>
@@ -269,75 +325,113 @@
 
 
     <!-- ═══════════════════════════════════════════════
-         TELA 2 — LOCALIZAÇÃO E DIMENSÕES DO DANO
+         TELA 2 — ZONA DO DANO
     ═══════════════════════════════════════════════ -->
     <div id="tela-dano" style="display:none" class="fade-in">
       <div class="step-bar">
-        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Identificação</span></div>
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Modelo + Lado</span></div>
         <span class="step-arrow">›</span>
-        <div class="step active"><span class="step-num">2</span><span>Dano</span></div>
+        <div class="step active"><span class="step-num">2</span><span>Zona do Dano</span></div>
         <span class="step-arrow">›</span>
         <div class="step"><span class="step-num">3</span><span>Estimativa</span></div>
         <span class="step-arrow">›</span>
         <div class="step"><span class="step-num">4</span><span>Cálculo</span></div>
       </div>
 
-      <div id="banner-dano" class="active-id-banner">
+      <div class="active-id-banner">
         <div class="info">
-          <span><i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong></span>
+          <span><i class="fas fa-wind"></i> <strong class="display-projeto"></strong></span>
           <span class="badge">WTG: <span class="display-wtg"></span></span>
           <span class="badge">Pá: <span class="display-blade"></span></span>
           <span class="badge display-tipo" style="background:rgba(255,255,255,.3)"></span>
+          <span class="badge-lado display-lado"></span>
         </div>
         <button onclick="voltarParaIdentificacao()" class="edit-id-btn"><i class="fas fa-edit"></i> Editar</button>
       </div>
 
       <div class="card">
-        <div class="card-header no-toggle" style="cursor:default">
-          <h2><i class="fas fa-map-pin"></i> Localização e Dimensões do Dano</h2>
+        <div class="card-header no-toggle">
+          <h2><i class="fas fa-ruler-combined"></i> Zona do Dano — Zi, Zf, Xi, Xf</h2>
         </div>
         <div class="card-content active">
 
           <div class="info-box">
             <p><strong><i class="fas fa-info-circle"></i> Regra de marcação (PR-20-ENG&CQ):</strong></p>
-            <p>• Deixar <strong>≥ 50 mm</strong> entre os lados do retângulo e as extremidades do defeito.</p>
-            <p>• Os lados do retângulo devem ser <strong>paralelos à corda e ao comprimento</strong> da pá. Diagonal <strong>NÃO é permitida</strong>.</p>
+            <p>• <strong>≥ 50 mm</strong> de borda em todos os lados do retângulo de reparo.</p>
+            <p>• Lados paralelos à corda e ao comprimento da pá. Diagonal <strong>NÃO é permitida</strong>.</p>
           </div>
 
           <div class="input-group">
-            <!-- Lado da Pá -->
-            <div class="input-section">
-              <label>Lado da Pá:</label>
-              <div class="toggle-group">
-                <input type="radio" name="lado-pa" id="lado-ps" value="PS">
-                <label for="lado-ps"><i class="fas fa-circle" style="font-size:.7rem"></i> PS — Pressão</label>
-                <input type="radio" name="lado-pa" id="lado-ss" value="SS">
-                <label for="lado-ss"><i class="fas fa-circle-notch" style="font-size:.7rem"></i> SS — Sucção</label>
+
+            <!-- Zi e Zf — posição spanwise -->
+            <div>
+              <label style="margin-bottom:8px;display:block">
+                Posição do dano no span <span class="label-hint">(mm a partir da flange)</span>
+              </label>
+              <div class="input-row">
+                <div class="input-section">
+                  <label for="zi-input" style="font-weight:500;font-size:.85rem;color:var(--gray)">
+                    Zi — início</label>
+                  <input type="number" id="zi-input" placeholder="Ex: 14500" min="0"
+                         oninput="atualizarZona()">
+                </div>
+                <div class="input-section">
+                  <label for="zf-input" style="font-weight:500;font-size:.85rem;color:var(--gray)">
+                    Zf — fim</label>
+                  <input type="number" id="zf-input" placeholder="Ex: 16000" min="0"
+                         oninput="atualizarZona()">
+                </div>
               </div>
             </div>
 
-            <!-- Posição Z -->
-            <div class="input-row">
-              <div class="input-section">
-                <label for="zi-input">Zi — Início do dano <span class="label-hint">(mm a partir da flange)</span></label>
-                <input type="number" id="zi-input" placeholder="Ex: 5000" min="0">
-              </div>
-              <div class="input-section">
-                <label for="zf-input">Zf — Fim do dano <span class="label-hint">(mm)</span></label>
-                <input type="number" id="zf-input" placeholder="Ex: 6200" min="0">
+            <!-- ─── COMPRIMENTO CALCULADO AUTOMATICAMENTE ─── -->
+            <div id="comp-auto-box" class="comp-auto-box">
+              <div class="comp-auto-icon"><i class="fas fa-check-circle"></i></div>
+              <div>
+                <div class="comp-auto-label">Comprimento calculado (Zf − Zi)</div>
+                <div class="comp-auto-value" id="comp-auto-value">—</div>
+                <div class="comp-auto-sub" id="comp-auto-sub"></div>
               </div>
             </div>
 
-            <!-- Dimensões do dano -->
-            <div class="input-row">
-              <div class="input-section">
-                <label for="comp-dano">Comprimento do dano <span class="label-hint">(mm, direção span)</span></label>
-                <input type="number" id="comp-dano" placeholder="Ex: 1200" min="0">
+            <!-- ─── POSIÇÃO NA CORDA (Xi / Xf) ─── -->
+            <div>
+              <label style="margin-bottom:8px;display:block">
+                Posição do dano na corda <span class="label-hint">(mm a partir da borda de ataque)</span>
+              </label>
+              <div class="input-row">
+                <div class="input-section">
+                  <label for="xi-input" style="font-weight:500;font-size:.85rem;color:var(--gray)">
+                    Xi — início</label>
+                  <input type="number" id="xi-input" placeholder="Ex: 0" min="0"
+                         oninput="atualizarZona()">
+                </div>
+                <div class="input-section">
+                  <label for="xf-input" style="font-weight:500;font-size:.85rem;color:var(--gray)">
+                    Xf — fim</label>
+                  <input type="number" id="xf-input" placeholder="Ex: 590" min="0"
+                         oninput="atualizarZona()">
+                </div>
               </div>
-              <div class="input-section">
-                <label for="larg-dano">Largura do dano <span class="label-hint">(mm, direção corda)</span></label>
-                <input type="number" id="larg-dano" placeholder="Ex: 300" min="0">
+            </div>
+
+            <!-- ─── LARGURA CALCULADA AUTOMATICAMENTE ─── -->
+            <div id="larg-auto-box" class="comp-auto-box">
+              <div class="comp-auto-icon"><i class="fas fa-check-circle"></i></div>
+              <div>
+                <div class="comp-auto-label">Largura calculada (Xf − Xi)</div>
+                <div class="comp-auto-value" id="larg-auto-value">—</div>
+                <div class="comp-auto-sub" id="larg-auto-sub"></div>
               </div>
+            </div>
+
+            <!-- Preview ao vivo das camadas detectadas -->
+            <div id="zona-preview" class="live-preview">
+              <div class="live-preview-title">
+                <i class="fas fa-bolt"></i> Preview — camadas nessa zona
+              </div>
+              <div id="zona-chips" class="layer-chips"></div>
+              <div id="zona-resumo" style="font-size:.85rem;color:var(--dark)"></div>
             </div>
 
             <!-- Atingiu o núcleo? -->
@@ -351,16 +445,15 @@
               </div>
             </div>
 
-            <!-- Material do núcleo (aparece se atingiu) -->
+            <!-- Seção de núcleo -->
             <div id="secao-nucleo" style="display:none">
               <div class="info-box warning">
-                <p><strong><i class="fas fa-exclamation-triangle"></i> Atenção — Consumo extra com Núcleo:</strong></p>
-                <p>• Adesivo G3 necessário para colagem: camada de <strong>5–7 mm</strong> de espessura nas superfícies de colagem (laminado inferior + contorno do núcleo).</p>
-                <p>• Folga (Gap) máxima entre o núcleo e o laminado: <strong>7 mm</strong> — impacta a quantidade de adesivo.</p>
-                <p>• Todas as faces do núcleo devem estar impregnadas de resina — inclua esse volume na estimativa.</p>
+                <p><strong><i class="fas fa-exclamation-triangle"></i> Consumo extra — Núcleo:</strong></p>
+                <p>• Adesivo G3: camada de <strong>5–7 mm</strong> nas superfícies de colagem (laminado inferior + contorno).</p>
+                <p>• Gap máximo laminado ↔ núcleo: <strong>7 mm</strong>.</p>
               </div>
               <div class="input-section">
-                <label for="material-nucleo">Material do Núcleo a Utilizar:</label>
+                <label for="material-nucleo">Material do Núcleo:</label>
                 <select id="material-nucleo">
                   <option value="">— Selecione o material —</option>
                   <option value="BALSA CORE 15mm">BALSA CORE 15 mm</option>
@@ -373,7 +466,7 @@
               </div>
               <div class="input-row" style="margin-top:6px">
                 <div class="input-section">
-                  <label for="comp-nucleo">Comprimento do núcleo a repor <span class="label-hint">(mm)</span></label>
+                  <label for="comp-nucleo">Comprimento do núcleo <span class="label-hint">(mm)</span></label>
                   <input type="number" id="comp-nucleo" placeholder="Ex: 1200" min="0">
                 </div>
                 <div class="input-section">
@@ -384,9 +477,11 @@
             </div>
 
             <div class="btn-row">
-              <button class="btn btn-gray" onclick="voltarParaIdentificacao()"><i class="fas fa-arrow-left"></i> Voltar</button>
-              <button class="btn btn-primary" onclick="avancarParaEstimativa()" style="flex:2">
-                Ver Estimativa <i class="fas fa-arrow-right"></i>
+              <button class="btn btn-gray" onclick="voltarParaIdentificacao()">
+                <i class="fas fa-arrow-left"></i> Voltar
+              </button>
+              <button class="btn btn-primary" id="btn-ver-estimativa" onclick="avancarParaEstimativa()" style="flex:2">
+                <i class="fas fa-flask"></i> Ver Estimativa Completa
               </button>
             </div>
           </div>
@@ -396,33 +491,82 @@
 
 
     <!-- ═══════════════════════════════════════════════
-         TELA 3 — ESTIMATIVA TEÓRICA
+         TELA 3 — ESTIMATIVA TEÓRICA COMPLETA
     ═══════════════════════════════════════════════ -->
     <div id="tela-estimativa" style="display:none" class="fade-in">
       <div class="step-bar">
-        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Identificação</span></div>
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Modelo + Lado</span></div>
         <span class="step-arrow">›</span>
-        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Dano</span></div>
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Zona do Dano</span></div>
         <span class="step-arrow">›</span>
         <div class="step active"><span class="step-num">3</span><span>Estimativa</span></div>
         <span class="step-arrow">›</span>
         <div class="step"><span class="step-num">4</span><span>Cálculo</span></div>
       </div>
 
-      <div id="banner-est" class="active-id-banner">
+      <div class="active-id-banner">
         <div class="info">
-          <span><i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong></span>
+          <span><i class="fas fa-wind"></i> <strong class="display-projeto"></strong></span>
           <span class="badge">WTG: <span class="display-wtg"></span></span>
           <span class="badge">Pá: <span class="display-blade"></span></span>
           <span class="badge display-tipo" style="background:rgba(255,255,255,.3)"></span>
+          <span class="badge-lado display-lado"></span>
         </div>
-        <button onclick="voltarParaDano()" class="edit-id-btn"><i class="fas fa-edit"></i> Editar</button>
+        <button onclick="voltarParaDano()" class="edit-id-btn"><i class="fas fa-edit"></i> Editar zona</button>
       </div>
 
-      <!-- Painel de estimativa calculada -->
       <div id="est-resultado" class="est-panel"></div>
 
-      <!-- Campos manuais de comparação -->
+      <!-- Camadas adicionais (caso a caso) -->
+      <div class="card">
+        <div class="card-header no-toggle">
+          <h2><i class="fas fa-plus-circle"></i> Camadas Adicionais (cobertura / skin / reforço)</h2>
+        </div>
+        <div class="card-content active">
+          <p style="color:var(--gray);font-size:.85rem;margin-bottom:12px">
+            Camadas definidas <strong>caso a caso</strong> pelo engenheiro (não calculadas automaticamente).
+            Ex.: skin externa maior, camadas de cobertura, reforços. Somam ao total.
+          </p>
+          <div class="input-group">
+            <div class="input-row">
+              <div class="input-section">
+                <label for="add-mat">Tecido</label>
+                <select id="add-mat">
+                  <option value="TX1200">Triax 1200</option>
+                  <option value="TX1800">Triax 1800</option>
+                  <option value="BX1200">Biax 1200</option>
+                  <option value="BX1010">Biax 1010</option>
+                  <option value="BX800">Biax 830</option>
+                  <option value="BZ750">BiZero 750</option>
+                  <option value="UD1000">UD 1000</option>
+                  <option value="UD1200">UD 1200 HM</option>
+                  <option value="UD1800">UD 1800 HM</option>
+                </select>
+              </div>
+              <div class="input-section">
+                <label for="add-qtd">Quantidade</label>
+                <input type="number" id="add-qtd" placeholder="1" min="1" value="1">
+              </div>
+            </div>
+            <div class="input-row">
+              <div class="input-section">
+                <label for="add-comp">Comprimento <span class="label-hint">(mm)</span></label>
+                <input type="number" id="add-comp" placeholder="Ex: 1685" min="0">
+              </div>
+              <div class="input-section">
+                <label for="add-larg">Largura <span class="label-hint">(mm)</span></label>
+                <input type="number" id="add-larg" placeholder="Ex: 1200" min="0">
+              </div>
+            </div>
+            <button class="btn btn-success" onclick="addAdicional()">
+              <i class="fas fa-plus"></i> Adicionar camada
+            </button>
+          </div>
+          <div id="adicionais-list" style="margin-top:14px"></div>
+        </div>
+      </div>
+
+      <!-- Ajuste manual (colapsável) -->
       <div class="card">
         <div class="card-header" onclick="toggleCard('est-manual')">
           <h2><i class="fas fa-sliders-h"></i> Ajuste Manual da Estimativa</h2>
@@ -430,7 +574,7 @@
         </div>
         <div id="est-manual-content" class="card-content">
           <p style="color:var(--gray);font-size:.88rem;margin-bottom:12px">
-            Os valores abaixo são pré-calculados. Ajuste se necessário antes de prosseguir.
+            Valores pré-calculados. Edite se necessário antes de prosseguir.
           </p>
           <div class="input-group">
             <div class="input-row">
@@ -465,22 +609,22 @@
     ═══════════════════════════════════════════════ -->
     <div id="tela-calculadora" style="display:none" class="fade-in">
       <div class="step-bar">
-        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Identificação</span></div>
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Modelo + Lado</span></div>
         <span class="step-arrow">›</span>
-        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Dano</span></div>
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Zona do Dano</span></div>
         <span class="step-arrow">›</span>
         <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Estimativa</span></div>
         <span class="step-arrow">›</span>
         <div class="step active"><span class="step-num">4</span><span>Cálculo</span></div>
       </div>
 
-      <div id="banner-calc" class="active-id-banner">
+      <div class="active-id-banner">
         <div class="info">
-          <span><i class="fas fa-map-marker-alt"></i> <strong class="display-projeto"></strong></span>
+          <span><i class="fas fa-wind"></i> <strong class="display-projeto"></strong></span>
           <span class="badge">WTG: <span class="display-wtg"></span></span>
           <span class="badge">Pá: <span class="display-blade"></span></span>
           <span class="badge display-tipo" style="background:rgba(255,255,255,.3)"></span>
-          <span class="badge display-lado" style="background:rgba(46,204,113,.35)"></span>
+          <span class="badge-lado display-lado"></span>
         </div>
         <button onclick="voltarParaEstimativa()" class="edit-id-btn"><i class="fas fa-arrow-left"></i> Voltar</button>
       </div>
@@ -493,10 +637,9 @@
         </div>
         <div id="reparo-content" class="card-content">
           <div class="info-box">
-            <p><strong>Resina:</strong> Hexion LR635 &nbsp;|&nbsp; <strong>Endurecedores:</strong> Hexion LH635 ou LH637</p>
-            <p><strong>Proporção:</strong> 100 : 30 &nbsp;|&nbsp; <strong>Nota:</strong> Peso do tecido ≈ Peso da resina (1:1)</p>
+            <p><strong>Resina:</strong> Hexion LR635 &nbsp;|&nbsp; <strong>Endurecedor:</strong> Hexion LH635 / LH637</p>
+            <p><strong>Proporção:</strong> 100 : 30 &nbsp;|&nbsp; <strong>Regra:</strong> Peso do tecido ≈ Peso da resina (1:1)</p>
           </div>
-
           <div class="input-group">
             <div class="input-section">
               <label>1. Tecidos Utilizados <span class="label-hint">(marque os aplicados)</span></label>
@@ -504,10 +647,10 @@
                 <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Triax 1200"> Triax 1200</label>
                 <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 830"> Biax 830</label>
                 <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 1200"> Biax 1200</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 450"> Biax 450</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 1010"> Biax 1010</label>
                 <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 1000"> UD 1000</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 661"> UD 661</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Bizero 750"> BiZero 750</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 1200"> UD 1200 HM</label>
+                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="BiZero 750"> BiZero 750</label>
                 <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Triax 1800"> Triax 1800</label>
               </div>
             </div>
@@ -533,7 +676,10 @@
           <div class="info-box">
             <p><strong>Resina:</strong> Epikote MGS BPR 135G3 &nbsp;|&nbsp; <strong>Endurecedor:</strong> Epikure MGS BPH 137GF</p>
             <p><strong>Proporção:</strong> 100 : 45</p>
-            <p id="adesivo-nucleo-hint" style="display:none;color:var(--warning)"><i class="fas fa-exclamation-triangle"></i> <strong>Reparo com núcleo:</strong> Considere a camada de colagem de <strong>5–7 mm</strong> no volume de adesivo (laminado inferior + contorno do núcleo).</p>
+            <p id="adesivo-nucleo-hint" style="display:none;color:var(--warning)">
+              <i class="fas fa-exclamation-triangle"></i>
+              <strong>Reparo com núcleo:</strong> Inclua a camada de colagem de <strong>5–7 mm</strong> no volume (laminado inferior + contorno).
+            </p>
           </div>
           <div class="input-group">
             <label for="adesivo-resina">Quantidade de Resina <span class="label-hint">(kg)</span></label>
@@ -598,7 +744,10 @@
       <div class="history-container">
         <div class="history-header" onclick="toggleHistory()">
           <h3><i class="fas fa-history"></i> Histórico (Últimos 30 Cálculos)</h3>
-          <span id="history-toggle" class="toggle-icon">▼</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span id="sync-badge" class="sync-badge"></span>
+            <span id="history-toggle" class="toggle-icon">▼</span>
+          </div>
         </div>
         <div id="history-content" class="history-content">
           <div id="history-list"></div>
@@ -620,7 +769,7 @@
     <p>Lean Way Solution &copy; <span id="current-year"></span> | Uso Interno — Extreme Wind</p>
     <p class="footer-info">PR-20-ENG&CQ | App otimizado para uso offline em parques eólicos</p>
   </footer>
-</div><!-- /container -->
+</div>
 
 <!-- ===================================================================
      JAVASCRIPT
@@ -629,196 +778,57 @@
 'use strict';
 
 /* ─────────────────────────────────────────────────────────────
-   TABELAS DE LAMINADO POR MODELO DE PÁ
-   Fonte: PR-20-ENG&CQ, AWP03_RI_10467_03, E0005458743 (NR81.5)
-   Zi/Zf em mm a partir da flange (DF)
+   TABELA DE LAMINADO — AW64.7 (única pá ativa no momento)
+   Fonte: AWP03_RI_10467_03
+   Zi / Zf em mm a partir da flange
    ───────────────────────────────────────────────────────────── */
 const BLADE_LAYUP = {
 
-  'AW56.7': {
-    maxLength: 56700,
-    layers: {
-      PS: buildAW567Layers(),
-      SS: buildAW567Layers()
-    },
-    core: {
-      SS: [{ mat:'PVC 20mm', Zi:1500,  Zf:10000 }, { mat:'PVC 15mm', Zi:10000, Zf:30000 }],
-      PS: [{ mat:'PVC 20mm', Zi:1500,  Zf:10000 }, { mat:'PVC 15mm', Zi:10000, Zf:30000 }]
-    }
-  },
-
-  'AW61.2': {
-    maxLength: 61200,
-    layers: {
-      PS: buildAW612Layers(),
-      SS: buildAW612Layers()
-    },
-    core: {
-      SS: [{ mat:'PVC 20mm', Zi:1500,  Zf:10000 }, { mat:'PVC 15mm', Zi:10000, Zf:42000 }],
-      PS: [{ mat:'PVC 20mm', Zi:1500,  Zf:10000 }, { mat:'PVC 15mm', Zi:10000, Zf:42000 }]
-    }
-  },
-
   'AW64.7': {
     maxLength: 64700,
-    layers: {
-      PS: buildAW647Layers(),
-      SS: buildAW647Layers()
-    },
+    layers: { PS: buildAW647Layers(), SS: buildAW647Layers() },
     core: {
       SS: [
-        { mat:'PVC 25mm', Zi:1500,  Zf:6000  },
-        { mat:'PVC 30mm', Zi:6000,  Zf:8000  },
-        { mat:'PVC 40mm', Zi:8000,  Zf:18000 }
+        { mat:'PVC 25mm', Zi:1500, Zf:6000  },
+        { mat:'PVC 30mm', Zi:6000, Zf:8000  },
+        { mat:'PVC 40mm', Zi:8000, Zf:18000 }
       ],
       PS: [
         { mat:'PVC 20mm', Zi:1500,  Zf:16000 },
         { mat:'PVC 10mm', Zi:16000, Zf:38000 }
       ]
     }
-  },
-
-  'NR81.5': {
-    maxLength: 81500,
-    layers: {
-      PS: buildNR815Layers_PS(),
-      SS: buildNR815Layers_SS()
-    },
-    core: {
-      PS: [{ mat:'Balsa/PVC (ver mapa de núcleo)', Zi:3300, Zf:79600 }],
-      SS: [{ mat:'Balsa/PVC (ver mapa de núcleo)', Zi:3300, Zf:79600 }]
-    }
   }
 };
 
-/* ── BUILDERS DE CAMADAS ── */
-
-function buildAW567Layers(){
-  const layers = [];
-  // 20 camadas TX1200 de reforço de raiz — Zf decrescente de 120mm em 120mm
-  // Ref: Tabela 27, AWP03_RI_10467_03 (AW56.7-1 / AW56.7-2)
-  const txZf = [7500,6500,5140,5020,4900,4780,4660,4540,4420,4300,
-                4180,4060,3940,3820,3700,3580,3460,3340,3220,3100];
-  txZf.forEach((zf,i) => layers.push({ type:'TX1200', Zi:0, Zf:zf, label:`TX-R${i+1}` }));
-  // Pele interna: 5 camadas BiZero 750
-  layers.push({ type:'BZ750', Zi:0,     Zf:56400, label:'PeleInt-1' });
-  layers.push({ type:'BZ750', Zi:0,     Zf:56400, label:'PeleInt-2' });
-  layers.push({ type:'BZ750', Zi:13500, Zf:51000, label:'PeleInt-3' });
-  layers.push({ type:'BZ750', Zi:16000, Zf:50000, label:'PeleInt-4' });
-  layers.push({ type:'BZ750', Zi:17000, Zf:38000, label:'PeleInt-5' });
-  // Pele externa: 5 camadas BiZero 750 (espelho da interna)
-  layers.push({ type:'BZ750', Zi:17000, Zf:38000, label:'PeleExt-1' });
-  layers.push({ type:'BZ750', Zi:16000, Zf:50000, label:'PeleExt-2' });
-  layers.push({ type:'BZ750', Zi:13500, Zf:51000, label:'PeleExt-3' });
-  layers.push({ type:'BZ750', Zi:0,     Zf:56400, label:'PeleExt-4' });
-  layers.push({ type:'BZ750', Zi:0,     Zf:56400, label:'PeleExt-5' });
-  return layers;
-}
-
-function buildAW612Layers(){
-  const layers = [];
-  // Mesmas 20 camadas TX1200 de raiz (iguais AW56.7)
-  const txZf = [7500,6500,5140,5020,4900,4780,4660,4540,4420,4300,
-                4180,4060,3940,3820,3700,3580,3460,3340,3220,3100];
-  txZf.forEach((zf,i) => layers.push({ type:'TX1200', Zi:0, Zf:zf, label:`TX-R${i+1}` }));
-  // Pele interna BiZero 750 — pá mais longa (Zf máx = 60890mm)
-  layers.push({ type:'BZ750', Zi:0,     Zf:60890, label:'PeleInt-1' });
-  layers.push({ type:'BZ750', Zi:0,     Zf:60890, label:'PeleInt-2' });
-  layers.push({ type:'BZ750', Zi:13500, Zf:55000, label:'PeleInt-3' });
-  layers.push({ type:'BZ750', Zi:16000, Zf:50000, label:'PeleInt-4' });
-  layers.push({ type:'BZ750', Zi:17000, Zf:38000, label:'PeleInt-5' });
-  // Pele externa (espelho)
-  layers.push({ type:'BZ750', Zi:17000, Zf:38000, label:'PeleExt-1' });
-  layers.push({ type:'BZ750', Zi:16000, Zf:50000, label:'PeleExt-2' });
-  layers.push({ type:'BZ750', Zi:13500, Zf:55000, label:'PeleExt-3' });
-  layers.push({ type:'BZ750', Zi:0,     Zf:60890, label:'PeleExt-4' });
-  layers.push({ type:'BZ750', Zi:0,     Zf:60890, label:'PeleExt-5' });
-  return layers;
-}
-
+/* ── BUILDER (AW64.7) ── */
 function buildAW647Layers(){
   const layers = [];
-  // Ref: Tabela 19, AWP03_RI_10467_03 (AW64.7-2)
-  // Pele interna BX1200
-  layers.push({ type:'BX1200', Zi:0,     Zf:64452, label:'PeleInt-1' });
-  layers.push({ type:'BX1200', Zi:14500, Zf:51500, label:'PeleInt-2' });
-  // Camadas estruturais de raiz — UD1800 e TX1800 (layers 6–15), da mais interna p/ fora
-  layers.push({ type:'UD1800', Zi:0, Zf:3120, label:'UD-15' });
-  layers.push({ type:'TX1800', Zi:0, Zf:3340, label:'TX-14' });
-  layers.push({ type:'TX1800', Zi:0, Zf:3560, label:'TX-13' });
-  layers.push({ type:'TX1800', Zi:0, Zf:3780, label:'TX-12' });
-  layers.push({ type:'TX1800', Zi:0, Zf:4000, label:'TX-11' });
-  layers.push({ type:'UD1800', Zi:0, Zf:4220, label:'UD-10' });
-  layers.push({ type:'TX1800', Zi:0, Zf:4440, label:'TX-9'  });
-  layers.push({ type:'TX1800', Zi:0, Zf:4660, label:'TX-8'  });
-  layers.push({ type:'TX1800', Zi:0, Zf:5500, label:'TX-7'  });
-  layers.push({ type:'TX1800', Zi:0, Zf:6500, label:'TX-6'  });
-  // TX1200 zona intermediária (layers 1–4)
-  layers.push({ type:'TX1200', Zi:1500,  Zf:7500,  label:'TX-4' });
+  // ── Pele externa — cobre toda a envergadura ──
+  layers.push({ type:'BX1200', Zi:0,     Zf:64452, label:'PExt-1' });
+  // ── Root Laminate Part 1 — ordem estrutural: UD (mais interno) → TX ──
+  // Zf derivados do procedimento Nordex (posição física no laminado)
+  layers.push({ type:'UD1800', Zi:0, Zf:2340, label:'UD-05'  });
+  layers.push({ type:'TX1800', Zi:0, Zf:2480, label:'TX-R04' });
+  layers.push({ type:'TX1800', Zi:0, Zf:2620, label:'TX-R03' });
+  layers.push({ type:'TX1800', Zi:0, Zf:2760, label:'TX-R02' });
+  layers.push({ type:'TX1800', Zi:0, Zf:2900, label:'TX-R01' });
+  // ── Zona de transição (TX1200 começa após a raiz) ──
+  layers.push({ type:'TX1200', Zi:3000,  Zf:7500,  label:'TX-4' });
   layers.push({ type:'TX1200', Zi:6000,  Zf:8000,  label:'TX-3' });
   layers.push({ type:'TX1200', Zi:8000,  Zf:18000, label:'TX-2' });
   layers.push({ type:'TX1200', Zi:10000, Zf:22000, label:'TX-1' });
-  // Pele externa BX1200 (espelho da interna)
-  layers.push({ type:'BX1200', Zi:14500, Zf:51500, label:'PeleExt-1' });
-  layers.push({ type:'BX1200', Zi:0,     Zf:64452, label:'PeleExt-2' });
+  // ── Pele secundária (meio da pá) ──
+  layers.push({ type:'BX1200', Zi:14500, Zf:51500, label:'PInt-2' });
   return layers;
-}
-
-function buildNR815Layers_PS(){
-  // Ref: Drawing E0005458743 — NR81.5 PS-2
-  return [
-    // Casca externa (outer shell)
-    { type:'BX1010', Zi:3300,  Zf:79450, label:'CascaExt-1' },
-    { type:'BX443',  Zi:39800, Zf:79600, label:'CascaExt-2' },
-    // Longarina principal (spar cap UD)
-    { type:'UD1200', Zi:4000,  Zf:66000, label:'Longar-PS1' },
-    { type:'UD1200', Zi:3500,  Zf:68000, label:'Longar-PS2' },
-    // Casca interna (inner shell)
-    { type:'BX1010', Zi:250,   Zf:79600, label:'CascaInt-1' },
-    { type:'BX1010', Zi:4100,  Zf:65900, label:'CascaInt-2' },
-    // Reforços de raiz — Root View 3 (6 BX1010 + 4 UD1200)
-    { type:'BX1010', Zi:875,   Zf:22460, label:'Raiz-R1' },
-    { type:'BX1010', Zi:800,   Zf:21190, label:'Raiz-R2' },
-    { type:'BX1010', Zi:725,   Zf:21115, label:'Raiz-R3' },
-    { type:'BX1010', Zi:650,   Zf:19845, label:'Raiz-R4' },
-    { type:'BX1010', Zi:575,   Zf:18575, label:'Raiz-R5' },
-    { type:'BX1010', Zi:500,   Zf:18500, label:'Raiz-R6' },
-    { type:'UD1200', Zi:425,   Zf:20800, label:'Raiz-UD1' },
-    { type:'UD1200', Zi:350,   Zf:19500, label:'Raiz-UD2' },
-    { type:'UD1200', Zi:275,   Zf:18200, label:'Raiz-UD3' },
-    { type:'UD1200', Zi:200,   Zf:18100, label:'Raiz-UD4' },
-  ];
-}
-
-function buildNR815Layers_SS(){
-  // SS com simetria estrutural em relação ao PS (NR81.5-2 SS)
-  return [
-    { type:'BX1010', Zi:3300,  Zf:79450, label:'CascaExt-1' },
-    { type:'BX443',  Zi:39800, Zf:79600, label:'CascaExt-2' },
-    { type:'UD1200', Zi:4000,  Zf:66000, label:'Longar-SS1' },
-    { type:'UD1200', Zi:3500,  Zf:68000, label:'Longar-SS2' },
-    { type:'BX1010', Zi:250,   Zf:79600, label:'CascaInt-1' },
-    { type:'BX1010', Zi:4100,  Zf:65900, label:'CascaInt-2' },
-    { type:'BX1010', Zi:875,   Zf:22460, label:'Raiz-R1' },
-    { type:'BX1010', Zi:800,   Zf:21190, label:'Raiz-R2' },
-    { type:'BX1010', Zi:725,   Zf:21115, label:'Raiz-R3' },
-    { type:'BX1010', Zi:650,   Zf:19845, label:'Raiz-R4' },
-    { type:'BX1010', Zi:575,   Zf:18575, label:'Raiz-R5' },
-    { type:'BX1010', Zi:500,   Zf:18500, label:'Raiz-R6' },
-    { type:'UD1200', Zi:425,   Zf:20800, label:'Raiz-UD1' },
-    { type:'UD1200', Zi:350,   Zf:19500, label:'Raiz-UD2' },
-    { type:'UD1200', Zi:275,   Zf:18200, label:'Raiz-UD3' },
-    { type:'UD1200', Zi:200,   Zf:18100, label:'Raiz-UD4' },
-  ];
 }
 
 /* ─────────────────────────────────────────────────────────────
    PROPRIEDADES DOS TECIDOS
-   weight: kg/m²  |  span: escalonamento spanwise (mm/camada)
-   chord: escalonamento chordwise (mm/camada)
-   Ref: Tabela 01, PR-20-ENG&CQ
-     • TRIAX  → 100mm span / 50mm corda por camada
-     • BIAX / BZ / UD → 50mm span / 50mm corda por camada
+   Tabela 01 — PR-20-ENG&CQ
+   span / chord = escalonamento por camada (mm)
+   TRIAX  → 100mm span / 50mm corda
+   BIAX/BZ/UD → 50mm span / 50mm corda
    ───────────────────────────────────────────────────────────── */
 const FABRIC_PROPS = {
   'TX1200': { weight:1.200, span:100, chord:50, label:'Triax 1200',  tag:'tag-tx' },
@@ -834,13 +844,58 @@ const FABRIC_PROPS = {
   'UD1800': { weight:1.800, span:50,  chord:50, label:'UD 1800 HM',  tag:'tag-ud' },
 };
 
+// Cores p/ chips de preview
+const CHIP_STYLE = {
+  'tag-tx': 'background:#e3f2fd;color:#1565c0',
+  'tag-bx': 'background:#e8f5e9;color:#2e7d32',
+  'tag-bz': 'background:#fff8e1;color:#e65100',
+  'tag-ud': 'background:#fce4ec;color:#880e4f',
+};
+
+const ORDER_CALC = ['TX1800','TX1200','BX1010','BX1200','BX800','BX443','BZ750','UD1800','UD1200','UD1000','UD661'];
+
+// Para AW64.7 o UD1800 é a camada mais interna (mais profunda) do laminado
+// de raiz — deve acumular stagger ANTES dos TX1800, não depois.
+function getOrderCalc(tipo){
+  if(tipo === 'AW64.7')
+    return ['UD1800','TX1800','TX1200','BX1010','BX1200','BX800','BX443','BZ750','UD1200','UD1000','UD661'];
+  return ORDER_CALC;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MÉTODO NOVO — Tabela de DF final (drop-off) por camada
+   Fonte: TABELA EXTERNA Nordex (SÃO FERNANDO #59 SS, df2240).
+   Cada camada da raiz termina (DF final) numa posição física; o reparo
+   é clampado nessa posição. Espaçamento de 140 mm entre camadas.
+   Onde houver tabela DF, o app usa o método novo; senão, o simétrico.
+   ───────────────────────────────────────────────────────────── */
+const DF_TABLE = {
+  'AW64.7': {
+    SS: [
+      { mat:'TX1800', df:2900 }, { mat:'TX1800', df:2760 }, { mat:'TX1800', df:2620 },
+      { mat:'TX1800', df:2480 }, { mat:'UD1800', df:2340 }, { mat:'TX1800', df:2200 },
+      { mat:'TX1800', df:2060 }, { mat:'TX1800', df:1920 }, { mat:'TX1800', df:1780 },
+      { mat:'UD1800', df:1640 }, { mat:'TX1800', df:1500 }, { mat:'TX1800', df:1360 },
+      { mat:'TX1800', df:1220 }
+    ]
+    // PS e demais pás: adicionar quando houver a tabela DF correspondente
+  }
+};
+
+// Substituição de reparo por gramatura (apenas p/ nota; a massa é conservada)
+const REPAIR_SUB = { 'TX1800':'TX1200 (×1,5)', 'UD1800':'UD1000 + TX1200' };
+
 /* ─────────────────────────────────────────────────────────────
    ESTADO GLOBAL
    ───────────────────────────────────────────────────────────── */
-let history    = JSON.parse(localStorage.getItem('leanway_history')    || '[]');
-let syncQueue  = JSON.parse(localStorage.getItem('leanway_sync_queue') || '[]');
+function safeParse(key){
+  try{ return JSON.parse(localStorage.getItem(key) || '[]'); }
+  catch(e){ console.warn('localStorage corrompido em', key, '— reiniciando lista'); return []; }
+}
+let history   = safeParse('leanway_history');
+let syncQueue = safeParse('leanway_sync_queue');
 let isHistoryVisible = false;
-const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnGGqqI8edzQXtSq5VP4HMwH0ui_4A-XwuQr3reA3y35oapZbRdaPp9Rm09BsnDf3v/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwnGGqqI8edzQXtSq5VP4HMwH0ui_4A-XwuQr3reA3y35oapZbRdaPp9Rm09BsnDf3v/exec';
 
 /* ─────────────────────────────────────────────────────────────
    INIT
@@ -848,63 +903,187 @@ const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwnGGqqI
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('current-year').textContent = new Date().getFullYear();
   carregarHistorico();
+  updateSyncBadge();
   tentarSincronizar();
 
-  // Mostrar/ocultar seção de núcleo ao alternar o toggle
   document.querySelectorAll('input[name="nucleo"]').forEach(r => {
     r.addEventListener('change', () => {
-      const sim = document.getElementById('nucleo-sim').checked;
-      document.getElementById('secao-nucleo').style.display = sim ? 'block' : 'none';
+      document.getElementById('secao-nucleo').style.display =
+        document.getElementById('nucleo-sim').checked ? 'block' : 'none';
     });
   });
 });
 
 window.addEventListener('online', () => {
-  if(syncQueue.length > 0){
-    showNotification('Reconectado — sincronizando dados...', 'info');
-    tentarSincronizar();
-  }
+  if(syncQueue.length > 0){ showNotification('Reconectado — sincronizando...','info'); tentarSincronizar(); }
 });
 
 /* ─────────────────────────────────────────────────────────────
-   NAVEGAÇÃO ENTRE TELAS
+   PREVIEW DE LAY-UP — Tela 1
+   Mostra quais tipos de tecido existem no laminado completo
+   ───────────────────────────────────────────────────────────── */
+function onTipoOuLadoChange(){
+  const tipo = v('tipo-pa');
+  const ladoEl = document.querySelector('input[name="lado-pa"]:checked');
+  const preview = document.getElementById('layup-preview');
+  const chips   = document.getElementById('layup-chips');
+  const note    = document.getElementById('layup-note');
+
+  if(!tipo || !ladoEl){ preview.classList.remove('visible'); return; }
+  const lado = ladoEl.value;
+  const bd   = BLADE_LAYUP[tipo];
+  if(!bd){ preview.classList.remove('visible'); return; }
+
+  const layers = bd.layers[lado] || [];
+  const byType = {};
+  layers.forEach(l => { byType[l.type] = (byType[l.type]||0)+1; });
+
+  let html = '';
+  getOrderCalc(tipo).forEach(t => {
+    if(!byType[t]) return;
+    const p = FABRIC_PROPS[t];
+    const s = CHIP_STYLE[p.tag] || '';
+    html += `<span class="layer-chip" style="${s}"><i class="fas fa-square" style="font-size:.5rem"></i>${p.label} ×${byType[t]}</span>`;
+  });
+  chips.innerHTML = html;
+  note.textContent = `Total de ${layers.length} camadas no laminado completo (${tipo} ${lado}). Na Tela 2, Zi/Zf filtrarão apenas as presentes na zona do dano.`;
+  preview.classList.add('visible');
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ATUALIZAÇÃO AO VIVO — Tela 2
+   Chamada em oninput de Zi, Zf e Largura
+   ───────────────────────────────────────────────────────────── */
+function atualizarZona(){
+  const zi  = parseFloat(v('zi-input'));
+  const zf  = parseFloat(v('zf-input'));
+  const xi  = parseFloat(v('xi-input'));
+  const xf  = parseFloat(v('xf-input'));
+  const W   = xf - xi;
+  const box = document.getElementById('comp-auto-box');
+
+  // ── Comprimento calculado automaticamente ──
+  if(!isNaN(zi) && !isNaN(zf) && zf > zi){
+    const comp = zf - zi;
+    document.getElementById('comp-auto-value').textContent =
+      comp.toLocaleString('pt-BR') + ' mm';
+    document.getElementById('comp-auto-sub').textContent =
+      `= ${(comp/1000).toFixed(3)} m   (Zf ${zf.toLocaleString('pt-BR')} − Zi ${zi.toLocaleString('pt-BR')})`;
+    box.classList.add('visible');
+  } else {
+    box.classList.remove('visible');
+  }
+
+  // ── Largura calculada automaticamente (Xf − Xi) ──
+  const lBox = document.getElementById('larg-auto-box');
+  if(!isNaN(xi) && !isNaN(xf) && xf > xi){
+    document.getElementById('larg-auto-value').textContent =
+      W.toLocaleString('pt-BR') + ' mm';
+    document.getElementById('larg-auto-sub').textContent =
+      `= ${(W/1000).toFixed(3)} m   (Xf ${xf.toLocaleString('pt-BR')} − Xi ${xi.toLocaleString('pt-BR')})`;
+    lBox.classList.add('visible');
+  } else {
+    lBox.classList.remove('visible');
+  }
+
+  // ── Preview de camadas detectadas ──
+  const tipo  = v('tipo-pa');
+  const ladoEl = document.querySelector('input[name="lado-pa"]:checked');
+  const preview = document.getElementById('zona-preview');
+
+  if(!isNaN(zi) && !isNaN(zf) && zf > zi && tipo && ladoEl){
+    const lado = ladoEl.value;
+    const bd   = BLADE_LAYUP[tipo];
+    const presentLayers = (bd ? bd.layers[lado] || [] : []).filter(l => l.Zi < zf && l.Zf > zi);
+    const byType = {};
+    presentLayers.forEach(l => { byType[l.type] = (byType[l.type]||0)+1; });
+
+    let html = '';
+    getOrderCalc(tipo).forEach(t => {
+      if(!byType[t]) return;
+      const p = FABRIC_PROPS[t];
+      const s = CHIP_STYLE[p.tag] || '';
+      html += `<span class="layer-chip" style="${s}">${p.label} ×${byType[t]}</span>`;
+    });
+
+    if(!html) html = `<span style="color:var(--gray);font-size:.85rem">Nenhuma camada nessa zona — verifique Zi/Zf.</span>`;
+
+    document.getElementById('zona-chips').innerHTML = html;
+
+    let resumo = '';
+    if(!isNaN(W) && W > 0 && presentLayers.length > 0){
+      const comp = zf - zi;
+      const baseL = comp + 100, baseW = W + 100;
+      let totalFab = 0, stL = 0, stW = 0;
+      getOrderCalc(tipo).forEach(t => {
+        const cnt = byType[t] || 0;
+        if(!cnt) return;
+        const p = FABRIC_PROPS[t];
+        if(!p) return;
+        for(let k=0; k<cnt; k++){
+          totalFab += ((baseL+stL)*(baseW+stW)/1e6)*p.weight;
+          stL += 2*p.span; stW += 2*p.chord;
+        }
+      });
+      const resina = totalFab;
+      const endur  = resina * 0.30;
+      resumo = `<div style="margin-top:8px;padding:10px;background:#f0fdf4;border-radius:8px;font-size:.88rem">
+        <strong style="color:var(--secondary-dark)"><i class="fas fa-flask"></i> Pré-estimativa:</strong>
+        &nbsp; Tecido: <strong>${fmt(totalFab)} kg</strong>
+        &nbsp;|&nbsp; Resina LR635: <strong>${fmt(resina)} kg</strong>
+        &nbsp;|&nbsp; Endur. LH635: <strong>${fmt(endur)} kg</strong>
+        &nbsp;|&nbsp; <strong style="color:var(--primary)">Total: ${fmt(resina+endur)} kg</strong>
+      </div>`;
+    }
+
+    document.getElementById('zona-resumo').innerHTML = resumo;
+    preview.classList.add('visible');
+  } else {
+    preview.classList.remove('visible');
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   NAVEGAÇÃO
    ───────────────────────────────────────────────────────────── */
 function avancarParaDano(){
-  const p = v('projeto-input'), w = v('wtg-input'), b = v('blade-input'), t = v('tipo-pa');
-  if(!p){ showNotification('Informe o Projeto / Parque Eólico', 'error'); return; }
-  if(!w){ showNotification('Informe a WTG (Aerogerador)', 'error'); return; }
-  if(!b){ showNotification('Informe o número da Pá', 'error'); return; }
-  if(!t){ showNotification('Selecione o Tipo de Pá', 'error'); return; }
-  updateBanners(p, w, b, t);
+  const p    = v('projeto-input'), w = v('wtg-input'), b = v('blade-input'), t = v('tipo-pa');
+  const lado = document.querySelector('input[name="lado-pa"]:checked');
+  if(!p)    { showNotification('Informe o Projeto / Parque Eólico','error'); return; }
+  if(!w)    { showNotification('Informe a WTG','error'); return; }
+  if(!b)    { showNotification('Informe o N° da Pá','error'); return; }
+  if(!t)    { showNotification('Selecione o Tipo de Pá','error'); return; }
+  if(!lado) { showNotification('Selecione o Lado da Pá (PS ou SS)','error'); return; }
+  updateBanners(p, w, b, t, lado.value);
   showScreen('tela-dano');
 }
 
 function avancarParaEstimativa(){
-  const lado = document.querySelector('input[name="lado-pa"]:checked');
-  const zi   = parseFloat(v('zi-input'));
-  const zf   = parseFloat(v('zf-input'));
-  const L    = parseFloat(v('comp-dano'));
-  const W    = parseFloat(v('larg-dano'));
-  if(!lado){         showNotification('Selecione o Lado da Pá (PS ou SS)', 'error'); return; }
-  if(isNaN(zi)||zi<0){ showNotification('Informe um Zi válido (≥ 0)', 'error'); return; }
-  if(isNaN(zf)||zf<=zi){ showNotification('Zf deve ser maior que Zi', 'error'); return; }
-  if(isNaN(L)||L<=0){  showNotification('Informe o Comprimento do dano (> 0)', 'error'); return; }
-  if(isNaN(W)||W<=0){  showNotification('Informe a Largura do dano (> 0)', 'error'); return; }
-  const nucSim = document.getElementById('nucleo-sim').checked;
-  if(nucSim && !v('material-nucleo')){ showNotification('Selecione o Material do Núcleo', 'error'); return; }
-
+  const zi = parseFloat(v('zi-input'));
+  const zf = parseFloat(v('zf-input'));
+  const xi = parseFloat(v('xi-input'));
+  const xf = parseFloat(v('xf-input'));
+  const W  = xf - xi;
+  if(isNaN(zi)||zi<0)        { showNotification('Informe Zi válido (≥ 0 mm)','error'); return; }
+  if(isNaN(zf)||zf<=zi)      { showNotification('Zf deve ser maior que Zi','error'); return; }
+  if(isNaN(xi)||xi<0)        { showNotification('Informe Xi válido (≥ 0 mm)','error'); return; }
+  if(isNaN(xf)||xf<=xi)      { showNotification('Xf deve ser maior que Xi','error'); return; }
+  const _bd = BLADE_LAYUP[v('tipo-pa')];
+  if(_bd && zf > _bd.maxLength){
+    showNotification(`Zf (${zf.toLocaleString('pt-BR')} mm) excede o comprimento da pá ${v('tipo-pa')} (${_bd.maxLength.toLocaleString('pt-BR')} mm)`,'error'); return;
+  }
+  if(document.getElementById('nucleo-sim').checked && !v('material-nucleo')){
+    showNotification('Selecione o Material do Núcleo','error'); return;
+  }
   gerarEstimativa();
   showScreen('tela-estimativa');
 }
 
 function avancarParaCalculadora(){
   showScreen('tela-calculadora');
-  // Exibe hint de núcleo no card de Adesivo G3 se houver reparo com núcleo
-  const temNucleo = document.getElementById('nucleo-sim').checked;
-  document.getElementById('adesivo-nucleo-hint').style.display = temNucleo ? 'block' : 'none';
-  // Abre o primeiro card automaticamente
-  const repaContentEl = document.getElementById('reparo-content');
-  if(!repaContentEl.classList.contains('active')) toggleCard('reparo');
+  document.getElementById('adesivo-nucleo-hint').style.display =
+    document.getElementById('nucleo-sim').checked ? 'block' : 'none';
+  if(!document.getElementById('reparo-content').classList.contains('active')) toggleCard('reparo');
 }
 
 function voltarParaIdentificacao(){ showScreen('tela-identificacao'); }
@@ -913,242 +1092,253 @@ function voltarParaEstimativa()   { showScreen('tela-estimativa'); }
 
 function showScreen(id){
   ['tela-identificacao','tela-dano','tela-estimativa','tela-calculadora'].forEach(s => {
-    const el = document.getElementById(s);
-    el.style.display = (s === id) ? 'block' : 'none';
+    document.getElementById(s).style.display = (s===id) ? 'block' : 'none';
   });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
-function updateBanners(p, w, b, t){
+function updateBanners(p, w, b, t, lado){
   document.querySelectorAll('.display-projeto').forEach(el => el.textContent = p);
   document.querySelectorAll('.display-wtg').forEach(el => el.textContent = w);
   document.querySelectorAll('.display-blade').forEach(el => el.textContent = b);
   document.querySelectorAll('.display-tipo').forEach(el => el.textContent = t);
+  if(lado) document.querySelectorAll('.display-lado').forEach(el => el.textContent = lado);
 }
 
 /* ─────────────────────────────────────────────────────────────
-   CÁLCULO DA ESTIMATIVA TEÓRICA
-   Regras aplicadas (PR-20-ENG&CQ + AWP03_RI_10467):
-   ① Borda mínima: +50mm em CADA lado do retângulo → baseL = L+100, baseW = W+100
-   ② Camada presente se: layer.Zi < Zf_dano  AND  layer.Zf > Zi_dano
-   ③ Escalonamento acumula de dentro p/ fora (ordem TX → BX/BZ → UD):
-        staggerL += 2 × props.span  (após cada camada)
-        staggerW += 2 × props.chord
-   ④ Peso tecido = Resina (1:1)  |  Endurecedor = Resina × 0,30
+   CÁLCULO DA ESTIMATIVA — Tela 3
    ───────────────────────────────────────────────────────────── */
-function gerarEstimativa(){
-  const tipo   = v('tipo-pa');
-  const lado   = document.querySelector('input[name="lado-pa"]:checked').value;
-  const zi     = parseFloat(v('zi-input'));
-  const zf     = parseFloat(v('zf-input'));
-  const L      = parseFloat(v('comp-dano'));
-  const W      = parseFloat(v('larg-dano'));
-  const nucleo = document.getElementById('nucleo-sim').checked;
+let EST_EXCLUDED = new Set();   // índices de camadas estruturais NÃO atingidas
+let ADICIONAIS   = [];          // camadas adicionais (caso a caso): {mat, comp, larg}
 
-  // Detecta camadas presentes na zona do dano
-  const bladeData = BLADE_LAYUP[tipo];
-  const allLayers = bladeData ? (bladeData.layers[lado] || []) : [];
-  const presentLayers = allLayers.filter(ly => ly.Zi < zf && ly.Zf > zi);
+function recalcEstimativa(){ gerarEstimativa(true); }
 
-  // Agrega por tipo de tecido
-  const byType = {};
-  presentLayers.forEach(ly => { byType[ly.type] = (byType[ly.type] || 0) + 1; });
+function togglePly(i, on){
+  if(on) EST_EXCLUDED.delete(i); else EST_EXCLUDED.add(i);
+  recalcEstimativa();
+}
 
-  // Ordem de escalonamento: TX mais fundo → BX/BZ → UD mais externo
-  const ORDER = ['TX1800','TX1200','BX1010','BX1200','BX800','BX443','BZ750','UD1800','UD1200','UD1000','UD661'];
-
-  const baseL = L + 100; // borda 50mm cada lado
-  const baseW = W + 100;
-
-  let staggerL = 0, staggerW = 0;
-  let totalFabricKg = 0;
-  const layerCalc = [];
-
-  ORDER.forEach(tp => {
-    const count = byType[tp] || 0;
-    if(count === 0) return;
-    const props = FABRIC_PROPS[tp];
-    if(!props) return;
-    for(let k = 0; k < count; k++){
-      const pL = baseL + staggerL;
-      const pW = baseW + staggerW;
-      const areaM2 = (pL * pW) / 1e6;
-      const kg = areaM2 * props.weight;
-      totalFabricKg += kg;
-      layerCalc.push({ type:tp, props, pL, pW, areaM2, kg, staggerL, staggerW });
-      staggerL += 2 * props.span;
-      staggerW += 2 * props.chord;
-    }
+/* ── MÉTODO NOVO (Reposição por DF / gramatura) ──
+   Cada camada da raiz é clampada na sua posição física de término (DF final).
+   Escalonamento por camada de reparo TX1200 = 65 mm (span) / 50 mm (corda).
+   Como 2 TX1800 = 3 TX1200 (gramatura 3600 = 3600), a TX1800 alterna 65/130
+   (corda 50/100). UD1800 (1ª camada) = 185/45. Skin externa BX1200 = 50/50,
+   ponta = Zf + 50. Reproduz a TABELA EXTERNA Nordex célula a célula. */
+function buildInstancesDF(layers, zi, zf, xi, xf){
+  const aff = layers.filter(l => l.df > zi).sort((a,b) => a.df - b.df);
+  let cumR = 0, cumC = 0, txN = 0;
+  const out = [];
+  aff.forEach((l, idx) => {
+    let rs, cs;
+    if(l.mat === 'TX1800'){ txN++; const full = (txN % 2 === 0); rs = full?130:65; cs = full?100:50; }
+    else if(l.mat === 'UD1800'){ rs = (idx === 0)?185:130; cs = (idx === 0)?45:100; }
+    else { rs = 50; cs = 50; }
+    cumR += rs; cumC += cs;
+    const Zf = l.df, Zi = zi - cumR, X2 = xf + cumC, X1 = Math.max(0, xi - cumC);
+    const Lp = Zf - Zi, Wp = X2 - X1;
+    out.push({ type:l.mat, props:FABRIC_PROPS[l.mat], L:Lp, W:Wp, Zi, Zf, area:Lp*Wp/1e6 });
   });
+  // Skin externa (BX1200) — cobre toda a pegada do reparo (ponta = Zf + 50)
+  cumR += 50; cumC += 50;
+  const sZf = zf + 50, sZi = zi - cumR, sX2 = xf + cumC, sX1 = Math.max(0, xi - cumC);
+  out.push({ type:'BX1200', props:FABRIC_PROPS['BX1200'], L:sZf-sZi, W:sX2-sX1,
+             Zi:sZi, Zf:sZf, area:(sZf-sZi)*(sX2-sX1)/1e6, skin:true });
+  return out;
+}
 
-  const resina      = totalFabricKg;          // 1:1 (Peso tecido = Peso resina)
-  const endurecedor = resina * 0.30;           // 100:30 (LR635/LH635)
-  const totalMix    = resina + endurecedor;
+/* ── MÉTODO SIMÉTRICO (fallback p/ pás sem tabela DF) ── */
+function buildInstancesSym(tipo, lado, zi, zf, xi, xf){
+  const baseL = (zf - zi) + 100, baseW = (xf - xi) + 100;
+  const bd = BLADE_LAYUP[tipo]; const all = bd ? (bd.layers[lado] || []) : [];
+  const present = all.filter(ly => ly.Zi < zf && ly.Zf > zi);
+  const order = getOrderCalc(tipo); const out = [];
+  let sL = 0, sW = 0;
+  order.forEach(tp => {
+    present.filter(ly => ly.type === tp).forEach(() => {
+      const p = FABRIC_PROPS[tp]; if(!p) return;
+      const pL = baseL + sL, pW = baseW + sW;
+      out.push({ type:tp, props:p, L:pL, W:pW, Zi:zi, Zf:zf, area:pL*pW/1e6 });
+      sL += 2*p.span; sW += 2*p.chord;
+    });
+  });
+  return out;
+}
 
-  // Preenche campos de ajuste manual
-  document.getElementById('est-tecido').value      = fmt(totalFabricKg);
-  document.getElementById('est-resina').value       = fmt(resina);
-  document.getElementById('est-endurecedor').value  = fmt(endurecedor);
+function gerarEstimativa(keepSelection){
+  const tipo = v('tipo-pa');
+  const lado = document.querySelector('input[name="lado-pa"]:checked').value;
+  const zi = parseFloat(v('zi-input')), zf = parseFloat(v('zf-input'));
+  const xi = parseFloat(v('xi-input')), xf = parseFloat(v('xf-input'));
+  const L = zf - zi, W = xf - xi;
 
-  // ── Tabela de camadas detectadas ──
-  let layerRowsHtml = '';
-  ORDER.forEach(tp => {
-    if(!byType[tp]) return;
-    const p   = FABRIC_PROPS[tp];
-    const tag = p ? p.tag : 'tag-bx';
-    const lbl = p ? p.label : tp;
-    const calcItem = layerCalc.filter(c => c.type === tp);
-    const kgTotal  = calcItem.reduce((s, c) => s + c.kg, 0);
-    layerRowsHtml += `<tr>
-      <td><span class="tag ${tag}">${lbl}</span></td>
-      <td style="text-align:center">${byType[tp]}</td>
-      <td style="text-align:center">${p ? p.span : '-'}&nbsp;/&nbsp;${p ? p.chord : '-'} mm</td>
-      <td style="text-align:right">${fmt(kgTotal)} kg</td>
+  const dfLayers = (DF_TABLE[tipo] || {})[lado];
+  const metodo   = dfLayers ? 'df' : 'sym';
+  const instances = (metodo === 'df')
+    ? buildInstancesDF(dfLayers, zi, zf, xi, xf)
+    : buildInstancesSym(tipo, lado, zi, zf, xi, xf);
+
+  if(!keepSelection) EST_EXCLUDED = new Set();
+
+  // Totais estruturais (camadas marcadas) — kg por gramatura original (conservada)
+  let estFab = 0;
+  instances.forEach((inst, i) => { if(!EST_EXCLUDED.has(i)) estFab += inst.area * inst.props.weight; });
+
+  // Camadas adicionais (caso a caso)
+  let addFab = 0;
+  ADICIONAIS.forEach(a => { const p = FABRIC_PROPS[a.mat]; if(p) addFab += (a.comp*a.larg/1e6) * p.weight; });
+
+  const totalFab = estFab + addFab;
+  const resina = totalFab, endurecedor = resina * 0.30, totalMix = resina + endurecedor;
+
+  document.getElementById('est-tecido').value      = fmt(totalFab);
+  document.getElementById('est-resina').value      = fmt(resina);
+  document.getElementById('est-endurecedor').value = fmt(endurecedor);
+
+  renderAdicionais();
+
+  // Detalhe por camada estrutural (checkbox de profundidade)
+  let rows = '';
+  instances.forEach((inst, i) => {
+    const p = inst.props, on = !EST_EXCLUDED.has(i);
+    const kg = inst.area * p.weight;
+    rows += `<tr style="${on?'':'opacity:.4'}">
+      <td style="text-align:center"><input type="checkbox" class="ply-check" ${on?'checked':''} onchange="togglePly(${i}, this.checked)"></td>
+      <td style="color:var(--gray);font-size:.8rem">${i+1}</td>
+      <td><span class="tag ${p.tag}">${p.label}</span>${inst.skin?' <span style="font-size:.7rem;color:var(--gray)">skin externa</span>':''}</td>
+      <td style="text-align:right">${on?inst.L.toLocaleString('pt-BR'):'—'}</td>
+      <td style="text-align:right">${on?inst.W.toLocaleString('pt-BR'):'—'}</td>
+      <td style="text-align:right">${on?inst.area.toFixed(4):'—'}</td>
+      <td style="text-align:right">${on?fmt(kg):'—'}</td>
     </tr>`;
   });
+  const addRow = addFab > 0
+    ? `<tr style="background:#eef7ff"><td></td><td></td><td><strong>+ Adicionais (${ADICIONAIS.length})</strong></td><td colspan="3" style="text-align:right;color:var(--gray)">ver seção abaixo</td><td style="text-align:right"><strong>${fmt(addFab)}</strong></td></tr>`
+    : '';
 
-  if(!layerRowsHtml){
-    layerRowsHtml = `<tr><td colspan="4" style="color:var(--gray);text-align:center;padding:14px">
-      <i class="fas fa-exclamation-circle"></i> Nenhuma camada detectada nessa zona.<br>
-      <small>Verifique Zi/Zf e o modelo de pá selecionado.</small></td></tr>`;
-  }
+  const badge = (metodo === 'df')
+    ? '<span style="background:#e8f5e9;color:#2e7d32;padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:700">MÉTODO NOVO · Reposição DF/gramatura</span>'
+    : '<span style="background:#fff8e1;color:#e65100;padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:700">MÉTODO SIMÉTRICO (sem tabela DF)</span>';
 
-  // ── Núcleo presente nessa zona ──
   let coreHtml = '';
-  if(bladeData && bladeData.core[lado]){
-    const coreInZone = bladeData.core[lado].filter(c => c.Zi < zf && c.Zf > zi);
-    if(coreInZone.length > 0){
-      coreHtml = `<div class="info-box warning" style="margin-top:12px">
-        <p><strong><i class="fas fa-layer-group"></i> Núcleo presente nesta zona (${lado}):</strong></p>
-        ${coreInZone.map(c => `<p>• <strong>${c.mat}</strong> de Z = ${c.Zi} mm até Z = ${c.Zf} mm</p>`).join('')}
-        ${nucleo
-          ? `<p style="margin-top:6px"><strong style="color:var(--warning)">✔ Reparo com núcleo selecionado —</strong>
-             inclua o consumo de <strong>Adesivo G3</strong> na Tela 4 (5–7 mm de espessura, gap ≤ 7 mm).</p>`
-          : ''}
-      </div>`;
-    }
+  const bd = BLADE_LAYUP[tipo];
+  if(bd && bd.core[lado]){
+    const cz = bd.core[lado].filter(c => c.Zi < zf && c.Zf > zi);
+    if(cz.length) coreHtml = `<div class="info-box warning" style="margin-top:12px">
+      <p><strong><i class="fas fa-layer-group"></i> Núcleo nesta zona (${lado}):</strong></p>
+      ${cz.map(c=>`<p>• <strong>${c.mat}</strong> — Z ${c.Zi.toLocaleString('pt-BR')}–${c.Zf.toLocaleString('pt-BR')} mm</p>`).join('')}</div>`;
   }
 
-  // ── Monta painel ──
-  const panel = document.getElementById('est-resultado');
-  panel.innerHTML = `
-    <div class="est-panel-title"><i class="fas fa-flask"></i> Estimativa Teórica Calculada</div>
+  document.getElementById('est-resultado').innerHTML = `
+    <div class="est-panel-title"><i class="fas fa-flask"></i> Estimativa — ${tipo} ${lado} &nbsp; ${badge}</div>
 
     <div style="background:#e8f4fd;border-radius:8px;padding:12px;margin-bottom:14px;font-size:.85rem;line-height:1.7">
-      <strong>Pá:</strong> ${tipo} &nbsp;|&nbsp;
-      <strong>Lado:</strong> ${lado} &nbsp;|&nbsp;
-      <strong>Zona:</strong> Z = ${zi} – ${zf} mm<br>
-      <strong>Dano:</strong> ${L} × ${W} mm &nbsp;|&nbsp;
-      <strong>Área base (c/ borda 50 mm):</strong> ${baseL} × ${baseW} mm
+      <strong>Zona:</strong> Z = ${zi.toLocaleString('pt-BR')}–${zf.toLocaleString('pt-BR')} mm &nbsp;|&nbsp; <strong>Dano:</strong> ${L.toLocaleString('pt-BR')} × ${W.toLocaleString('pt-BR')} mm
+      ${metodo==='df' ? '<br><span style="font-size:.78rem;color:var(--gray)">Cada camada clampada no DF final. Tecido reposto por gramatura (TX1800→TX1200, UD1800→UD1000+TX1200).</span>' : ''}
     </div>
 
-    <p style="font-size:.82rem;color:var(--gray);margin-bottom:8px">
-      <i class="fas fa-info-circle"></i> Camadas detectadas na zona de reparo:
-    </p>
     <table class="layer-table">
-      <thead>
-        <tr>
-          <th>Tecido</th>
-          <th style="text-align:center">Camadas</th>
-          <th style="text-align:center">Escal. Span/Corda</th>
-          <th style="text-align:right">Tecido (kg)</th>
-        </tr>
-      </thead>
-      <tbody>${layerRowsHtml}</tbody>
+      <thead><tr><th style="text-align:center">✓</th><th>#</th><th>Tecido</th>
+        <th style="text-align:right">Comp (mm)</th><th style="text-align:right">Larg (mm)</th>
+        <th style="text-align:right">Área m²</th><th style="text-align:right">Kg</th></tr></thead>
+      <tbody>${rows}${addRow}</tbody>
     </table>
     ${coreHtml}
 
     <div class="result-grid" style="margin-top:16px">
-      <div class="result-item">
-        <strong>Total Tecido</strong>
-        <div class="result-value">${fmt(totalFabricKg)}<span class="result-unit">kg</span></div>
-      </div>
-      <div class="result-item">
-        <strong>Resina LR635</strong>
-        <div class="result-value">${fmt(resina)}<span class="result-unit">kg</span></div>
-      </div>
-      <div class="result-item">
-        <strong>Endurecedor LH635 (30%)</strong>
-        <div class="result-value">${fmt(endurecedor)}<span class="result-unit">kg</span></div>
-      </div>
-      <div class="result-item" style="grid-column:1/-1;border-left:4px solid var(--secondary)">
-        <strong>Mistura Total Estimada</strong>
-        <div class="result-value">${fmt(totalMix)}<span class="result-unit">kg</span></div>
-      </div>
+      <div class="result-item"><strong>Total Tecido</strong><div class="result-value">${fmt(totalFab)}<span class="result-unit">kg</span></div></div>
+      <div class="result-item"><strong>Resina LR635</strong><div class="result-value">${fmt(resina)}<span class="result-unit">kg</span></div></div>
+      <div class="result-item"><strong>Endur. LH635 (30%)</strong><div class="result-value">${fmt(endurecedor)}<span class="result-unit">kg</span></div></div>
+      <div class="result-item" style="grid-column:1/-1;border-left:4px solid var(--secondary)"><strong>Mistura Total</strong><div class="result-value">${fmt(totalMix)}<span class="result-unit">kg</span></div></div>
     </div>
     <p style="font-size:.78rem;color:var(--gray);margin-top:12px">
-      * Estimativa teórica com base no lay-up de projeto. Ajuste conforme profundidade real e condições do dano.
-    </p>
-  `;
+      * Estrutural automático (camadas marcadas) + adicionais caso a caso. Desmarque camadas não atingidas pela profundidade do dano.
+    </p>`;
 
-  // Atualiza badge de lado nos banners da calculadora
   document.querySelectorAll('.display-lado').forEach(el => el.textContent = lado);
 }
 
-/* ─────────────────────────────────────────────────────────────
-   CÁLCULOS DE MATERIAIS (Tela 4)
-   ───────────────────────────────────────────────────────────── */
+/* ── Camadas adicionais (caso a caso) ── */
+function addAdicional(){
+  const mat = v('add-mat');
+  const comp = parseFloat(v('add-comp')), larg = parseFloat(v('add-larg'));
+  const qtd = parseInt(v('add-qtd'), 10) || 1;
+  if(!mat || isNaN(comp) || comp<=0 || isNaN(larg) || larg<=0){
+    showNotification('Informe tecido, comprimento e largura válidos','error'); return;
+  }
+  for(let k=0; k<qtd; k++) ADICIONAIS.push({ mat, comp, larg });
+  ['add-comp','add-larg'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  const q=document.getElementById('add-qtd'); if(q) q.value='1';
+  renderAdicionais(); recalcEstimativa();
+  showNotification('Camada adicional incluída','success');
+}
 
-/* Reparo Estrutural — Hexion LR635 / LH635  →  100 : 30 */
+function removeAdicional(i){ ADICIONAIS.splice(i,1); renderAdicionais(); recalcEstimativa(); }
+
+function renderAdicionais(){
+  const el = document.getElementById('adicionais-list'); if(!el) return;
+  if(!ADICIONAIS.length){ el.innerHTML = '<p style="color:var(--gray);font-size:.85rem">Nenhuma camada adicional lançada.</p>'; return; }
+  el.innerHTML = ADICIONAIS.map((a,i) => {
+    const p = FABRIC_PROPS[a.mat] || { label:a.mat, weight:0, tag:'' };
+    const kg = (a.comp*a.larg/1e6) * p.weight;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;background:#f8f9fa;padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:.85rem">
+      <span><span class="tag ${p.tag}">${p.label}</span> &nbsp;${a.comp.toLocaleString('pt-BR')} × ${a.larg.toLocaleString('pt-BR')} mm &nbsp;→&nbsp; <strong>${fmt(kg)} kg</strong></span>
+      <button onclick="removeAdicional(${i})" style="background:#fdecea;color:#c0392b;border:none;border-radius:6px;padding:5px 9px;cursor:pointer"><i class="fas fa-trash"></i></button>
+    </div>`;
+  }).join('');
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CÁLCULOS DE MATERIAIS — Tela 4
+   ───────────────────────────────────────────────────────────── */
 function calcularReparo(){
   const resina = parsePt(v('resina-input'));
-  if(!resina || resina <= 0){ showNotification('Insira a quantidade de resina (kg)', 'error'); return; }
+  if(!resina||resina<=0){ showNotification('Insira a quantidade de resina (kg)','error'); return; }
   const checks  = document.querySelectorAll('input[name="tecido-reparo"]:checked');
-  const tecidos = Array.from(checks).map(c => c.value).join(' + ') || 'Não informado';
+  const tecidos = Array.from(checks).map(c=>c.value).join(' + ') || 'Não informado';
   const endur   = resina * 0.30;
-  const total   = resina + endur;
   document.getElementById('result-reparo').innerHTML =
-    buildResultHTML('Reparo Estrutural', resina, endur, 0, total, resina, tecidos);
+    buildResultHTML('Reparo Estrutural', resina, endur, 0, resina+endur, resina, tecidos);
   document.getElementById('result-reparo').classList.add('active');
 }
 
-/* Adesivo G3 — BPR 135G3 / BPH 137GF  →  100 : 45 */
 function calcularAdesivo(){
   const resina = parsePt(v('adesivo-resina'));
-  if(!resina || resina <= 0){ showNotification('Insira a quantidade de resina (kg)', 'error'); return; }
+  if(!resina||resina<=0){ showNotification('Insira a quantidade de resina (kg)','error'); return; }
   const endur = resina * 0.45;
-  const total = resina + endur;
   document.getElementById('result-adesivo').innerHTML =
-    buildResultHTML('Adesivo G3', resina, endur, 0, total);
+    buildResultHTML('Adesivo G3', resina, endur, 0, resina+endur);
   document.getElementById('result-adesivo').classList.add('active');
 }
 
-/* Filler — BladeRep Profile Filler 3 / Hardener Filler 3  →  6 : 1 */
 function calcularFiller(){
   const base = parsePt(v('filler-base'));
-  if(!base || base <= 0){ showNotification('Insira a quantidade de base (kg)', 'error'); return; }
+  if(!base||base<=0){ showNotification('Insira a quantidade de base (kg)','error'); return; }
   const endur = base / 6;
-  const total = base + endur;
   document.getElementById('result-filler').innerHTML =
-    buildResultHTML('Filler 3', base, endur, 0, total);
+    buildResultHTML('Filler 3', base, endur, 0, base+endur);
   document.getElementById('result-filler').classList.add('active');
 }
 
-/* TopCoat — BladeRep TopCoat 12 / Hardener 12  →  4 : 1  (+Thinner 10% opcional) */
 function calcularPintura(){
   const base     = parsePt(v('pintura-base'));
   const diluidor = document.getElementById('diluidor-check').checked;
-  if(!base || base <= 0){ showNotification('Insira a quantidade de base (kg)', 'error'); return; }
+  if(!base||base<=0){ showNotification('Insira a quantidade de base (kg)','error'); return; }
   const endur = base / 4;
   const dilui = diluidor ? base * 0.10 : 0;
-  const total = base + endur + dilui;
   document.getElementById('result-pintura').innerHTML =
-    buildResultHTML('TopCoat 12', base, endur, dilui, total);
+    buildResultHTML('TopCoat 12', base, endur, dilui, base+endur+dilui);
   document.getElementById('result-pintura').classList.add('active');
 }
 
 function buildResultHTML(tipo, base, endur, adicional, total, tecido=0, nomeTecidos=''){
   let extras = '';
-  if(adicional > 0)
-    extras = `<div class="result-item"><strong>Diluidor</strong>
-      <div class="result-value">${fmt(adicional)}<span class="result-unit">kg</span></div></div>`;
-  if(tecido > 0)
-    extras = `<div class="result-item"><strong>Tecido Estimado</strong>
-      <div class="result-value">${fmt(tecido)}<span class="result-unit">kg</span></div></div>`;
-  let tecHtml = '';
-  if(nomeTecidos)
-    tecHtml = `<div style="grid-column:1/-1;background:#e3f2fd;padding:10px;border-radius:8px;
-      font-size:.88rem;color:var(--primary)"><strong>Tecidos Utilizados:</strong> ${nomeTecidos}</div>`;
+  if(adicional>0) extras = `<div class="result-item"><strong>Diluidor</strong>
+    <div class="result-value">${fmt(adicional)}<span class="result-unit">kg</span></div></div>`;
+  if(tecido>0)    extras = `<div class="result-item"><strong>Tecido Est.</strong>
+    <div class="result-value">${fmt(tecido)}<span class="result-unit">kg</span></div></div>`;
+  const tecHtml = nomeTecidos
+    ? `<div style="grid-column:1/-1;background:#e3f2fd;padding:10px;border-radius:8px;
+        font-size:.88rem;color:var(--primary)"><strong>Tecidos:</strong> ${nomeTecidos}</div>` : '';
 
   return `
     <div class="result-title"><i class="fas fa-calculator"></i> Resultado — ${tipo}</div>
@@ -1172,172 +1362,208 @@ function buildResultHTML(tipo, base, endur, adicional, total, tecido=0, nomeTeci
    HISTÓRICO E SINCRONIZAÇÃO
    ───────────────────────────────────────────────────────────── */
 function salvarCalculo(tipo, base, endur, adicional, total, nomeTecidos=''){
-  const projeto   = v('projeto-input');
-  const wtg       = v('wtg-input');
-  const blade     = v('blade-input');
-  const tipoPa    = v('tipo-pa');
-  const lado      = (document.querySelector('input[name="lado-pa"]:checked') || {}).value || '';
-  const zi        = v('zi-input')   || '';
-  const zf        = v('zf-input')   || '';
-  const compDano  = v('comp-dano')  || '';
-  const largDano  = v('larg-dano')  || '';
-  const nucleo    = document.getElementById('nucleo-sim').checked;
-  const matNucleo = v('material-nucleo') || '';
-  const estTec    = parsePt(v('est-tecido'))      || 0;
-  const estRes    = parsePt(v('est-resina'))       || 0;
-  const estEnd    = parsePt(v('est-endurecedor'))  || 0;
+  const projeto  = v('projeto-input'), wtg  = v('wtg-input'), blade = v('blade-input');
+  const tipoPa   = v('tipo-pa');
+  const lado     = (document.querySelector('input[name="lado-pa"]:checked')||{}).value||'';
+  const zi       = v('zi-input')||'';
+  const zf       = v('zf-input')||'';
+  // compDano derivado automaticamente
+  const zi_n     = parseFloat(zi), zf_n = parseFloat(zf);
+  const compDano = (!isNaN(zi_n)&&!isNaN(zf_n)) ? String(zf_n-zi_n) : '';
+  const xi_n     = parseFloat(v('xi-input')), xf_n = parseFloat(v('xf-input'));
+  const largDano = (!isNaN(xi_n)&&!isNaN(xf_n)) ? String(xf_n-xi_n) : '';
+  const tecnico  = v('tecnico-input')||'';
+  const dataInsp = v('data-inspecao')||'';
+  const nucleo   = document.getElementById('nucleo-sim').checked;
+  const matNucleo= v('material-nucleo')||'';
+  const estTec   = parsePt(v('est-tecido'))||0;
+  const estRes   = parsePt(v('est-resina'))||0;
+  const estEnd   = parsePt(v('est-endurecedor'))||0;
 
-  if(!projeto || !wtg || !blade){
-    showNotification('Dados de identificação incompletos', 'error');
-    voltarParaIdentificacao();
-    return;
+  if(!projeto||!wtg||!blade){
+    showNotification('Dados de identificação incompletos','error');
+    voltarParaIdentificacao(); return;
   }
 
   const calculo = {
-    id: Date.now(), projeto, wtg, blade, tipoPa, lado,
-    zi, zf, compDano, largDano, nucleo, matNucleo,
-    tecidosUsados: nomeTecidos,
-    estTecido: estTec, estResina: estRes, estEndurecedor: estEnd,
-    tipo, base, endurecedor: endur, adicional, total,
-    data: new Date().toLocaleString('pt-BR')
+    id:Date.now(), projeto, wtg, blade, tipoPa, lado, tecnico, dataInsp,
+    zi, zf, xi:(isNaN(xi_n)?'':String(xi_n)), xf:(isNaN(xf_n)?'':String(xf_n)),
+    compDano, largDano, nucleo, matNucleo,
+    tecidosUsados:nomeTecidos,
+    estTecido:estTec, estResina:estRes, estEndurecedor:estEnd,
+    tipo, base, endurecedor:endur, adicional, total,
+    data:new Date().toLocaleString('pt-BR')
   };
 
   history.unshift(calculo);
-  if(history.length > 30) history = history.slice(0, 30);
+  if(history.length>30) history = history.slice(0,30);
   localStorage.setItem('leanway_history', JSON.stringify(history));
 
   syncQueue.push(calculo);
   localStorage.setItem('leanway_sync_queue', JSON.stringify(syncQueue));
 
-  showNotification('Cálculo salvo!', 'success');
+  showNotification('Cálculo salvo!','success');
   if(isHistoryVisible) carregarHistorico();
   tentarSincronizar();
 }
 
 async function tentarSincronizar(){
-  if(!navigator.onLine || syncQueue.length === 0 || !GOOGLE_APPS_SCRIPT_URL) return;
-  try {
-    await fetch(GOOGLE_APPS_SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify(syncQueue),
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-    });
-    syncQueue = [];
-    localStorage.setItem('leanway_sync_queue', JSON.stringify(syncQueue));
-    showNotification('Dados enviados para a planilha!', 'success');
-  } catch(e) {
-    console.log('Sem conexão — envio pendente ao reconectar.');
-  }
+  if(!navigator.onLine||syncQueue.length===0||!GAS_URL){ updateSyncBadge(); return; }
+  try{
+    await fetch(GAS_URL,{method:'POST',body:JSON.stringify(syncQueue),
+      headers:{'Content-Type':'text/plain;charset=utf-8'}});
+    syncQueue=[];
+    localStorage.setItem('leanway_sync_queue',JSON.stringify(syncQueue));
+    showNotification('Dados enviados para a planilha!','success');
+  }catch(e){ console.log('Offline — envio pendente.'); }
+  updateSyncBadge();
+}
+
+/* Indicador de fila de sincronização (cabeçalho do Histórico) */
+function updateSyncBadge(){
+  const b = document.getElementById('sync-badge');
+  if(!b) return;
+  const n = syncQueue.length;
+  if(n > 0){ b.textContent = `⏳ ${n} pendente${n>1?'s':''}`; b.className = 'sync-badge pending'; }
+  else     { b.textContent = '✓ sincronizado';                b.className = 'sync-badge ok'; }
 }
 
 function carregarHistorico(){
   const list = document.getElementById('history-list');
-  if(history.length === 0){
-    list.innerHTML = '<p style="text-align:center;color:var(--gray);padding:16px">Nenhum cálculo no histórico</p>';
+  if(history.length===0){
+    list.innerHTML='<p style="text-align:center;color:var(--gray);padding:16px">Nenhum cálculo no histórico</p>';
     return;
   }
   list.innerHTML = history.map(item => {
     let det = `Base: ${fmt(item.base)} kg | Endur.: ${fmt(item.endurecedor)} kg`;
-    if(item.adicional > 0) det += ` | Adic.: ${fmt(item.adicional)} kg`;
+    if(item.adicional>0) det += ` | Adic.: ${fmt(item.adicional)} kg`;
     if(item.tecidosUsados)
       det += `<br><span style="color:var(--primary);font-size:.82rem"><strong>Tecidos:</strong> ${item.tecidosUsados}</span>`;
     let zoneInfo = '';
-    if(item.zi || item.zf)
-      zoneInfo = `<span style="font-size:.8rem;color:var(--gray)">Z: ${item.zi||'?'}–${item.zf||'?'} mm${item.lado?' | '+item.lado:''} | ${item.compDano||'?'}×${item.largDano||'?'} mm</span><br>`;
+    if(item.zi||item.zf)
+      zoneInfo = `<span style="font-size:.8rem;color:var(--gray)">Z: ${item.zi||'?'}–${item.zf||'?'} mm | comp: ${item.compDano||'?'} mm${item.lado?' | '+item.lado:''} | larg: ${item.largDano||'?'} mm</span><br>`;
+    const resp = (item.tecnico||item.dataInsp)
+      ? `<br><span style="font-size:.78rem;color:var(--gray)">${item.tecnico?'<i class="fas fa-user"></i> '+item.tecnico:''}${item.dataInsp?'&nbsp;&nbsp;|&nbsp;&nbsp;<i class="fas fa-calendar-day"></i> '+item.dataInsp:''}</span>` : '';
     return `<div class="history-item">
       <div class="history-item-header">
         <span class="history-type">${item.tipo}</span>
         <span class="history-date">${item.data}</span>
       </div>
       <div class="history-details" style="margin-bottom:6px;border-bottom:1px solid #eee;padding-bottom:6px;font-size:.85rem">
-        <strong>${item.projeto||'N/A'}</strong> | WTG: ${item.wtg||'N/A'} | Pá: ${item.blade||'N/A'}${item.tipoPa?' ('+item.tipoPa+')':''}
+        <strong>${item.projeto||'N/A'}</strong> | WTG: ${item.wtg||'N/A'} | Pá: ${item.blade||'N/A'}${item.tipoPa?' ('+item.tipoPa+')':''}${resp}
       </div>
       <div class="history-details">
         ${zoneInfo}${det}<br>
         <strong style="color:var(--primary)">Total: ${fmt(item.total)} kg</strong>
-        ${item.nucleo ? `<span style="margin-left:10px;color:var(--warning);font-size:.8rem"><i class="fas fa-layer-group"></i> ${item.matNucleo||'Núcleo'}</span>` : ''}
+        ${item.nucleo?`<span style="margin-left:8px;color:var(--warning);font-size:.8rem"><i class="fas fa-layer-group"></i> ${item.matNucleo||'Núcleo'}</span>`:''}
+      </div>
+      <div class="history-item-actions">
+        <button class="hi-reuse" onclick="duplicarItem(${item.id})"><i class="fas fa-copy"></i> Reusar dados</button>
+        <button class="hi-del" onclick="excluirItem(${item.id})"><i class="fas fa-trash"></i> Excluir</button>
       </div>
     </div>`;
   }).join('');
 }
 
+/* Excluir um único item do histórico */
+function excluirItem(id){
+  if(!confirm('Excluir este cálculo do histórico?')) return;
+  history = history.filter(h => h.id !== id);
+  localStorage.setItem('leanway_history', JSON.stringify(history));
+  carregarHistorico();
+  showNotification('Cálculo excluído','success');
+}
+
+/* Reusar os dados de um item — repopula identificação + zona e volta à Tela 2 */
+function duplicarItem(id){
+  const it = history.find(h => h.id === id);
+  if(!it){ showNotification('Item não encontrado','error'); return; }
+  const set = (eid,val)=>{ const el=document.getElementById(eid); if(el) el.value = val||''; };
+  set('projeto-input', it.projeto); set('wtg-input', it.wtg); set('blade-input', it.blade);
+  set('tecnico-input', it.tecnico); set('data-inspecao', it.dataInsp);
+  if(it.tipoPa){ const t=document.getElementById('tipo-pa'); if(t) t.value = it.tipoPa; }
+  if(it.lado){ const r=document.getElementById(it.lado==='PS'?'lado-ps':'lado-ss'); if(r) r.checked = true; }
+  set('zi-input', it.zi); set('zf-input', it.zf);
+  set('xi-input', it.xi); set('xf-input', it.xf);
+  onTipoOuLadoChange();
+  atualizarZona();
+  if(it.projeto && it.wtg && it.blade && it.tipoPa && it.lado)
+    updateBanners(it.projeto, it.wtg, it.blade, it.tipoPa, it.lado);
+  showScreen('tela-dano');
+  showNotification('Dados carregados — ajuste e gere nova estimativa','info');
+}
+
 function toggleHistory(){
-  const c = document.getElementById('history-content');
-  const i = document.getElementById('history-toggle');
-  isHistoryVisible = !c.classList.contains('active');
+  const c=document.getElementById('history-content'), i=document.getElementById('history-toggle');
+  isHistoryVisible=!c.classList.contains('active');
   c.classList.toggle('active');
-  i.textContent = isHistoryVisible ? '▲' : '▼';
+  i.textContent=isHistoryVisible?'▲':'▼';
   if(isHistoryVisible) carregarHistorico();
 }
 
 function limparHistorico(){
-  if(!confirm('Apagar todo o histórico salvo?')) return;
-  history = [];
-  localStorage.removeItem('leanway_history');
-  carregarHistorico();
-  showNotification('Histórico apagado', 'success');
+  if(!confirm('Apagar todo o histórico?')) return;
+  history=[]; localStorage.removeItem('leanway_history');
+  carregarHistorico(); showNotification('Histórico apagado','success');
 }
 
 function exportarHistorico(){
-  if(history.length === 0){ showNotification('Sem dados para exportar', 'error'); return; }
-  const cab = 'Projeto;WTG;Blade;TipoPa;Lado;Zi(mm);Zf(mm);CompDano(mm);LargDano(mm);Nucleo;MatNucleo;' +
-              'TecidosUsados;Est.Tecido(kg);Est.Resina(kg);Est.Endur(kg);Tipo;Base(kg);Endurecedor(kg);Adicional(kg);Total(kg);Data\n';
+  if(history.length===0){ showNotification('Sem dados para exportar','error'); return; }
+  const cab = 'Projeto;WTG;Blade;TipoPa;Lado;Tecnico;DataInspecao;Zi(mm);Zf(mm);Xi(mm);Xf(mm);CompDano(mm);LargDano(mm);Nucleo;MatNucleo;' +
+              'TecidosUsados;Est.Tecido;Est.Resina;Est.Endur;Tipo;Base;Endurecedor;Adicional;Total;Data\n';
   const linhas = history.map(i =>
-    `"${i.projeto||''}";"${i.wtg||''}";"${i.blade||''}";"${i.tipoPa||''}";"${i.lado||''}";` +
-    `"${i.zi||''}";"${i.zf||''}";"${i.compDano||''}";"${i.largDano||''}";"${i.nucleo?'Sim':'Não'}";"${i.matNucleo||''}";` +
-    `"${i.tecidosUsados||''}";"${fmt(i.estTecido||0)}";"${fmt(i.estResina||0)}";"${fmt(i.estEndurecedor||0)}";` +
-    `"${i.tipo}";"${fmt(i.base)}";"${fmt(i.endurecedor)}";"${fmt(i.adicional)}";"${fmt(i.total)}";"${i.data}"`
+    `"${i.projeto||''}"; "${i.wtg||''}"; "${i.blade||''}"; "${i.tipoPa||''}"; "${i.lado||''}"; "${i.tecnico||''}"; "${i.dataInsp||''}"; ` +
+    `"${i.zi||''}"; "${i.zf||''}"; "${i.xi||''}"; "${i.xf||''}"; "${i.compDano||''}"; "${i.largDano||''}"; "${i.nucleo?'Sim':'Não'}"; "${i.matNucleo||''}"; ` +
+    `"${i.tecidosUsados||''}"; "${fmt(i.estTecido||0)}"; "${fmt(i.estResina||0)}"; "${fmt(i.estEndurecedor||0)}"; ` +
+    `"${i.tipo}"; "${fmt(i.base)}"; "${fmt(i.endurecedor)}"; "${fmt(i.adicional)}"; "${fmt(i.total)}"; "${i.data}"`
   ).join('\n');
-  const blob = new Blob(['\uFEFF' + cab + linhas], { type: 'text/csv;charset=utf-8' });
+  const blob = new Blob(['\ufeff'+cab+linhas],{type:'text/csv;charset=utf-8'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url;
-  a.download = `leanway_${new Date().toISOString().split('T')[0]}.csv`;
+  a.href=url; a.download=`leanway_${new Date().toISOString().split('T')[0]}.csv`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showNotification('Download iniciado!', 'success');
+  showNotification('Download iniciado!','success');
 }
 
 /* ─────────────────────────────────────────────────────────────
    UI HELPERS
    ───────────────────────────────────────────────────────────── */
 function toggleCard(id){
-  const c   = document.getElementById(`${id}-content`);
-  const hdr = c.previousElementSibling;
-  const ico = hdr ? hdr.querySelector('.toggle-icon') : null;
+  const c=document.getElementById(`${id}-content`);
+  const hdr=c.previousElementSibling, ico=hdr?hdr.querySelector('.toggle-icon'):null;
   if(c.classList.contains('active')){
-    c.classList.remove('active');
-    if(ico) ico.textContent = '▼';
+    c.classList.remove('active'); if(ico) ico.textContent='▼';
   } else {
-    // fecha os demais cards da tela atual (exceto history)
-    document.querySelectorAll('#tela-calculadora .card-content, #tela-estimativa .card-content').forEach(el => {
-      if(el.id && el.id !== 'history-content'){
+    document.querySelectorAll('#tela-calculadora .card-content,#tela-estimativa .card-content').forEach(el=>{
+      if(el.id&&el.id!=='history-content'){
         el.classList.remove('active');
-        const h = el.previousElementSibling;
-        if(h){ const ig = h.querySelector('.toggle-icon'); if(ig) ig.textContent = '▼'; }
+        const h=el.previousElementSibling; if(h){const ig=h.querySelector('.toggle-icon');if(ig)ig.textContent='▼';}
       }
     });
-    c.classList.add('active');
-    if(ico) ico.textContent = '▲';
+    c.classList.add('active'); if(ico) ico.textContent='▲';
   }
 }
 
 function showNotification(msg, type){
-  const n = document.getElementById('notification');
-  const colors = {
-    success: getComputedStyle(document.documentElement).getPropertyValue('--secondary').trim(),
-    error:   getComputedStyle(document.documentElement).getPropertyValue('--danger').trim(),
-    info:    getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
-  };
-  n.style.background = colors[type] || colors.info;
-  n.textContent = msg;
-  n.classList.add('show');
-  setTimeout(() => n.classList.remove('show'), 3400);
+  const n=document.getElementById('notification');
+  const c={success:'--secondary',error:'--danger',info:'--accent'};
+  n.style.background=getComputedStyle(document.documentElement).getPropertyValue(c[type]||c.info).trim();
+  n.textContent=msg; n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),3400);
 }
 
-function v(id)      { return (document.getElementById(id) || {}).value || ''; }
-function fmt(n)     { return (isNaN(n) ? 0 : n).toFixed(3).replace('.', ','); }
-function parsePt(s) { return parseFloat((s || '').toString().replace(',', '.')); }
+function v(id)      { return (document.getElementById(id)||{}).value||''; }
+function fmt(n)     { return (isNaN(n)?0:n).toFixed(3).replace('.',','); }
+function parsePt(s) { return parseFloat((s||'').toString().replace(',','.')); }
+</script>
+<script>
+/* Service Worker — habilita uso offline (requer hospedagem em http/https) */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW não registrado:', err));
+  });
+}
 </script>
 </body>
 </html>
