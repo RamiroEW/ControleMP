@@ -566,35 +566,6 @@
         </div>
       </div>
 
-      <!-- Ajuste manual (colapsável) -->
-      <div class="card">
-        <div class="card-header" onclick="toggleCard('est-manual')">
-          <h2><i class="fas fa-sliders-h"></i> Ajuste Manual da Estimativa</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div id="est-manual-content" class="card-content">
-          <p style="color:var(--gray);font-size:.88rem;margin-bottom:12px">
-            Valores pré-calculados. Edite se necessário antes de prosseguir.
-          </p>
-          <div class="input-group">
-            <div class="input-row">
-              <div class="input-section">
-                <label for="est-tecido">Tecido Estimado <span class="label-hint">(kg)</span></label>
-                <input type="text" id="est-tecido" placeholder="0,000">
-              </div>
-              <div class="input-section">
-                <label for="est-resina">Resina Estimada <span class="label-hint">(kg)</span></label>
-                <input type="text" id="est-resina" placeholder="0,000">
-              </div>
-            </div>
-            <div class="input-section">
-              <label for="est-endurecedor">Endurecedor Estimado <span class="label-hint">(kg)</span></label>
-              <input type="text" id="est-endurecedor" placeholder="0,000">
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class="btn-row">
         <button class="btn btn-gray" onclick="voltarParaDano()"><i class="fas fa-arrow-left"></i> Voltar</button>
         <button class="btn btn-primary" onclick="avancarParaCalculadora()" style="flex:2">
@@ -627,43 +598,6 @@
           <span class="badge-lado display-lado"></span>
         </div>
         <button onclick="voltarParaEstimativa()" class="edit-id-btn"><i class="fas fa-arrow-left"></i> Voltar</button>
-      </div>
-
-      <!-- Reparo Estrutural -->
-      <div class="card">
-        <div class="card-header" onclick="toggleCard('reparo')">
-          <h2><i class="fas fa-hard-hat"></i> Reparo Estrutural (Laminação)</h2>
-          <span class="toggle-icon">▼</span>
-        </div>
-        <div id="reparo-content" class="card-content">
-          <div class="info-box">
-            <p><strong>Resina:</strong> Hexion LR635 &nbsp;|&nbsp; <strong>Endurecedor:</strong> Hexion LH635 / LH637</p>
-            <p><strong>Proporção:</strong> 100 : 30 &nbsp;|&nbsp; <strong>Regra:</strong> Peso do tecido ≈ Peso da resina (1:1)</p>
-          </div>
-          <div class="input-group">
-            <div class="input-section">
-              <label>1. Tecidos Utilizados <span class="label-hint">(marque os aplicados)</span></label>
-              <div class="fabric-grid">
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Triax 1200"> Triax 1200</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 830"> Biax 830</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 1200"> Biax 1200</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Biax 1010"> Biax 1010</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 1000"> UD 1000</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="UD 1200"> UD 1200 HM</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="BiZero 750"> BiZero 750</label>
-                <label class="fabric-checkbox"><input type="checkbox" name="tecido-reparo" value="Triax 1800"> Triax 1800</label>
-              </div>
-            </div>
-            <div class="input-section">
-              <label for="resina-input">2. Quantidade de Resina Gasta <span class="label-hint">(kg)</span></label>
-              <input type="text" id="resina-input" placeholder="Ex: 10,500">
-            </div>
-            <button class="btn btn-success" onclick="calcularReparo()">
-              <i class="fas fa-calculator"></i> Calcular Mistura
-            </button>
-          </div>
-          <div id="result-reparo" class="result-container"></div>
-        </div>
       </div>
 
       <!-- Adesivo G3 -->
@@ -896,6 +830,8 @@ let history   = safeParse('leanway_history');
 let syncQueue = safeParse('leanway_sync_queue');
 let isHistoryVisible = false;
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwnGGqqI8edzQXtSq5VP4HMwH0ui_4A-XwuQr3reA3y35oapZbRdaPp9Rm09BsnDf3v/exec';
+const RESINA_RATIO = 1.10;                          // tecido : resina = 1 : 1,10
+let EST = { tecido:0, resina:0, endurecedor:0 };    // último resultado calculado (p/ salvar)
 
 /* ─────────────────────────────────────────────────────────────
    INIT
@@ -1011,26 +947,19 @@ function atualizarZona(){
     document.getElementById('zona-chips').innerHTML = html;
 
     let resumo = '';
-    if(!isNaN(W) && W > 0 && presentLayers.length > 0){
-      const comp = zf - zi;
-      const baseL = comp + 100, baseW = W + 100;
-      let totalFab = 0, stL = 0, stW = 0;
-      getOrderCalc(tipo).forEach(t => {
-        const cnt = byType[t] || 0;
-        if(!cnt) return;
-        const p = FABRIC_PROPS[t];
-        if(!p) return;
-        for(let k=0; k<cnt; k++){
-          totalFab += ((baseL+stL)*(baseW+stW)/1e6)*p.weight;
-          stL += 2*p.span; stW += 2*p.chord;
-        }
-      });
-      const resina = totalFab;
+    const dfLayersP = (DF_TABLE[tipo] || {})[lado];
+    if(!isNaN(W) && W > 0 && (dfLayersP || presentLayers.length > 0)){
+      const insts = dfLayersP
+        ? buildInstancesDF(dfLayersP, zi, zf, xi, xf)
+        : buildInstancesSym(tipo, lado, zi, zf, xi, xf);
+      let totalFab = 0;
+      insts.forEach(it => { totalFab += it.area * it.props.weight; });
+      const resina = totalFab * RESINA_RATIO;
       const endur  = resina * 0.30;
       resumo = `<div style="margin-top:8px;padding:10px;background:#f0fdf4;border-radius:8px;font-size:.88rem">
         <strong style="color:var(--secondary-dark)"><i class="fas fa-flask"></i> Pré-estimativa:</strong>
         &nbsp; Tecido: <strong>${fmt(totalFab)} kg</strong>
-        &nbsp;|&nbsp; Resina LR635: <strong>${fmt(resina)} kg</strong>
+        &nbsp;|&nbsp; Resina LR635 (1:1,10): <strong>${fmt(resina)} kg</strong>
         &nbsp;|&nbsp; Endur. LH635: <strong>${fmt(endur)} kg</strong>
         &nbsp;|&nbsp; <strong style="color:var(--primary)">Total: ${fmt(resina+endur)} kg</strong>
       </div>`;
@@ -1083,7 +1012,7 @@ function avancarParaCalculadora(){
   showScreen('tela-calculadora');
   document.getElementById('adesivo-nucleo-hint').style.display =
     document.getElementById('nucleo-sim').checked ? 'block' : 'none';
-  if(!document.getElementById('reparo-content').classList.contains('active')) toggleCard('reparo');
+  if(!document.getElementById('adesivo-content').classList.contains('active')) toggleCard('adesivo');
 }
 
 function voltarParaIdentificacao(){ showScreen('tela-identificacao'); }
@@ -1188,11 +1117,9 @@ function gerarEstimativa(keepSelection){
   ADICIONAIS.forEach(a => { const p = FABRIC_PROPS[a.mat]; if(p) addFab += (a.comp*a.larg/1e6) * p.weight; });
 
   const totalFab = estFab + addFab;
-  const resina = totalFab, endurecedor = resina * 0.30, totalMix = resina + endurecedor;
+  const resina = totalFab * RESINA_RATIO, endurecedor = resina * 0.30, totalMix = resina + endurecedor;
 
-  document.getElementById('est-tecido').value      = fmt(totalFab);
-  document.getElementById('est-resina').value      = fmt(resina);
-  document.getElementById('est-endurecedor').value = fmt(endurecedor);
+  EST = { tecido: totalFab, resina, endurecedor };   // guarda p/ salvar (Tela 4)
 
   renderAdicionais();
 
@@ -1244,14 +1171,19 @@ function gerarEstimativa(keepSelection){
     </table>
     ${coreHtml}
 
-    <div class="result-grid" style="margin-top:16px">
+    <div style="margin-top:14px;padding:10px 12px;background:#f0fdf4;border-radius:8px;font-size:.85rem">
+      <strong><i class="fas fa-calculator"></i> Tecido total:</strong>
+      estrutural <strong>${fmt(estFab)} kg</strong> + adicionais <strong>${fmt(addFab)} kg</strong>
+      = <strong style="color:var(--secondary-dark)">${fmt(totalFab)} kg</strong>
+    </div>
+    <div class="result-grid" style="margin-top:12px">
       <div class="result-item"><strong>Total Tecido</strong><div class="result-value">${fmt(totalFab)}<span class="result-unit">kg</span></div></div>
-      <div class="result-item"><strong>Resina LR635</strong><div class="result-value">${fmt(resina)}<span class="result-unit">kg</span></div></div>
+      <div class="result-item"><strong>Resina LR635 (1:1,10)</strong><div class="result-value">${fmt(resina)}<span class="result-unit">kg</span></div></div>
       <div class="result-item"><strong>Endur. LH635 (30%)</strong><div class="result-value">${fmt(endurecedor)}<span class="result-unit">kg</span></div></div>
       <div class="result-item" style="grid-column:1/-1;border-left:4px solid var(--secondary)"><strong>Mistura Total</strong><div class="result-value">${fmt(totalMix)}<span class="result-unit">kg</span></div></div>
     </div>
     <p style="font-size:.78rem;color:var(--gray);margin-top:12px">
-      * Estrutural automático (camadas marcadas) + adicionais caso a caso. Desmarque camadas não atingidas pela profundidade do dano.
+      * Estrutural (camadas marcadas) + adicionais (caso a caso). Resina = tecido × 1,10 · Endurecedor = resina × 0,30.
     </p>`;
 
   document.querySelectorAll('.display-lado').forEach(el => el.textContent = lado);
@@ -1290,17 +1222,6 @@ function renderAdicionais(){
 /* ─────────────────────────────────────────────────────────────
    CÁLCULOS DE MATERIAIS — Tela 4
    ───────────────────────────────────────────────────────────── */
-function calcularReparo(){
-  const resina = parsePt(v('resina-input'));
-  if(!resina||resina<=0){ showNotification('Insira a quantidade de resina (kg)','error'); return; }
-  const checks  = document.querySelectorAll('input[name="tecido-reparo"]:checked');
-  const tecidos = Array.from(checks).map(c=>c.value).join(' + ') || 'Não informado';
-  const endur   = resina * 0.30;
-  document.getElementById('result-reparo').innerHTML =
-    buildResultHTML('Reparo Estrutural', resina, endur, 0, resina+endur, resina, tecidos);
-  document.getElementById('result-reparo').classList.add('active');
-}
-
 function calcularAdesivo(){
   const resina = parsePt(v('adesivo-resina'));
   if(!resina||resina<=0){ showNotification('Insira a quantidade de resina (kg)','error'); return; }
@@ -1376,9 +1297,9 @@ function salvarCalculo(tipo, base, endur, adicional, total, nomeTecidos=''){
   const dataInsp = v('data-inspecao')||'';
   const nucleo   = document.getElementById('nucleo-sim').checked;
   const matNucleo= v('material-nucleo')||'';
-  const estTec   = parsePt(v('est-tecido'))||0;
-  const estRes   = parsePt(v('est-resina'))||0;
-  const estEnd   = parsePt(v('est-endurecedor'))||0;
+  const estTec   = EST.tecido||0;
+  const estRes   = EST.resina||0;
+  const estEnd   = EST.endurecedor||0;
 
   if(!projeto||!wtg||!blade){
     showNotification('Dados de identificação incompletos','error');
