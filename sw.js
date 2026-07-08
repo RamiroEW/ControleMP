@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   SERVICE WORKER — Extreme Wind Solution
+   SERVICE WORKER — Extreme Wind
    Habilita uso offline em parques eólicos.
    • App shell (HTML/manifest/ícone) → pré-cacheado na instalação
    • Font Awesome (cdnjs) → cacheado em tempo de execução (cache-first)
