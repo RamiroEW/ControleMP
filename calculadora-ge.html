@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extreme Wind - Calculadora de Reparos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        :root {
+            --extreme-dark: #0a1a3a;
+            --extreme-blue: #0066cc;
+            --extreme-light: #00b4ff;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+        
+        html {
+            overflow-x: hidden;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+            width: 100%;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .logo-ew {
+            max-width: 320px;
+            width: 70%;
+            height: auto;
+            display: block;
+            margin: 0 auto 8px;
+        }
+        
+        .logo-text {
+            font-family: 'Arial Black', sans-serif;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--extreme-dark);
+        }
+        
+        .logo-text span {
+            color: var(--extreme-blue);
+        }
+        
+        .logo-subtitle {
+            font-size: 1.1rem;
+            color: var(--extreme-blue);
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        /* Cards principais */
+        .main-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .menu-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--extreme-blue);
+            box-shadow: 0 8px 15px rgba(0, 102, 204, 0.1);
+        }
+        
+        .menu-card.structural:hover {
+            border-color: var(--extreme-blue);
+        }
+        
+        .menu-card.finish:hover {
+            border-color: var(--extreme-blue);
+        }
+        
+        .menu-card.history:hover {
+            border-color: var(--success-color);
+        }
+        
+        .menu-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, var(--extreme-blue), var(--extreme-light));
+            color: white;
+        }
+        
+        .menu-card.finish .menu-icon {
+            background: linear-gradient(135deg, var(--extreme-blue), #00b4ff);
+        }
+        
+        .menu-card.history .menu-icon {
+            background: linear-gradient(135deg, var(--success-color), #34d399);
+        }
+        
+        .menu-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--extreme-dark);
+        }
+        
+        .menu-card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+        
+        /* Telas */
+        .screen {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .screen-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--extreme-blue);
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: #f1f5f9;
+        }
+        
+        .screen-title {
+            flex: 1;
+            text-align: center;
+            color: var(--extreme-dark);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        /* Opções de material */
+        .material-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .material-option {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .material-option:hover {
+            border-color: var(--extreme-blue);
+        }
+        
+        .material-option.selected {
+            border-color: var(--extreme-blue);
+            background: #f0f9ff;
+        }
+        
+        .material-option i {
+            font-size: 2rem;
+            color: var(--extreme-blue);
+            margin-bottom: 10px;
+        }
+        
+        .material-option h4 {
+            color: var(--extreme-dark);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        /* Formulários */
+        .form-section {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--extreme-dark);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--extreme-blue);
+        }
+        
+        .unit-toggle {
+            display: flex;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            width: 120px;
+        }
+        
+        .unit-btn {
+            flex: 1;
+            padding: 14px 0;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: var(--text-light);
+        }
+        
+        .unit-btn.active {
+            background: var(--extreme-blue);
+            color: white;
+        }
+        
+        select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--extreme-blue);
+        }
+        
+        /* Checkbox para Thinner */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .checkbox-group label {
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--extreme-dark);
+        }
+        
+        /* Resultados */
+        .results-section {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 2px solid var(--border-color);
+        }
+        
+        .results-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: var(--extreme-dark);
+            font-size: 1.2rem;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .result-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--extreme-dark);
+        }
+        
+        .result-unit {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-left: 4px;
+        }
+        
+        /* Botões de ação */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 14px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .btn-primary {
+            background: var(--extreme-blue);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--extreme-dark);
+            border: 2px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #0da271;
+        }
+        
+        /* Avisos */
+        .alert {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            color: #92400e;
+        }
+        
+        .alert i {
+            color: var(--warning-color);
+        }
+        
+        .alert-danger {
+            background: #fee2e2;
+            border-left: 4px solid var(--danger-color);
+            color: #7f1d1d;
+        }
+        
+        .alert-danger i {
+            color: var(--danger-color);
+        }
+        
+        /* Histórico */
+        .history-list {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            background: white;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--extreme-blue);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .history-date {
+            font-weight: 600;
+            color: var(--extreme-dark);
+        }
+        
+        .history-type {
+            background: var(--extreme-blue);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .history-details {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+        
+        .history-params {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .param-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .param-item:last-child {
+            border-bottom: none;
+        }
+        
+        .param-label {
+            font-weight: 500;
+            color: var(--extreme-dark);
+        }
+        
+        .param-value {
+            color: var(--extreme-blue);
+            font-weight: 600;
+        }
+        
+        .empty-history {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+        
+        .empty-history i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .logo-ew {
+                width: 85%;
+            }
+            
+            .main-menu {
+                grid-template-columns: 1fr;
+            }
+            
+            .material-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .unit-toggle {
+                width: 100%;
+            }
+            
+            .history-params {
+                grid-template-columns: 1fr;
+            }
+
+            .oem-badge {
+                right: 10px;
+                bottom: 10px;
+                padding: 8px 12px;
+            }
+            .oem-badge img {
+                height: 38px;
+            }
+        }
+
+        /* Selo OEM — GE Vernova, fixo no canto inferior direito (igual à calculadora EW) */
+        .oem-badge {
+            position: fixed;
+            right: 16px;
+            bottom: 14px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 10px 16px;
+            z-index: 900;
+        }
+        .oem-badge img {
+            display: block;
+            height: 50px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho -->
+        <header class="app-header">
+            <div class="logo-container">
+                <img src="logo-ew.png" alt="Extreme Wind Blade Services" class="logo-ew">
+                <div class="logo-subtitle">Calculadora de Reparos em Pás Eólicas</div>
+            </div>
+        </header>
+        
+        <!-- Tela 0: Identificação do Reparo -->
+        <div id="screen-identificacao" class="screen active">
+            <h2 class="screen-title">Identificação do Reparo</h2>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 25px;">
+                Preencha os dados antes de iniciar o cálculo
+            </p>
+
+            <div class="form-section">
+                <label class="form-label" for="ge-projeto">Projeto / Parque Eólico</label>
+                <div class="input-group">
+                    <input type="text" id="ge-projeto" placeholder="Ex: São Fernando 1">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label" for="ge-wtg">WTG (Aerogerador)</label>
+                <div class="input-group">
+                    <input type="text" id="ge-wtg" placeholder="Ex: A2-16">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label" for="ge-blade">N° da Pá (Blade)</label>
+                <div class="input-group">
+                    <input type="text" id="ge-blade" placeholder="Ex: 114">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label" for="ge-tecnico">Técnico Responsável</label>
+                <div class="input-group">
+                    <input type="text" id="ge-tecnico" placeholder="Ex: João Silva">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label" for="ge-data-pesagem">Data de Pesagem</label>
+                <div class="input-group">
+                    <input type="date" id="ge-data-pesagem">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label" for="ge-tipo-reparo">Tipo de Reparo</label>
+                <select id="ge-tipo-reparo">
+                    <option value="Externo">Reparo Externo</option>
+                    <option value="Interno">Reparo Interno</option>
+                    <option value="LPS">LPS</option>
+                    <option value="SBI">Reparo de SBI</option>
+                </select>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label" for="ge-nucleo-afetado">O Núcleo foi afetado?</label>
+                <select id="ge-nucleo-afetado">
+                    <option value="nao">Não</option>
+                    <option value="sim">Sim — Núcleo afetado</option>
+                </select>
+            </div>
+
+            <div id="ge-secao-nucleo" class="form-section" style="display: none;">
+                <label class="form-label" for="ge-material-nucleo">Material do Núcleo a ser usado</label>
+                <select id="ge-material-nucleo">
+                    <option value="">— Selecione o material —</option>
+                    <option value="BALSA CORE 15mm">BALSA CORE 15 mm</option>
+                    <option value="BALSA CORE 20mm">BALSA CORE 20 mm</option>
+                    <option value="BALSA CORE 32mm">BALSA CORE 32 mm</option>
+                    <option value="ESPUMA PVC 20mm">ESPUMA PVC 20 mm</option>
+                    <option value="ESPUMA FLEX PVC H60 20mm">ESPUMA FLEXÍVEL PVC H60 GS 20 mm</option>
+                    <option value="ESPUMA FLEX PET FOAM 50mm">ESPUMA FLEXÍVEL PET FOAM 50 mm</option>
+                </select>
+                <label class="form-label" for="ge-peso-nucleo" style="margin-top: 14px;">Peso do Núcleo utilizado (g)</label>
+                <div class="input-group">
+                    <input type="text" id="ge-peso-nucleo" inputmode="decimal" placeholder="Ex: 350">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Tecido(s) utilizado(s)</label>
+                <div class="input-group">
+                    <select id="ge-tecido-select" style="flex: 2;">
+                        <option value="">— Selecione o tecido —</option>
+                        <option value="Triax 1200">Triax 1200</option>
+                        <option value="Biax 830">Biax 830</option>
+                        <option value="Biax 750">Biax 750</option>
+                        <option value="Biax 450">Biax 450</option>
+                        <option value="UD 1000">UD 1000</option>
+                        <option value="UD 661">UD 661</option>
+                        <option value="BiZero 750">BiZero 750</option>
+                        <option value="CSM 300">CSM 300</option>
+                    </select>
+                    <input type="text" id="ge-tecido-qtd" inputmode="decimal" placeholder="Peso (g)">
+                </div>
+                <button type="button" class="btn btn-secondary" id="ge-btn-add-tecido" style="margin-top: 12px;">
+                    <i class="fas fa-plus"></i> Adicionar tecido
+                </button>
+                <div id="ge-tecidos-list" style="margin-top: 10px;"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="ge-btn-continuar">Continuar <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Tela 1: Menu Principal -->
+        <div id="screen-main" class="screen">
+            <div class="screen-header">
+                <button class="back-btn" id="back-from-main">
+                    <i class="fas fa-edit"></i> Editar identificação
+                </button>
+                <div class="screen-title" style="font-size: 1.2rem;">Calculadora de Reparos</div>
+            </div>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 25px;">
+                Selecione o tipo de reparo que será realizado
+            </p>
+            
+            <div class="main-menu">
+                <div class="menu-card structural" id="btn-structural">
+                    <div class="menu-icon">
+                        <i class="fas fa-hard-hat"></i>
+                    </div>
+                    <h3>Reparo Estrutural</h3>
+                    <p>Para reparos com tecido de fibra, núcleo ou adesivos estruturais</p>
+                </div>
+                
+                <div class="menu-card finish" id="btn-finish">
+                    <div class="menu-icon">
+                        <i class="fas fa-paint-roller"></i>
+                    </div>
+                    <h3>Acabamento</h3>
+                    <p>Para preenchimento de perfis e aplicação de revestimentos</p>
+                </div>
+                
+                <div class="menu-card history" id="btn-history">
+                    <div class="menu-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h3>Histórico</h3>
+                    <p>Visualize os últimos cálculos realizados</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tela 2: Reparo Estrutural - Seleção de Material -->
+        <div id="screen-structural" class="screen">
+            <div class="screen-header">
+                <button class="back-btn" id="back-from-structural">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <div class="screen-title">Reparo Estrutural</div>
+            </div>
+            
+            <p>Selecione o material de referência para o reparo:</p>
+            
+            <div class="material-options">
+                <div class="material-option" id="opt-fabric">
+                    <i class="fas fa-layer-group"></i>
+                    <h4>Tecido de Fibra</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">Usa peso da fibra como referência</p>
+                </div>
+                
+                <div class="material-option" id="opt-core">
+                    <i class="fas fa-cube"></i>
+                    <h4>Núcleo</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">Requer resina com Aerosil</p>
+                </div>
+                
+                <div class="material-option" id="opt-adhesive">
+                    <i class="fas fa-glue"></i>
+                    <h4>Adesivo G3</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">Usa apenas peso da base</p>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="btn-continue">Continuar <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+        
+        <!-- Tela 3: Cálculo Estrutural -->
+        <div id="screen-calc-structural" class="screen">
+            <div class="screen-header">
+                <button class="back-btn" id="back-from-calc-structural">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <div class="screen-title">Cálculo Estrutural</div>
+            </div>
+            
+            <div class="alert alert-danger" id="weight-alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="alert-text"></span>
+            </div>
+            
+            <div class="form-section">
+                <label class="form-label" id="weight-label">Peso de Referência (kg)</label>
+                <div class="input-group">
+                    <input type="number" id="reference-weight" step="0.001" min="0.001" value="0.100" placeholder="Digite o peso em kg">
+                </div>
+                <div id="weight-hint" style="font-size: 0.9rem; color: var(--text-light); margin-top: 5px;"></div>
+            </div>
+            
+            <div class="form-section">
+                <label class="form-label">Selecionar Material</label>
+                <select id="material-select">
+                    <!-- Opções serão preenchidas por JavaScript -->
+                </select>
+            </div>
+            
+            <div id="material-info" style="margin: 20px 0; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                <!-- Informações do material serão exibidas aqui -->
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="btn-calculate">Calcular <i class="fas fa-calculator"></i></button>
+            </div>
+            
+            <div id="results-section" class="results-section" style="display: none;">
+                <div class="results-title">
+                    <i class="fas fa-list-check"></i>
+                    <span>Resultados</span>
+                </div>
+                
+                <div class="results-grid" id="results-grid">
+                    <!-- Resultados serão exibidos aqui -->
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <label class="form-label">Notas (opcional)</label>
+                    <input type="text" id="calc-notes" placeholder="Ex: Lâmina #B-214, reparo na borda de ataque" style="width: 100%;">
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="btn-save">Salvar Cálculo <i class="fas fa-save"></i></button>
+                    <button class="btn btn-secondary" id="btn-new-calc">Novo Cálculo <i class="fas fa-redo"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tela 4: Cálculo de Acabamento -->
+        <div id="screen-finish" class="screen">
+            <div class="screen-header">
+                <button class="back-btn" id="back-from-finish">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <div class="screen-title">Acabamento</div>
+            </div>
+            
+            <div class="form-section">
+                <label class="form-label">Peso da Base (kg)</label>
+                <div class="input-group">
+                    <input type="number" id="base-weight" step="0.001" min="0.001" value="0.100" placeholder="Digite o peso da base em kg">
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 5px;">
+                    O aplicativo calculará o endurecedor necessário
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <label class="form-label">Selecionar Material</label>
+                <select id="finish-material-select">
+                    <option value="alexit_profile_3">Alexit Profile Filler 3</option>
+                    <option value="alexit_topcoat_12">Alexit Topcoat 12</option>
+                </select>
+            </div>
+
+            <div class="form-section" id="finish-sbi-produto-section" style="display: none;">
+                <label class="form-label" for="finish-sbi-produto">Produto (conforme checklist)</label>
+                <select id="finish-sbi-produto">
+                    <option value="TOP COAT 12 RAL 3020 RED">TOP COAT 12 RAL 3020 RED</option>
+                    <option value="TOP COAT 12 RED 3020">TOP COAT 12 RED 3020</option>
+                </select>
+                <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 8px;">
+                    Endurecedor: HARDENER12 - ALEXIT - Mankiewicz - 3kg
+                </div>
+            </div>
+            
+            <div id="finish-material-info" style="margin: 20px 0; padding: 15px; background: #f8fafc; border-radius: 8px;">
+                <!-- Informações do material serão exibidas aqui -->
+            </div>
+            
+            <!-- Opção para Thinner (apenas para Topcoat 12) -->
+            <div id="thinner-option" class="checkbox-group" style="display: none;">
+                <input type="checkbox" id="use-thinner">
+                <label for="use-thinner">Adicionar Thinner (15% sobre a mistura Topcoat + Endurecedor)</label>
+            </div>
+            
+            <div class="alert alert-danger" id="finish-weight-alert" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="finish-alert-text"></span>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="btn-calculate-finish">Calcular <i class="fas fa-calculator"></i></button>
+            </div>
+            
+            <div id="finish-results-section" class="results-section" style="display: none;">
+                <div class="results-title">
+                    <i class="fas fa-list-check"></i>
+                    <span>Resultados</span>
+                </div>
+                
+                <div class="results-grid" id="finish-results-grid">
+                    <!-- Resultados serão exibidos aqui -->
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <label class="form-label">Notas (opcional)</label>
+                    <input type="text" id="finish-calc-notes" placeholder="Ex: Lâmina #B-214, acabamento superficial" style="width: 100%;">
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="btn-save-finish">Salvar Cálculo <i class="fas fa-save"></i></button>
+                    <button class="btn btn-secondary" id="btn-new-finish">Novo Cálculo <i class="fas fa-redo"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tela 5: Histórico -->
+        <div id="screen-history" class="screen">
+            <div class="screen-header">
+                <button class="back-btn" id="back-from-history">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <div class="screen-title">Histórico de Cálculos</div>
+            </div>
+            
+            <div class="results-grid" style="margin-bottom: 25px;">
+                <div class="result-item">
+                    <div class="result-label">Cálculos Salvos</div>
+                    <div class="result-value" id="total-calculations">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Último Cálculo</div>
+                    <div class="result-value" id="last-calculation">-</div>
+                </div>
+            </div>
+            
+            <!-- Filtros para histórico -->
+            <div class="form-section">
+                <label class="form-label">Filtrar por tipo de material</label>
+                <select id="history-filter">
+                    <option value="all">Todos os materiais</option>
+                    <option value="estrutural">Reparo Estrutural</option>
+                    <option value="acabamento">Acabamento</option>
+                </select>
+            </div>
+            
+            <div id="history-list" class="history-list">
+                <!-- Histórico será carregado aqui -->
+            </div>
+            
+            <div id="empty-history" class="empty-history">
+                <i class="fas fa-history"></i>
+                <h3>Nenhum cálculo salvo</h3>
+                <p>Os cálculos que você salvar aparecerão aqui</p>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="btn-clear-history">Limpar Histórico <i class="fas fa-trash-alt"></i></button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Extreme Wind Blade Services © 2026</p>
+            <p style="font-size: 0.85rem; margin-top: 5px;">Calculadora para reparos em campo</p>
+        </footer>
+    </div>
+
+    <div class="oem-badge" id="oem-badge"><img src="logo-oem-ge.png" alt="GE Vernova"></div>
+
+    <script>
+        // Dados dos materiais atualizados
+        const materialsData = {
+            fabric: [
+                {
+                    id: "sika_ch910_1",
+                    name: "SikaBiresin CH910-1 (rápido)",
+                    baseWeight: 100,
+                    hardenerWeight: 20,
+                    description: "Resina epóxi de cura rápida"
+                },
+                {
+                    id: "sika_ch910_5",
+                    name: "SikaBiresin CH910-5 (lento)",
+                    baseWeight: 100,
+                    hardenerWeight: 20,
+                    description: "Resina epóxi de cura lenta"
+                },
+                {
+                    id: "hexion_lr135",
+                    name: "Hexion LR135",
+                    baseWeight: 100,
+                    hardenerWeight: 35,
+                    description: "Resina epóxi versátil"
+                }
+            ],
+            
+            core: [
+                {
+                    id: "sika_core_1",
+                    name: "SikaBiresin CH910-1 com Aerosil",
+                    baseWeight: 100,
+                    hardenerWeight: 20,
+                    aerosilPercent: 1.8,
+                    description: "Resina com Aerosil para núcleo"
+                },
+                {
+                    id: "sika_core_5",
+                    name: "SikaBiresin CH910-5 com Aerosil",
+                    baseWeight: 100,
+                    hardenerWeight: 20,
+                    aerosilPercent: 1.8,
+                    description: "Resina com Aerosil para núcleo"
+                }
+            ],
+            
+            adhesive: [
+                {
+                    id: "adhesive_g3",
+                    name: "Adesivo de colagem G3",
+                    baseWeight: 100,
+                    hardenerWeight: 45,
+                    description: "Adesivo estrutural"
+                }
+            ],
+            
+            finish: [
+                {
+                    id: "alexit_profile_3",
+                    name: "Alexit Profile Filler 3",
+                    baseWeight: 100,
+                    hardenerWeight: 17,
+                    description: "Preenchedor de perfil"
+                },
+                {
+                    id: "alexit_topcoat_12",
+                    name: "Alexit Topcoat 12",
+                    baseWeight: 100,
+                    hardenerWeight: 25,
+                    description: "Revestimento final"
+                },
+                {
+                    id: "alexit_topcoat_12_sbi",
+                    name: "Alexit Topcoat 12 (SBI)",
+                    baseWeight: 100,
+                    hardenerWeight: 25,
+                    description: "Revestimento final — SBI (produto conforme checklist)"
+                }
+            ]
+        };
+
+        // Estado da aplicação
+        const appState = {
+            currentScreen: 'identificacao',
+            selectedMaterialType: null,
+            selectedMaterial: null,
+            currentUnit: 'kg',
+            useThinner: false
+        };
+
+        // Estado da Identificação (Tela 0) — usado para rastreio de uso,
+        // anexado a cada cálculo salvo no histórico.
+        let IDENTIFICACAO_GE = {};
+        let TECIDOS_GE = [];
+        // Só a 1ª gravação após a Identificação ser (re)confirmada envia
+        // núcleo/tecido para a planilha — evita duplicar o consumo ao salvar
+        // vários cálculos (Estrutural + Acabamento) do mesmo reparo.
+        let nucleoTecidoRegistradoGE = false;
+
+        // Sincronização com Google Sheets (mesma planilha/aba Consumo_MP da
+        // calculadora EW — o campo "cliente" diferencia a origem dos dados)
+        const GAS_URL_GE = 'https://script.google.com/macros/s/AKfycbwnGGqqI8edzQXtSq5VP4HMwH0ui_4A-XwuQr3reA3y35oapZbRdaPp9Rm09BsnDf3v/exec';
+        let syncQueueGE = JSON.parse(localStorage.getItem('extremeWindSyncQueueGE') || '[]');
+
+        // Elementos DOM
+        const DOM = {
+            screens: {
+                identificacao: document.getElementById('screen-identificacao'),
+                main: document.getElementById('screen-main'),
+                structural: document.getElementById('screen-structural'),
+                calcStructural: document.getElementById('screen-calc-structural'),
+                finish: document.getElementById('screen-finish'),
+                history: document.getElementById('screen-history')
+            },
+            
+            // Navegação
+            btnStructural: document.getElementById('btn-structural'),
+            btnFinish: document.getElementById('btn-finish'),
+            btnHistory: document.getElementById('btn-history'),
+            
+            backFromStructural: document.getElementById('back-from-structural'),
+            backFromCalcStructural: document.getElementById('back-from-calc-structural'),
+            backFromFinish: document.getElementById('back-from-finish'),
+            backFromHistory: document.getElementById('back-from-history'),
+            
+            // Seleção de material estrutural
+            optFabric: document.getElementById('opt-fabric'),
+            optCore: document.getElementById('opt-core'),
+            optAdhesive: document.getElementById('opt-adhesive'),
+            btnContinue: document.getElementById('btn-continue'),
+            
+            // Cálculo estrutural
+            weightAlert: document.getElementById('weight-alert'),
+            alertText: document.getElementById('alert-text'),
+            weightLabel: document.getElementById('weight-label'),
+            weightHint: document.getElementById('weight-hint'),
+            referenceWeight: document.getElementById('reference-weight'),
+            materialSelect: document.getElementById('material-select'),
+            materialInfo: document.getElementById('material-info'),
+            resultsSection: document.getElementById('results-section'),
+            resultsGrid: document.getElementById('results-grid'),
+            calcNotes: document.getElementById('calc-notes'),
+            btnCalculate: document.getElementById('btn-calculate'),
+            btnSave: document.getElementById('btn-save'),
+            btnNewCalc: document.getElementById('btn-new-calc'),
+            
+            // Cálculo de acabamento
+            baseWeight: document.getElementById('base-weight'),
+            finishMaterialSelect: document.getElementById('finish-material-select'),
+            finishSbiProdutoSection: document.getElementById('finish-sbi-produto-section'),
+            finishSbiProduto: document.getElementById('finish-sbi-produto'),
+            finishMaterialInfo: document.getElementById('finish-material-info'),
+            thinnerOption: document.getElementById('thinner-option'),
+            useThinner: document.getElementById('use-thinner'),
+            finishWeightAlert: document.getElementById('finish-weight-alert'),
+            finishAlertText: document.getElementById('finish-alert-text'),
+            finishResultsSection: document.getElementById('finish-results-section'),
+            finishResultsGrid: document.getElementById('finish-results-grid'),
+            finishCalcNotes: document.getElementById('finish-calc-notes'),
+            btnCalculateFinish: document.getElementById('btn-calculate-finish'),
+            btnSaveFinish: document.getElementById('btn-save-finish'),
+            btnNewFinish: document.getElementById('btn-new-finish'),
+            
+            // Histórico
+            historyFilter: document.getElementById('history-filter'),
+            totalCalculations: document.getElementById('total-calculations'),
+            lastCalculation: document.getElementById('last-calculation'),
+            historyList: document.getElementById('history-list'),
+            emptyHistory: document.getElementById('empty-history'),
+            btnClearHistory: document.getElementById('btn-clear-history'),
+
+            // Identificação (Tela 0)
+            backFromMain: document.getElementById('back-from-main'),
+            geProjeto: document.getElementById('ge-projeto'),
+            geWtg: document.getElementById('ge-wtg'),
+            geBlade: document.getElementById('ge-blade'),
+            geTecnico: document.getElementById('ge-tecnico'),
+            geDataPesagem: document.getElementById('ge-data-pesagem'),
+            geTipoReparo: document.getElementById('ge-tipo-reparo'),
+            geNucleoAfetado: document.getElementById('ge-nucleo-afetado'),
+            geSecaoNucleo: document.getElementById('ge-secao-nucleo'),
+            geMaterialNucleo: document.getElementById('ge-material-nucleo'),
+            gePesoNucleo: document.getElementById('ge-peso-nucleo'),
+            geTecidoSelect: document.getElementById('ge-tecido-select'),
+            geTecidoQtd: document.getElementById('ge-tecido-qtd'),
+            geBtnAddTecido: document.getElementById('ge-btn-add-tecido'),
+            geTecidosList: document.getElementById('ge-tecidos-list'),
+            geBtnContinuar: document.getElementById('ge-btn-continuar')
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            loadHistory();
+            tentarSincronizarGE();
+            
+            // Selecionar primeira opção por padrão
+            selectMaterialOption('fabric');
+            
+            // Configurar evento para mostrar/ocultar opção de Thinner e atualizar info do material
+            DOM.finishMaterialSelect.addEventListener('change', toggleThinnerOption);
+            DOM.finishMaterialSelect.addEventListener('change', updateFinishMaterialInfo);
+            DOM.useThinner.addEventListener('change', function() {
+                appState.useThinner = this.checked;
+            });
+            
+            // Configurar filtro de histórico
+            DOM.historyFilter.addEventListener('change', updateHistoryDisplay);
+            
+            // Atualizar informações do material de acabamento inicial
+            updateFinishMaterialInfo();
+        });
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Navegação principal
+            DOM.btnStructural.addEventListener('click', () => {
+                // LPS não usa tecido/núcleo — pergunta o peso da resina direto
+                if (IDENTIFICACAO_GE.tipoReparo === 'LPS') {
+                    appState.selectedMaterialType = 'resina';
+                    setupCalculationScreen();
+                    showScreen('calcStructural');
+                } else {
+                    showScreen('structural');
+                }
+            });
+            DOM.btnFinish.addEventListener('click', () => showScreen('finish'));
+            DOM.btnHistory.addEventListener('click', () => showScreen('history'));
+            
+            // Navegação de voltar
+            DOM.backFromStructural.addEventListener('click', () => showScreen('main'));
+            DOM.backFromCalcStructural.addEventListener('click', () => {
+                showScreen(IDENTIFICACAO_GE.tipoReparo === 'LPS' ? 'main' : 'structural');
+            });
+            DOM.backFromFinish.addEventListener('click', () => showScreen('main'));
+            DOM.backFromHistory.addEventListener('click', () => showScreen('main'));
+            
+            // Seleção de material
+            DOM.optFabric.addEventListener('click', () => selectMaterialOption('fabric'));
+            DOM.optCore.addEventListener('click', () => selectMaterialOption('core'));
+            DOM.optAdhesive.addEventListener('click', () => selectMaterialOption('adhesive'));
+            
+            DOM.btnContinue.addEventListener('click', goToCalculation);
+            
+            // Cálculo estrutural
+            DOM.materialSelect.addEventListener('change', updateMaterialInfo);
+            DOM.referenceWeight.addEventListener('input', checkWeight);
+            DOM.btnCalculate.addEventListener('click', calculateStructural);
+            DOM.btnSave.addEventListener('click', saveCalculation);
+            DOM.btnNewCalc.addEventListener('click', resetCalculation);
+            
+            // Cálculo de acabamento
+            DOM.baseWeight.addEventListener('input', checkFinishWeight);
+            DOM.btnCalculateFinish.addEventListener('click', calculateFinish);
+            DOM.btnSaveFinish.addEventListener('click', saveFinishCalculation);
+            DOM.btnNewFinish.addEventListener('click', resetFinishCalculation);
+            
+            // Histórico
+            DOM.btnClearHistory.addEventListener('click', clearHistory);
+
+            // Identificação (Tela 0)
+            DOM.backFromMain.addEventListener('click', () => showScreen('identificacao'));
+            DOM.geNucleoAfetado.addEventListener('change', () => {
+                DOM.geSecaoNucleo.style.display = DOM.geNucleoAfetado.value === 'sim' ? 'block' : 'none';
+            });
+            DOM.gePesoNucleo.addEventListener('input', function(){ geOnlyNumeric(this); });
+            DOM.geTecidoQtd.addEventListener('input', function(){ geOnlyNumeric(this); });
+            DOM.geBtnAddTecido.addEventListener('click', addTecidoGE);
+            DOM.geBtnContinuar.addEventListener('click', continuarIdentificacaoGE);
+        }
+
+        // ── Identificação (Tela 0) ──────────────────────────────────
+        // Bloqueia letras nos campos que só aceitam número (peso em g)
+        function geOnlyNumeric(el) {
+            el.value = el.value.replace(/[^0-9.,]/g, '');
+        }
+
+        function addTecidoGE() {
+            const tec = DOM.geTecidoSelect.value;
+            const qtd = DOM.geTecidoQtd.value;
+            if (!tec) { alert('Selecione o tecido.'); return; }
+            if (!qtd) { alert('Informe o peso (g).'); return; }
+            TECIDOS_GE.push({ tecido: tec, qtd: qtd });
+            DOM.geTecidoSelect.value = '';
+            DOM.geTecidoQtd.value = '';
+            renderTecidosGE();
+        }
+
+        function removeTecidoGE(i) {
+            TECIDOS_GE.splice(i, 1);
+            renderTecidosGE();
+        }
+
+        function renderTecidosGE() {
+            DOM.geTecidosList.innerHTML = TECIDOS_GE.map((t, i) => `
+                <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:0.85rem;border:1px solid var(--border-color)">
+                    <span><strong>${t.tecido}</strong>${t.qtd ? ' — ' + t.qtd + ' g' : ''}</span>
+                    <button onclick="removeTecidoGE(${i})" style="background:#fee2e2;color:#7f1d1d;border:none;border-radius:6px;padding:5px 9px;cursor:pointer"><i class="fas fa-trash"></i></button>
+                </div>`).join('');
+        }
+
+        // Valida e avança da Identificação para o Menu Principal
+        function continuarIdentificacaoGE() {
+            const projeto = DOM.geProjeto.value.trim();
+            const wtg = DOM.geWtg.value.trim();
+            const blade = DOM.geBlade.value.trim();
+
+            if (!projeto) { alert('Informe o Projeto / Parque Eólico.'); return; }
+            if (!wtg) { alert('Informe a WTG.'); return; }
+            if (!blade) { alert('Informe o N° da Pá.'); return; }
+
+            const nucleoAfetado = DOM.geNucleoAfetado.value === 'sim';
+            if (nucleoAfetado && !DOM.geMaterialNucleo.value) {
+                alert('Selecione o Material do Núcleo.'); return;
+            }
+            if (nucleoAfetado && !DOM.gePesoNucleo.value) {
+                alert('Informe o peso do núcleo utilizado (g).'); return;
+            }
+
+            IDENTIFICACAO_GE = {
+                cliente: 'GE',
+                projeto, wtg, blade,
+                tecnico: DOM.geTecnico.value || '',
+                dataPesagem: DOM.geDataPesagem.value || '',
+                tipoReparo: DOM.geTipoReparo.value,
+                nucleo: nucleoAfetado,
+                matNucleo: DOM.geMaterialNucleo.value || '',
+                pesoNucleoG: DOM.gePesoNucleo.value || '',
+                tecidos: TECIDOS_GE.slice()
+            };
+            nucleoTecidoRegistradoGE = false;
+            aplicarTipoReparoGE();
+
+            showScreen('main');
+        }
+
+        // Reparo Interno e LPS não têm Acabamento (Filler/Pintura); Externo e
+        // SBI têm. Mesma lógica já usada na calculadora EW/Nordex.
+        function aplicarTipoReparoGE() {
+            const tipo = IDENTIFICACAO_GE.tipoReparo;
+            const usaAcabamento = (tipo === 'Externo' || tipo === 'SBI');
+            DOM.btnFinish.style.display = usaAcabamento ? 'block' : 'none';
+        }
+
+        // 'resina' (LPS) reaproveita a mesma lista de resinas do 'fabric'
+        function getMaterialsKeyGE(type) {
+            return type === 'resina' ? 'fabric' : type;
+        }
+
+        // Mostrar tela específica
+        function showScreen(screenName) {
+            // Esconder todas as telas
+            for (const screen in DOM.screens) {
+                DOM.screens[screen].classList.remove('active');
+            }
+            
+            // Mostrar tela selecionada
+            DOM.screens[screenName].classList.add('active');
+            appState.currentScreen = screenName;
+            
+            // Ações específicas
+            if (screenName === 'history') {
+                updateHistoryDisplay();
+            } else if (screenName === 'finish') {
+                atualizarOpcoesAcabamentoGE();
+            } else if (screenName === 'structural') {
+                aplicarDisponibilidadeMateriaisGE();
+            }
+            
+            // Esconder alertas
+            DOM.weightAlert.style.display = 'none';
+            DOM.finishWeightAlert.style.display = 'none';
+        }
+
+        // Selecionar opção de material
+        function selectMaterialOption(type) {
+            appState.selectedMaterialType = type;
+            
+            // Atualizar seleção visual
+            [DOM.optFabric, DOM.optCore, DOM.optAdhesive].forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            switch(type) {
+                case 'fabric': DOM.optFabric.classList.add('selected'); break;
+                case 'core': DOM.optCore.classList.add('selected'); break;
+                case 'adhesive': DOM.optAdhesive.classList.add('selected'); break;
+            }
+        }
+
+        // Tecido de Fibra e Núcleo só aparecem como opção se já tiverem sido
+        // informados na Identificação — o peso já registrado lá é reaproveitado
+        // (não perguntamos de novo).
+        function aplicarDisponibilidadeMateriaisGE() {
+            const temTecido = TECIDOS_GE.length > 0;
+            const temNucleo = IDENTIFICACAO_GE.nucleo === true;
+            DOM.optFabric.style.display = temTecido ? 'block' : 'none';
+            DOM.optCore.style.display = temNucleo ? 'block' : 'none';
+
+            const selecionadoIndisponivel =
+                (appState.selectedMaterialType === 'fabric' && !temTecido) ||
+                (appState.selectedMaterialType === 'core' && !temNucleo);
+
+            if (!appState.selectedMaterialType || selecionadoIndisponivel) {
+                selectMaterialOption(temTecido ? 'fabric' : (temNucleo ? 'core' : 'adhesive'));
+            }
+        }
+
+        // Ir para tela de cálculo
+        function goToCalculation() {
+            if (!appState.selectedMaterialType) {
+                alert('Selecione um tipo de material primeiro.');
+                return;
+            }
+            
+            // Configurar a tela de cálculo
+            setupCalculationScreen();
+            showScreen('calcStructural');
+        }
+
+        // Configurar tela de cálculo
+        function setupCalculationScreen() {
+            // Limpar seleção anterior
+            DOM.materialSelect.innerHTML = '';
+            DOM.resultsSection.style.display = 'none';
+            DOM.weightAlert.style.display = 'none';
+            
+            // Configurar textos baseados no tipo de material
+            let weightLabel = '';
+            let weightHint = '';
+            let pesoAutoPreenchido = null; // (kg) — vem da Identificação, quando aplicável
+
+            switch(appState.selectedMaterialType) {
+                case 'fabric': {
+                    weightLabel = 'Peso do Tecido de Fibra (kg)';
+                    weightHint = 'Peso somado dos tecidos informados na Identificação — não é possível editar aqui.';
+                    const totalG = TECIDOS_GE.reduce((soma, t) => soma + (parseFloat(String(t.qtd || '0').replace(',', '.')) || 0), 0);
+                    pesoAutoPreenchido = totalG / 1000;
+                    break;
+                }
+                case 'core': {
+                    weightLabel = 'Peso do Núcleo (kg)';
+                    weightHint = 'Peso informado na Identificação — não é possível editar aqui. Será usada mesma quantidade de resina+endurecedor (1:1) + Aerosil adicional sobre a mistura';
+                    const pesoG = parseFloat(String(IDENTIFICACAO_GE.pesoNucleoG || '0').replace(',', '.')) || 0;
+                    pesoAutoPreenchido = pesoG / 1000;
+                    break;
+                }
+                case 'adhesive':
+                    weightLabel = 'Peso da Base do Adesivo (kg)';
+                    weightHint = 'O endurecedor será calculado automaticamente';
+                    break;
+                case 'resina':
+                    weightLabel = 'Peso da Resina (kg)';
+                    weightHint = 'Reparo de LPS — informe o peso da resina a ser utilizada';
+                    break;
+            }
+            
+            DOM.weightLabel.textContent = weightLabel;
+            DOM.weightHint.textContent = weightHint;
+            
+            // Carregar materiais apropriados
+            const materials = materialsData[getMaterialsKeyGE(appState.selectedMaterialType)];
+            materials.forEach(material => {
+                const option = document.createElement('option');
+                option.value = material.id;
+                option.textContent = material.name;
+                DOM.materialSelect.appendChild(option);
+            });
+            
+            // Selecionar primeiro material
+            if (materials.length > 0) {
+                DOM.materialSelect.value = materials[0].id;
+                updateMaterialInfo();
+            }
+            
+            // Peso: auto-preenchido e travado (tecido/núcleo) ou editável (adesivo/resina)
+            if (pesoAutoPreenchido !== null) {
+                DOM.referenceWeight.value = pesoAutoPreenchido.toFixed(3);
+                DOM.referenceWeight.readOnly = true;
+                DOM.referenceWeight.style.background = '#f1f5f9';
+            } else {
+                DOM.referenceWeight.value = '0.100';
+                DOM.referenceWeight.readOnly = false;
+                DOM.referenceWeight.style.background = '';
+            }
+            checkWeight();
+        }
+
+        // Atualizar informações do material
+        function updateMaterialInfo() {
+            const materialId = DOM.materialSelect.value;
+            const materials = materialsData[getMaterialsKeyGE(appState.selectedMaterialType)];
+            const material = materials.find(m => m.id === materialId);
+            
+            if (!material) return;
+            
+            appState.selectedMaterial = material;
+            
+            // Exibir informações do material
+            let infoHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div>
+                        <strong style="color: var(--extreme-dark);">${material.name}</strong>
+                        <div style="font-size: 0.9rem; color: var(--text-light);">${material.description}</div>
+                    </div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: var(--extreme-blue);">
+                        ${material.baseWeight}:${material.hardenerWeight}
+                    </div>
+                </div>
+            `;
+            
+            if (material.aerosilPercent) {
+                infoHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                        <div style="font-size: 0.9rem; color: var(--text-light);">Aerosil</div>
+                        <div style="font-size: 1rem; font-weight: 600; color: var(--extreme-blue);">
+                            ${material.aerosilPercent}% sobre a mistura
+                        </div>
+                    </div>
+                `;
+            }
+            
+            DOM.materialInfo.innerHTML = infoHTML;
+        }
+
+        // Mostrar/ocultar opção de Thinner
+        function toggleThinnerOption() {
+            const selectedMaterial = DOM.finishMaterialSelect.value;
+            if (selectedMaterial === 'alexit_topcoat_12' || selectedMaterial === 'alexit_topcoat_12_sbi') {
+                DOM.thinnerOption.style.display = 'flex';
+            } else {
+                DOM.thinnerOption.style.display = 'none';
+                DOM.useThinner.checked = false;
+                appState.useThinner = false;
+            }
+        }
+
+        // Reconstrói as opções de Acabamento conforme o tipo de reparo — SBI
+        // usa o Topcoat 12 (SBI) no lugar do Topcoat 12 padrão (mesma ideia já
+        // usada na calculadora EW/Nordex para o cliente SBI).
+        function atualizarOpcoesAcabamentoGE() {
+            const isSBI = IDENTIFICACAO_GE.tipoReparo === 'SBI';
+            DOM.finishMaterialSelect.innerHTML = '';
+            const opcoes = [
+                { id: 'alexit_profile_3' },
+                { id: isSBI ? 'alexit_topcoat_12_sbi' : 'alexit_topcoat_12' }
+            ];
+            opcoes.forEach(o => {
+                const material = materialsData.finish.find(m => m.id === o.id);
+                const opt = document.createElement('option');
+                opt.value = material.id;
+                opt.textContent = material.name;
+                DOM.finishMaterialSelect.appendChild(opt);
+            });
+            DOM.finishMaterialSelect.value = opcoes[0].id;
+            updateFinishMaterialInfo();
+        }
+
+        // Atualizar informações do material de acabamento
+        function updateFinishMaterialInfo() {
+            const materialId = DOM.finishMaterialSelect.value;
+            const material = materialsData.finish.find(m => m.id === materialId);
+            
+            if (!material) return;
+
+            DOM.finishSbiProdutoSection.style.display = (materialId === 'alexit_topcoat_12_sbi') ? 'block' : 'none';
+            
+            DOM.finishMaterialInfo.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div>
+                        <strong style="color: var(--extreme-dark);">${material.name}</strong>
+                        <div style="font-size: 0.9rem; color: var(--text-light);">${material.description}</div>
+                    </div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: var(--extreme-blue);">
+                        ${material.baseWeight}:${material.hardenerWeight}
+                    </div>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--text-light);">Proporção base:endurecedor</div>
+            `;
+            
+            // Atualizar também a opção de Thinner
+            toggleThinnerOption();
+        }
+
+        // Verificar peso (estrutural)
+        function checkWeight() {
+            const weight = parseFloat(DOM.referenceWeight.value);
+            
+            if (isNaN(weight) || weight <= 0) {
+                DOM.weightAlert.style.display = 'none';
+                return;
+            }
+            
+            // Verificar se excede 2.5kg
+            if (weight > 2.5) {
+                DOM.alertText.textContent = `O peso total (${weight.toFixed(3)}kg) excede o limite de 2.5kg. Por favor dividir a pesagem.`;
+                DOM.weightAlert.style.display = 'flex';
+            } else {
+                DOM.weightAlert.style.display = 'none';
+            }
+        }
+
+        // Verificar peso (acabamento)
+        function checkFinishWeight() {
+            const weight = parseFloat(DOM.baseWeight.value);
+            
+            if (isNaN(weight) || weight <= 0) {
+                DOM.finishWeightAlert.style.display = 'none';
+                return;
+            }
+            
+            // Verificar se excede 2.5kg (para acabamento, a base será menor que o total)
+            if (weight > 2.0) { // Base mais baixa pois será somado o endurecedor
+                DOM.finishAlertText.textContent = `O peso da base (${weight.toFixed(3)}kg) pode resultar em mistura acima de 2.5kg. Por favor dividir a pesagem.`;
+                DOM.finishWeightAlert.style.display = 'flex';
+            } else {
+                DOM.finishWeightAlert.style.display = 'none';
+            }
+        }
+
+        // Calcular estrutural
+        function calculateStructural() {
+            if (!appState.selectedMaterial) {
+                alert('Selecione um material primeiro.');
+                return;
+            }
+            
+            const weight = parseFloat(DOM.referenceWeight.value);
+            if (isNaN(weight) || weight <= 0) {
+                alert('Digite um peso válido.');
+                return;
+            }
+            
+            const material = appState.selectedMaterial;
+            
+            // Calcular pesos (tudo em kg)
+            let referenceWeight, baseWeight, hardenerWeight, aerosilWeight, totalWeight;
+            
+            if (appState.selectedMaterialType === 'adhesive') {
+                // Adesivo: peso da base é o peso informado
+                referenceWeight = weight;
+                baseWeight = weight;
+                const hardenerRatio = material.hardenerWeight / material.baseWeight;
+                hardenerWeight = baseWeight * hardenerRatio;
+                totalWeight = baseWeight + hardenerWeight;
+                aerosilWeight = 0;
+            } else if (appState.selectedMaterialType === 'fabric' || appState.selectedMaterialType === 'resina') {
+                // Tecido (auto-preenchido) ou Resina do LPS (peso informado direto): peso é o peso total
+                referenceWeight = weight;
+                totalWeight = weight;
+                const totalParts = material.baseWeight + material.hardenerWeight;
+                const baseRatio = material.baseWeight / totalParts;
+                const hardenerRatio = material.hardenerWeight / totalParts;
+                
+                baseWeight = totalWeight * baseRatio;
+                hardenerWeight = totalWeight * hardenerRatio;
+                aerosilWeight = 0;
+            } else {
+                // NÚCLEO: proporção 1:1 (núcleo):(resina+endurecedor) + Aerosil sobre a mistura
+                referenceWeight = weight;
+                
+                // A mistura (resina+endurecedor) deve ter o mesmo peso do núcleo (1:1)
+                const totalResinaEndurecedor = referenceWeight;
+                
+                // Calcular resina e endurecedor dentro da proporção 100:20
+                const totalParts = material.baseWeight + material.hardenerWeight;
+                const baseRatio = material.baseWeight / totalParts;
+                const hardenerRatio = material.hardenerWeight / totalParts;
+                
+                baseWeight = totalResinaEndurecedor * baseRatio;
+                hardenerWeight = totalResinaEndurecedor * hardenerRatio;
+                
+                // Aerosil: 1.8% sobre a mistura (resina+endurecedor)
+                const misturaResinaEndurecedor = baseWeight + hardenerWeight;
+                aerosilWeight = misturaResinaEndurecedor * (material.aerosilPercent / 100);
+                
+                // Peso total da mistura (resina+endurecedor+aerosil) - NÃO inclui o núcleo
+                totalWeight = misturaResinaEndurecedor + aerosilWeight;
+            }
+            
+            // Armazenar todos os parâmetros para salvar depois
+            appState.currentCalculation = {
+                type: 'estrutural',
+                materialType: appState.selectedMaterialType,
+                materialName: material.name,
+                materialProportion: `${material.baseWeight}:${material.hardenerWeight}`,
+                aerosilPercent: material.aerosilPercent || 0,
+                reference: referenceWeight,
+                base: baseWeight,
+                hardener: hardenerWeight,
+                aerosil: aerosilWeight || 0,
+                total: totalWeight,
+                unit: 'kg'
+            };
+            
+            // Exibir resultados com 3 casas decimais
+            let resultsHTML = '';
+            
+            // Rótulo do peso de referência conforme o tipo
+            const rotulosReferencia = {
+                core: 'Peso do Núcleo',
+                fabric: 'Peso do Tecido de Fibra',
+                resina: 'Peso da Resina'
+            };
+            const rotuloReferencia = rotulosReferencia[appState.selectedMaterialType] || 'Peso de Referência';
+            resultsHTML += `
+                <div class="result-item">
+                    <div class="result-label">${rotuloReferencia}</div>
+                    <div class="result-value">${referenceWeight.toFixed(3)}<span class="result-unit">kg</span></div>
+                </div>
+            `;
+            
+            resultsHTML += `
+                <div class="result-item">
+                    <div class="result-label">Base</div>
+                    <div class="result-value">${baseWeight.toFixed(3)}<span class="result-unit">kg</span></div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Endurecedor</div>
+                    <div class="result-value">${hardenerWeight.toFixed(3)}<span class="result-unit">kg</span></div>
+                </div>
+            `;
+            
+            if (material.aerosilPercent) {
+                resultsHTML += `
+                    <div class="result-item">
+                        <div class="result-label">Aerosil (${material.aerosilPercent}% sobre a mistura)</div>
+                        <div class="result-value">${aerosilWeight.toFixed(3)}<span class="result-unit">kg</span></div>
+                    </div>
+                `;
+            }
+            
+            resultsHTML += `
+                <div class="result-item">
+                    <div class="result-label">Peso Total da Mistura</div>
+                    <div class="result-value">${totalWeight.toFixed(3)}<span class="result-unit">kg</span></div>
+                </div>
+            `;
+            
+            DOM.resultsGrid.innerHTML = resultsHTML;
+            DOM.resultsSection.style.display = 'block';
+            
+            // Rolagem suave para resultados
+            setTimeout(() => {
+                DOM.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        // Calcular acabamento
+        function calculateFinish() {
+            const weight = parseFloat(DOM.baseWeight.value);
+            if (isNaN(weight) || weight <= 0) {
+                alert('Digite um peso válido para a base.');
+                return;
+            }
+            
+            const materialId = DOM.finishMaterialSelect.value;
+            const material = materialsData.finish.find(m => m.id === materialId);
+            
+            if (!material) {
+                alert('Selecione um material de acabamento.');
+                return;
+            }
+
+            const isTopcoat = (materialId === 'alexit_topcoat_12' || materialId === 'alexit_topcoat_12_sbi');
+            const produtoSBI = (materialId === 'alexit_topcoat_12_sbi') ? DOM.finishSbiProduto.value : '';
+            
+            // Calcular pesos (tudo em kg)
+            const referenceWeight = weight; // Para acabamento, referência = base
+            const baseWeight = weight;
+            const hardenerRatio = material.hardenerWeight / material.baseWeight;
+            const hardenerWeight = baseWeight * hardenerRatio;
+            let totalWeight = baseWeight + hardenerWeight;
+            let thinnerWeight = 0;
+            
+            // Calcular Thinner se necessário
+            if (appState.useThinner && isTopcoat) {
+                thinnerWeight = totalWeight * 0.15; // 15% sobre a mistura
+                totalWeight += thinnerWeight;
+            }
+            
+            // Armazenar todos os parâmetros para salvar depois
+            appState.currentFinishCalculation = {
+                type: 'acabamento',
+                materialName: material.name,
+                produtoSBI: produtoSBI, // grafia exata do checklist, quando SBI
+                materialProportion: `${material.baseWeight}:${material.hardenerWeight}`,
+                useThinner: appState.useThinner && isTopcoat,
+                thinnerPercent: 15,
+                reference: referenceWeight,
+                base: baseWeight,
+                hardener: hardenerWeight,
+                thinner: thinnerWeight,
+                total: totalWeight,
+                unit: 'kg'
+            };
+            
+            // Exibir resultados com 3 casas decimais
+            let resultsHTML = '';
+            
+            resultsHTML += `
+                <div class="result-item">
+                    <div class="result-label">Peso da Base</div>
+                    <div class="result-value">${baseWeight.toFixed(3)}<span class="result-unit">kg</span></div>
+                </div>
+                
+                <div class="result-item">
+                    <div class="result-label">Endurecedor</div>
+                    <div class="result-value">${hardenerWeight.toFixed(3)}<span class="result-unit">kg</span></div>
+                </div>
+            `;
+            
+            if (thinnerWeight > 0) {
+                resultsHTML += `
+                    <div class="result-item">
+                        <div class="result-label">Thinner</div>
+                        <div class="result-value">${thinnerWeight.toFixed(3)}<span class="result-unit">kg</span></div>
+                    </div>
+                `;
+            }
+            
+            resultsHTML += `
+                <div class="result-item">
+                    <div class="result-label">Peso Total</div>
+                    <div class="result-value">${totalWeight.toFixed(3)}<span class="result-unit">kg</span></div>
+                </div>
+            `;
+            
+            DOM.finishResultsGrid.innerHTML = resultsHTML;
+            DOM.finishResultsSection.style.display = 'block';
+            
+            // Rolagem suave para resultados
+            setTimeout(() => {
+                DOM.finishResultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        // Salvar cálculo estrutural
+        function saveCalculation() {
+            if (!appState.currentCalculation) return;
+            
+            const calculation = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                ...IDENTIFICACAO_GE,
+                incluirNucleoTecido: !nucleoTecidoRegistradoGE,
+                ...appState.currentCalculation,
+                notes: DOM.calcNotes.value || ''
+            };
+            nucleoTecidoRegistradoGE = true;
+            
+            saveToHistory(calculation);
+            alert('Cálculo salvo!');
+            DOM.calcNotes.value = '';
+        }
+
+        // Salvar cálculo de acabamento
+        function saveFinishCalculation() {
+            if (!appState.currentFinishCalculation) return;
+            
+            const calculation = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                ...IDENTIFICACAO_GE,
+                incluirNucleoTecido: !nucleoTecidoRegistradoGE,
+                ...appState.currentFinishCalculation,
+                notes: DOM.finishCalcNotes.value || ''
+            };
+            nucleoTecidoRegistradoGE = true;
+            
+            saveToHistory(calculation);
+            alert('Cálculo salvo!');
+            DOM.finishCalcNotes.value = '';
+        }
+
+        // Salvar no histórico
+        function saveToHistory(calculation) {
+            let history = JSON.parse(localStorage.getItem('extremeWindHistory') || '[]');
+            
+            // Adicionar novo cálculo no início
+            history.unshift(calculation);
+            
+            // Manter apenas últimos 30 dias
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            history = history.filter(calc => new Date(calc.date) > thirtyDaysAgo);
+            
+            // Limitar a 100 entradas
+            if (history.length > 100) {
+                history = history.slice(0, 100);
+            }
+            
+            localStorage.setItem('extremeWindHistory', JSON.stringify(history));
+            
+            // Atualizar exibição se estiver na tela de histórico
+            if (appState.currentScreen === 'history') {
+                updateHistoryDisplay();
+            }
+
+            // Enfileira para envio à planilha (Google Sheets) e tenta sincronizar
+            syncQueueGE.push(calculation);
+            localStorage.setItem('extremeWindSyncQueueGE', JSON.stringify(syncQueueGE));
+            tentarSincronizarGE();
+        }
+
+        // ── Sincronização com Google Sheets ─────────────────────────
+        // Converte um cálculo do GE em linhas "categoria/material/quantidade_kg"
+        // (mesmo formato longo que a calculadora EW já envia para Consumo_MP).
+        function materiaisDoCalculoGE(calc) {
+            const linhas = [];
+            const add = (categoria, material, qtdKg) => {
+                if (qtdKg > 0) linhas.push({ categoria, material, quantidade_kg: Number(qtdKg.toFixed(3)) });
+            };
+            const paraNumero = s => parseFloat(String(s || '0').replace(',', '.')) || 0;
+
+            if (calc.materialName) {
+                // Topcoat SBI: nome canônico único, igual ao usado na calculadora
+                // EW/Nordex — as duas grafias do checklist (RAL 3020 red / RED 3020)
+                // caem no mesmo material para a tabela dinâmica não duplicar.
+                const isTopcoatSBI = calc.materialName === 'Alexit Topcoat 12 (SBI)';
+                const nomeBase = isTopcoatSBI ? 'Top coat 12 red 3020' : calc.materialName;
+                const nomeEndur = isTopcoatSBI ? 'HARDENER12 - ALEXIT - Mankiewicz - 3kg' : (calc.materialName + ' - Endurecedor');
+                const nomeDiluidor = isTopcoatSBI ? 'Thinner 12' : 'Thinner';
+
+                add('Base', nomeBase, calc.base || 0);
+                add('Endurecedor', nomeEndur, calc.hardener || 0);
+                if (calc.aerosil > 0) add('Aerosil', 'Aerosil (' + calc.materialName + ')', calc.aerosil);
+                if (calc.thinner > 0) add('Diluidor', nomeDiluidor, calc.thinner);
+            }
+            if (calc.incluirNucleoTecido) {
+                if (calc.nucleo) add('Núcleo', calc.matNucleo || 'Núcleo', paraNumero(calc.pesoNucleoG) / 1000);
+                (calc.tecidos || []).forEach(t => add('Tecido', t.tecido, paraNumero(t.qtd) / 1000));
+            }
+            return linhas;
+        }
+
+        async function tentarSincronizarGE() {
+            if (!navigator.onLine || syncQueueGE.length === 0 || !GAS_URL_GE) return;
+            try {
+                const linhas = syncQueueGE.flatMap(c => materiaisDoCalculoGE(c).map(m => ({
+                    id: c.id, data: new Date(c.date).toLocaleString('pt-BR'),
+                    cliente: c.cliente || 'GE', projeto: c.projeto, wtg: c.wtg, blade: c.blade,
+                    tecnico: c.tecnico, dataPesagem: c.dataPesagem, tipoReparo: c.tipoReparo,
+                    categoria: m.categoria, material: m.material, quantidade_kg: m.quantidade_kg
+                })));
+                await fetch(GAS_URL_GE, { method: 'POST', body: JSON.stringify(linhas),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                syncQueueGE = [];
+                localStorage.setItem('extremeWindSyncQueueGE', JSON.stringify(syncQueueGE));
+            } catch (e) { console.log('Offline — envio pendente (GE).'); }
+        }
+
+        window.addEventListener('online', () => { tentarSincronizarGE(); });
+
+        // Carregar histórico
+        function loadHistory() {
+            return JSON.parse(localStorage.getItem('extremeWindHistory') || '[]');
+        }
+
+        // Atualizar exibição do histórico
+        function updateHistoryDisplay() {
+            let history = loadHistory();
+            const filterValue = DOM.historyFilter.value;
+            
+            // Aplicar filtro se necessário
+            if (filterValue !== 'all') {
+                history = history.filter(calc => calc.type === filterValue);
+            }
+            
+            DOM.totalCalculations.textContent = history.length;
+            
+            if (history.length > 0) {
+                const lastCalc = history[0];
+                const lastDate = new Date(lastCalc.date);
+                DOM.lastCalculation.textContent = lastDate.toLocaleDateString('pt-BR');
+                
+                // Exibir histórico
+                let historyHTML = '';
+                
+                history.forEach(calc => {
+                    const date = new Date(calc.date);
+                    const formattedDate = date.toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    const typeColor = calc.type === 'estrutural' ? 'var(--extreme-blue)' : 'var(--extreme-blue)';
+                    const typeText = calc.type === 'estrutural' ? 'Estrutural' : 'Acabamento';
+                    
+                    historyHTML += `
+                        <div class="history-item">
+                            <div class="history-header">
+                                <div class="history-date">${formattedDate}</div>
+                                <div class="history-type" style="background: ${typeColor}">${typeText}</div>
+                            </div>
+
+                            ${calc.projeto ? `
+                            <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);">
+                                <strong style="color: var(--extreme-dark);">${calc.projeto}</strong> | WTG: ${calc.wtg || 'N/A'} | Pá: ${calc.blade || 'N/A'}${calc.tipoReparo ? ' | Reparo ' + calc.tipoReparo : ''}
+                                ${calc.tecnico || calc.dataPesagem ? `<br>${calc.tecnico ? '<i class="fas fa-user"></i> ' + calc.tecnico : ''}${calc.dataPesagem ? '&nbsp;&nbsp;|&nbsp;&nbsp;<i class="fas fa-calendar-day"></i> ' + calc.dataPesagem : ''}` : ''}
+                            </div>
+                            ` : ''}
+                            
+                            <div class="history-details">
+                                <strong>${calc.materialName}${calc.produtoSBI ? ' — ' + calc.produtoSBI : ''}</strong>
+                                <div style="font-size: 0.9rem; color: var(--text-light); margin: 5px 0;">
+                                    Proporção: ${calc.materialProportion}
+                                    ${calc.aerosilPercent > 0 ? ` | Aerosil: ${calc.aerosilPercent}% sobre a mistura` : ''}
+                                    ${calc.useThinner ? ` | Thinner: ${calc.thinnerPercent}%` : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="history-params">
+                                ${calc.materialType === 'core' ? `
+                                <div class="param-item">
+                                    <span class="param-label">Núcleo:</span>
+                                    <span class="param-value">${calc.reference.toFixed(3)}${calc.unit}</span>
+                                </div>
+                                ` : `
+                                <div class="param-item">
+                                    <span class="param-label">Referência:</span>
+                                    <span class="param-value">${calc.reference.toFixed(3)}${calc.unit}</span>
+                                </div>
+                                `}
+                                <div class="param-item">
+                                    <span class="param-label">Base:</span>
+                                    <span class="param-value">${calc.base.toFixed(3)}${calc.unit}</span>
+                                </div>
+                                <div class="param-item">
+                                    <span class="param-label">Endurecedor:</span>
+                                    <span class="param-value">${calc.hardener.toFixed(3)}${calc.unit}</span>
+                                </div>
+                                ${calc.aerosil > 0 ? `
+                                <div class="param-item">
+                                    <span class="param-label">Aerosil:</span>
+                                    <span class="param-value">${calc.aerosil.toFixed(3)}${calc.unit}</span>
+                                </div>
+                                ` : ''}
+                                ${calc.thinner > 0 ? `
+                                <div class="param-item">
+                                    <span class="param-label">Thinner:</span>
+                                    <span class="param-value">${calc.thinner.toFixed(3)}${calc.unit}</span>
+                                </div>
+                                ` : ''}
+                                <div class="param-item">
+                                    <span class="param-label">Total Mistura:</span>
+                                    <span class="param-value">${calc.total.toFixed(3)}${calc.unit}</span>
+                                </div>
+                            </div>
+                            
+                            ${calc.notes ? `
+                            <div style="margin-top: 10px; padding: 8px; background: #f0f9ff; border-radius: 4px; border-left: 3px solid var(--extreme-blue);">
+                                <strong>Notas:</strong> ${calc.notes}
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                
+                DOM.historyList.innerHTML = historyHTML;
+                DOM.emptyHistory.style.display = 'none';
+            } else {
+                DOM.historyList.innerHTML = '';
+                DOM.emptyHistory.style.display = 'block';
+                DOM.lastCalculation.textContent = '-';
+            }
+        }
+
+        // Limpar histórico
+        function clearHistory() {
+            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+                localStorage.removeItem('extremeWindHistory');
+                updateHistoryDisplay();
+                alert('Histórico limpo!');
+            }
+        }
+
+        // Resetar cálculo estrutural
+        function resetCalculation() {
+            setupCalculationScreen(); // reaplica o peso auto-preenchido (tecido/núcleo) quando houver
+            DOM.calcNotes.value = '';
+            DOM.resultsSection.style.display = 'none';
+            DOM.weightAlert.style.display = 'none';
+        }
+
+        // Resetar cálculo de acabamento
+        function resetFinishCalculation() {
+            DOM.baseWeight.value = '0.100';
+            DOM.finishCalcNotes.value = '';
+            DOM.finishResultsSection.style.display = 'none';
+            DOM.finishWeightAlert.style.display = 'none';
+            DOM.useThinner.checked = false;
+            appState.useThinner = false;
+        }
+    </script>
+</body>
+</html>
