@@ -19,7 +19,8 @@
       --accent:#3498db;--danger:#e74c3c;--warning:#f39c12;--light:#f8f9fa;--dark:#333;
       --gray:#6c757d;--border:#dee2e6;--shadow:0 4px 6px rgba(0,0,0,.1);--radius:10px;
     }
-    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f5f7fa;color:var(--dark);line-height:1.6;padding-bottom:30px}
+    html{overflow-x:hidden}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f5f7fa;color:var(--dark);line-height:1.6;padding-bottom:30px;overflow-x:hidden;width:100%}
     .container{max-width:820px;margin:0 auto;padding:0 14px}
 
     /* HEADER — logo Extreme Wind em destaque */
@@ -195,13 +196,59 @@
   <main>
 
     <!-- ═══════════════════════════════════════════════
+         TELA 0 — CLIENTE (OEM)
+    ═══════════════════════════════════════════════ -->
+    <div id="tela-cliente" class="fade-in">
+      <div class="step-bar">
+        <div class="step active"><span class="step-num">1</span><span>Cliente</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step"><span class="step-num">2</span><span>Identificação</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step"><span class="step-num">3</span><span>Cálculo</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header no-toggle">
+          <h2><i class="fas fa-building"></i> Cliente</h2>
+        </div>
+        <div class="card-content active">
+          <div class="input-group">
+            <div class="input-section">
+              <label>Cliente:</label>
+              <div class="toggle-group">
+                <input type="radio" name="cliente" id="cliente-nordex" value="Nordex">
+                <label for="cliente-nordex">Nordex</label>
+                <input type="radio" name="cliente" id="cliente-ge" value="GE">
+                <label for="cliente-ge">GE</label>
+                <input type="radio" name="cliente" id="cliente-siemens" value="Siemens">
+                <label for="cliente-siemens">Siemens</label>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="avancarParaIdentificacao()">
+              Avançar <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tela-cliente -->
+
+    <!-- ═══════════════════════════════════════════════
          TELA 1 — IDENTIFICAÇÃO
     ═══════════════════════════════════════════════ -->
-    <div id="tela-identificacao" class="fade-in">
+    <div id="tela-identificacao" style="display:none" class="fade-in">
       <div class="step-bar">
-        <div class="step active"><span class="step-num">1</span><span>Identificação</span></div>
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Cliente</span></div>
         <span class="step-arrow">›</span>
-        <div class="step"><span class="step-num">2</span><span>Cálculo</span></div>
+        <div class="step active"><span class="step-num">2</span><span>Identificação</span></div>
+        <span class="step-arrow">›</span>
+        <div class="step"><span class="step-num">3</span><span>Cálculo</span></div>
+      </div>
+
+      <div class="active-id-banner">
+        <div class="info">
+          <span><i class="fas fa-building"></i> Cliente: <strong class="display-cliente"></strong></span>
+        </div>
+        <button onclick="voltarParaCliente()" class="edit-id-btn"><i class="fas fa-edit"></i> Trocar</button>
       </div>
 
       <div class="card">
@@ -275,7 +322,7 @@
                 <option value="ESPUMA FLEX PET FOAM 50mm">ESPUMA FLEXÍVEL PET FOAM 50 mm</option>
               </select>
               <label for="peso-nucleo">Peso do Núcleo utilizado <span class="label-hint">(g)</span></label>
-              <input type="text" id="peso-nucleo" placeholder="Ex: 350">
+              <input type="text" id="peso-nucleo" inputmode="decimal" oninput="onlyNumeric(this)" placeholder="Ex: 350">
               <p style="font-size:.75rem;color:var(--warning)"><i class="fas fa-exclamation-triangle"></i>
                 Reparo com núcleo: incluir camada de colagem G3 de 5–7 mm (laminado inferior + contorno).</p>
             </div>
@@ -298,7 +345,7 @@
                   </select>
                 </div>
                 <div class="input-section">
-                  <input type="text" id="tecido-qtd" placeholder="Peso (g) — Ex: 9545">
+                  <input type="text" id="tecido-qtd" inputmode="decimal" oninput="onlyNumeric(this)" placeholder="Peso (g) — Ex: 9545">
                 </div>
               </div>
               <button type="button" class="btn btn-success" onclick="addTecido()">
@@ -321,13 +368,16 @@
     ═══════════════════════════════════════════════ -->
     <div id="tela-calculadora" style="display:none" class="fade-in">
       <div class="step-bar">
+        <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Cliente</span></div>
+        <span class="step-arrow">›</span>
         <div class="step done"><span class="step-num"><i class="fas fa-check" style="font-size:.6rem"></i></span><span>Identificação</span></div>
         <span class="step-arrow">›</span>
-        <div class="step active"><span class="step-num">2</span><span>Cálculo</span></div>
+        <div class="step active"><span class="step-num">3</span><span>Cálculo</span></div>
       </div>
 
       <div class="active-id-banner">
         <div class="info">
+          <span class="badge display-cliente-badge" style="background:rgba(255,255,255,.25)"></span>
           <span><i class="fas fa-wind"></i> <strong class="display-projeto"></strong></span>
           <span class="badge">WTG: <span class="display-wtg"></span></span>
           <span class="badge">Pá: <span class="display-blade"></span></span>
@@ -353,7 +403,7 @@
           </div>
           <div class="input-group">
             <label for="estrutural-resina">Quantidade de Resina <span class="label-hint">(g)</span></label>
-            <input type="text" id="estrutural-resina" placeholder="Ex: 5000">
+            <input type="text" id="estrutural-resina" inputmode="decimal" oninput="onlyNumeric(this)" placeholder="Ex: 5000">
             <button class="btn btn-success" onclick="calcularEstrutural()">
               <i class="fas fa-calculator"></i> Calcular
             </button>
@@ -379,7 +429,7 @@
           </div>
           <div class="input-group">
             <label for="adesivo-resina">Quantidade de Resina <span class="label-hint">(g)</span></label>
-            <input type="text" id="adesivo-resina" placeholder="Ex: 5000">
+            <input type="text" id="adesivo-resina" inputmode="decimal" oninput="onlyNumeric(this)" placeholder="Ex: 5000">
             <button class="btn btn-success" onclick="calcularAdesivo()">
               <i class="fas fa-calculator"></i> Calcular
             </button>
@@ -388,7 +438,7 @@
         </div>
       </div>
 
-      <!-- Preenchimento (apenas reparo EXTERNO) -->
+      <!-- Preenchimento (apenas reparo EXTERNO/SBI) -->
       <div class="card" id="card-filler">
         <div class="card-header" onclick="toggleCard('preenchimento')">
           <h2><i class="fas fa-fill-drip"></i> Acabamento — Preenchimento (Filler)</h2>
@@ -401,7 +451,7 @@
           </div>
           <div class="input-group">
             <label for="filler-base">Quantidade de Base <span class="label-hint">(g)</span></label>
-            <input type="text" id="filler-base" placeholder="Ex: 6000">
+            <input type="text" id="filler-base" inputmode="decimal" oninput="onlyNumeric(this)" placeholder="Ex: 6000">
             <button class="btn btn-success" onclick="calcularFiller()">
               <i class="fas fa-calculator"></i> Calcular
             </button>
@@ -410,7 +460,7 @@
         </div>
       </div>
 
-      <!-- Pintura (apenas reparo EXTERNO) -->
+      <!-- Pintura (apenas reparo EXTERNO — não SBI) -->
       <div class="card" id="card-pintura">
         <div class="card-header" onclick="toggleCard('pintura')">
           <h2><i class="fas fa-paint-roller"></i> Acabamento — Pintura (Top Coat)</h2>
@@ -423,7 +473,7 @@
           </div>
           <div class="input-group">
             <label for="pintura-base">Quantidade de Base <span class="label-hint">(g)</span></label>
-            <input type="text" id="pintura-base" placeholder="Ex: 4000">
+            <input type="text" id="pintura-base" inputmode="decimal" oninput="onlyNumeric(this)" placeholder="Ex: 4000">
             <label class="checkbox-group">
               <input type="checkbox" id="diluidor-check">
               <span>Adicionar diluidor (Thinner 12)</span>
@@ -433,6 +483,42 @@
             </button>
           </div>
           <div id="result-pintura" class="result-container"></div>
+        </div>
+      </div>
+
+      <!-- Pintura SBI (apenas reparo de SBI) — mesma proporção do TopCoat 12,
+           produto varia entre as duas grafias usadas no checklist, mas ambas
+           são normalizadas para o mesmo material no relatório (ver item 3). -->
+      <div class="card" id="card-topcoat-sbi" style="display:none">
+        <div class="card-header" onclick="toggleCard('topcoatsbi')">
+          <h2><i class="fas fa-paint-roller"></i> Acabamento — Pintura SBI (Top Coat)</h2>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div id="topcoatsbi-content" class="card-content">
+          <div class="info-box">
+            <p><strong>Produto (conforme checklist):</strong></p>
+          </div>
+          <div class="input-group">
+            <label for="topcoatsbi-produto">Produto utilizado</label>
+            <select id="topcoatsbi-produto">
+              <option value="TOP COAT 12 RAL 3020 RED">TOP COAT 12 RAL 3020 RED</option>
+              <option value="TOP COAT 12 RED 3020">TOP COAT 12 RED 3020</option>
+            </select>
+            <p style="font-size:.82rem;color:var(--gray)">
+              <strong>Endurecedor:</strong> HARDENER12 - ALEXIT - Mankiewicz - 3kg &nbsp;|&nbsp;
+              <strong>Proporção:</strong> 4 : 1 &nbsp;|&nbsp; <strong>Diluidor (opcional):</strong> Thinner 12 — 10% da base
+            </p>
+            <label for="topcoatsbi-base">Quantidade de Base <span class="label-hint">(g)</span></label>
+            <input type="text" id="topcoatsbi-base" inputmode="decimal" oninput="onlyNumeric(this)" placeholder="Ex: 4000">
+            <label class="checkbox-group">
+              <input type="checkbox" id="diluidor-sbi-check">
+              <span>Adicionar diluidor (Thinner 12)</span>
+            </label>
+            <button class="btn btn-success" onclick="calcularTopcoatSBI()">
+              <i class="fas fa-calculator"></i> Calcular
+            </button>
+          </div>
+          <div id="result-topcoatsbi" class="result-container"></div>
         </div>
       </div>
 
@@ -466,7 +552,7 @@
     <p class="footer-info">PR-20-ENG&CQ | App otimizado para uso offline em parques eólicos</p>
   </footer>
 
-  <div class="oem-badge"><img src="logo-oem.png" alt="Nordex · Acciona Windpower"></div>
+  <div class="oem-badge" id="oem-badge"><img src="logo-oem.png" alt="Nordex · Acciona Windpower"></div>
 </div>
 
 <!-- ===================================================================
@@ -486,6 +572,7 @@ let history   = safeParse('leanway_history');
 let syncQueue = safeParse('leanway_sync_queue');
 let isHistoryVisible = false;
 let TECIDOS_USADOS = [];   // lista de {tecido, qtd} — qtd em GRAMAS (string digitada); permite mais de um tecido por reparo
+let CLIENTE_SELECIONADO = ''; // Nordex, GE ou Siemens — escolhido na Tela 0
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwnGGqqI8edzQXtSq5VP4HMwH0ui_4A-XwuQr3reA3y35oapZbRdaPp9Rm09BsnDf3v/exec';
 
 // Núcleo e tecidos são atributos do REPARO (Tela 1), não de cada clique em
@@ -495,6 +582,20 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwnGGqqI8edzQXtSq5VP4HM
 // volta a false quando o núcleo ou os tecidos realmente mudam — navegar
 // entre as telas sem alterar esses dados não deve gerar duplicidade.
 let nucleoTecidoRegistrado = false;
+
+/* ── Validação numérica (item 1): bloqueia letras em campos só-de-número ──
+   Mantém apenas dígitos, vírgula e ponto. Aplicado via oninput em todos os
+   campos de quantidade/peso (g), evitando entradas inválidas como "5000kg"
+   ou letras digitadas por engano. */
+function onlyNumeric(el){
+  const cursor = el.selectionStart;
+  const antes = el.value;
+  el.value = el.value.replace(/[^0-9.,]/g, '');
+  if(cursor !== null && el.value.length !== antes.length){
+    const diff = antes.length - el.value.length;
+    el.setSelectionRange(Math.max(0, cursor - diff), Math.max(0, cursor - diff));
+  }
+}
 
 /* ── Tecido(s) utilizado(s) — adicionar/remover da lista ── */
 function addTecido(){
@@ -532,6 +633,7 @@ function renderTecidos(){
    ───────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('current-year').textContent = new Date().getFullYear();
+  showScreen('tela-cliente');
   carregarHistorico();
   updateSyncBadge();
   tentarSincronizar();
@@ -553,18 +655,28 @@ function getTipoReparo(){
   return el ? el.value : 'Externo';
 }
 
-/* Reparo interno e LPS não usam Filler nem Pintura (Top Coat); SBI usa, como o externo */
+/* Reparo interno e LPS não usam Filler nem Pintura (Top Coat).
+   SBI usa Filler e uma Pintura específica (card-topcoat-sbi) no lugar do
+   card-pintura padrão, pois o produto de acabamento do SBI segue outra
+   nomenclatura (ver item 2/3). */
 function aplicarTipoReparo(){
   const tipo = getTipoReparo();
-  const usaAcabamento = (tipo === 'Externo' || tipo === 'SBI');
+  const isSBI = tipo === 'SBI';
+  const usaAcabamento = (tipo === 'Externo' || isSBI);
   document.getElementById('card-filler').style.display  = usaAcabamento ? 'block' : 'none';
-  document.getElementById('card-pintura').style.display = usaAcabamento ? 'block' : 'none';
+  document.getElementById('card-pintura').style.display = (usaAcabamento && !isSBI) ? 'block' : 'none';
+  document.getElementById('card-topcoat-sbi').style.display = isSBI ? 'block' : 'none';
+  if(!usaAcabamento || isSBI){
+    const c = document.getElementById('pintura-content');
+    if(c && c.classList.contains('active')) c.classList.remove('active');
+  }
+  if(!isSBI){
+    const c = document.getElementById('topcoatsbi-content');
+    if(c && c.classList.contains('active')) c.classList.remove('active');
+  }
   if(!usaAcabamento){
-    // fecha os cards ocultos, se estiverem abertos
-    ['preenchimento','pintura'].forEach(id => {
-      const c = document.getElementById(id + '-content');
-      if(c && c.classList.contains('active')) c.classList.remove('active');
-    });
+    const c = document.getElementById('preenchimento-content');
+    if(c && c.classList.contains('active')) c.classList.remove('active');
   }
   // badges do banner
   document.querySelectorAll('.display-tiporeparo').forEach(el => el.textContent = 'Reparo ' + tipo);
@@ -587,6 +699,28 @@ window.addEventListener('online', () => {
 /* ─────────────────────────────────────────────────────────────
    NAVEGAÇÃO
    ───────────────────────────────────────────────────────────── */
+function getCliente(){
+  const el = document.querySelector('input[name="cliente"]:checked');
+  return el ? el.value : '';
+}
+
+function avancarParaIdentificacao(){
+  const cliente = getCliente();
+  if(!cliente){ showNotification('Selecione o Cliente','error'); return; }
+  CLIENTE_SELECIONADO = cliente;
+  document.querySelectorAll('.display-cliente').forEach(el => el.textContent = cliente);
+  document.querySelectorAll('.display-cliente-badge').forEach(el => el.textContent = 'Cliente: ' + cliente);
+  // GE usa uma calculadora própria (outros materiais/proporções) — abre o
+  // app dedicado em vez de seguir para a Identificação padrão (Nordex/Siemens).
+  if(cliente === 'GE'){
+    window.location.href = 'calculadora-ge.html';
+    return;
+  }
+  showScreen('tela-identificacao');
+}
+
+function voltarParaCliente(){ showScreen('tela-cliente'); }
+
 function avancarParaCalculadora(){
   const p = v('projeto-input'), w = v('wtg-input'), b = v('blade-input');
   if(!p){ showNotification('Informe o Projeto / Parque Eólico','error'); return; }
@@ -607,9 +741,12 @@ function avancarParaCalculadora(){
 function voltarParaIdentificacao(){ showScreen('tela-identificacao'); }
 
 function showScreen(id){
-  ['tela-identificacao','tela-calculadora'].forEach(s => {
+  ['tela-cliente','tela-identificacao','tela-calculadora'].forEach(s => {
     document.getElementById(s).style.display = (s===id) ? 'block' : 'none';
   });
+  // Selo OEM (Nordex): nunca na Tela 0, e só depois se o cliente escolhido for Nordex
+  const mostrarSeloOEM = (id !== 'tela-cliente') && (CLIENTE_SELECIONADO === 'Nordex');
+  document.getElementById('oem-badge').style.display = mostrarSeloOEM ? 'block' : 'none';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -660,14 +797,32 @@ function calcularPintura(){
   document.getElementById('result-pintura').classList.add('active');
 }
 
+/* Pintura específica de SBI — mesma proporção 4:1 do TopCoat 12 (item 2).
+   O produto selecionado (uma das duas grafias do checklist) é gravado no
+   histórico para rastreabilidade, mas a exportação para a planilha sempre
+   usa o nome canônico "Top coat 12 red 3020" (item 3), via CATALOGO_MATERIAIS. */
+function calcularTopcoatSBI(){
+  const base     = parsePt(v('topcoatsbi-base'));
+  const diluidor = document.getElementById('diluidor-sbi-check').checked;
+  const produto  = v('topcoatsbi-produto');
+  if(!base||base<=0){ showNotification('Insira a quantidade de base (g)','error'); return; }
+  const endur = base / 4;
+  const dilui = diluidor ? base * 0.10 : 0;
+  document.getElementById('result-topcoatsbi').innerHTML =
+    buildResultHTML('TopCoat SBI', base, endur, dilui, base+endur+dilui, produto);
+  document.getElementById('result-topcoatsbi').classList.add('active');
+}
+
 // base/endur/adicional/total chegam em GRAMAS (unidade da Tela 2)
-function buildResultHTML(tipo, base, endur, adicional, total){
+function buildResultHTML(tipo, base, endur, adicional, total, produto){
   let extras = '';
   if(adicional>0) extras = `<div class="result-item"><strong>Diluidor</strong>
     <div class="result-value">${fmt(adicional)}<span class="result-unit">g</span></div></div>`;
 
+  const produtoArg = produto ? `'${produto.replace(/'/g,"\\'")}'` : 'null';
+
   return `
-    <div class="result-title"><i class="fas fa-calculator"></i> Resultado — ${tipo}</div>
+    <div class="result-title"><i class="fas fa-calculator"></i> Resultado — ${tipo}${produto ? ' — '+produto : ''}</div>
     <div class="result-grid">
       <div class="result-item"><strong>Base / Resina</strong>
         <div class="result-value">${fmt(base)}<span class="result-unit">g</span></div></div>
@@ -678,7 +833,7 @@ function buildResultHTML(tipo, base, endur, adicional, total){
         <strong>Mistura Total</strong>
         <div class="result-value">${fmt(total)}<span class="result-unit">g</span></div></div>
     </div>
-    <button class="save-btn" onclick="salvarCalculo('${tipo}',${base},${endur},${adicional},${total})">
+    <button class="save-btn" onclick="salvarCalculo('${tipo}',${base},${endur},${adicional},${total},${produtoArg})">
       <i class="fas fa-save"></i> Salvar e Sincronizar
     </button>`;
 }
@@ -686,7 +841,7 @@ function buildResultHTML(tipo, base, endur, adicional, total){
 /* ─────────────────────────────────────────────────────────────
    HISTÓRICO E SINCRONIZAÇÃO
    ───────────────────────────────────────────────────────────── */
-function salvarCalculo(tipo, base, endur, adicional, total){
+function salvarCalculo(tipo, base, endur, adicional, total, produto){
   const projeto  = v('projeto-input'), wtg = v('wtg-input'), blade = v('blade-input');
   const tecnico     = v('tecnico-input')||'';
   const dataPesagem = v('data-pesagem')||'';
@@ -703,13 +858,14 @@ function salvarCalculo(tipo, base, endur, adicional, total){
   // (Adesivo + Filler + Pintura...) do mesmo reparo.
   const calculo = {
     id:Date.now(), projeto, wtg, blade, tecnico, dataPesagem,
+    cliente:CLIENTE_SELECIONADO||'',
     tipoReparo:getTipoReparo(),
     nucleo:document.getElementById('nucleo-sim').checked,
     matNucleo:v('material-nucleo')||'',
     pesoNucleoKg:(parsePt(v('peso-nucleo'))||0)/1000,
     tecidos:TECIDOS_USADOS.map(t => ({ tecido:t.tecido, qtdKg:(parsePt(t.qtd)||0)/1000 })),
     incluirNucleoTecido:!nucleoTecidoRegistrado,
-    tipo, base:base/1000, endurecedor:endur/1000, adicional:adicional/1000, total:total/1000,
+    tipo, produto:produto||'', base:base/1000, endurecedor:endur/1000, adicional:adicional/1000, total:total/1000,
     data:new Date().toLocaleString('pt-BR')
   };
   nucleoTecidoRegistrado = true;
@@ -732,12 +888,21 @@ function salvarCalculo(tipo, base, endur, adicional, total){
    sempre as mesmas colunas (categoria, material, quantidade_kg),
    diferente da tabela larga anterior que misturava tipos numa
    mesma coluna "adicional" (tecido, diluidor etc.).
+
+   Item 3 — Análise vs. Realizado: "TOP COAT 12 RED 3020" e
+   "TOP COAT 12 ral 3020 red" são o MESMO produto, apenas grafado
+   de duas formas diferentes no checklist. Por isso o material da
+   entrada 'TopCoat SBI' abaixo é fixo — "Top coat 12 red 3020" —
+   independente de qual das duas opções foi escolhida no select.
+   Isso garante que a tabela dinâmica some as duas variantes como
+   um único item, em vez de tratá-las como materiais distintos.
    ───────────────────────────────────────────────────────────── */
 const CATALOGO_MATERIAIS = {
   'Reparo Estrutural': { base:['Resina Laminação','HEXION LR635'],   endur:['Endurecedor Laminação','HEXION LH635/LH637'] },
   'Adesivo G3':         { base:['Resina Adesivo','Epikote MGS BPR 135G3'], endur:['Endurecedor Adesivo','Epikure MGS BPH 137GF'] },
   'Filler 3':           { base:['Base Filler','BladeRep Profile Filler 3'], endur:['Endurecedor Filler','BladeRep Hardener Filler 3'] },
   'TopCoat 12':         { base:['Base Pintura','BladeRep TopCoat 12'], endur:['Endurecedor Pintura','BladeRep Hardener 12'], adicional:['Diluidor','Thinner 12'] },
+  'TopCoat SBI':        { base:['Base Pintura SBI','Top coat 12 red 3020'], endur:['Endurecedor Pintura SBI','HARDENER12 - ALEXIT - Mankiewicz - 3kg'], adicional:['Diluidor','Thinner 12'] },
 };
 
 function materiaisDoCalculo(calculo){
@@ -768,7 +933,7 @@ async function tentarSincronizar(){
     // momento do "Salvar", então repetir o envio (ex.: retry offline) nunca
     // duplica linhas nem perde núcleo/tecido de um envio que falhou antes.
     const linhas = syncQueue.flatMap(c => materiaisDoCalculo(c).map(m => ({
-      id:c.id, data:c.data, projeto:c.projeto, wtg:c.wtg, blade:c.blade,
+      id:c.id, data:c.data, cliente:c.cliente||'', projeto:c.projeto, wtg:c.wtg, blade:c.blade,
       tecnico:c.tecnico, dataPesagem:c.dataPesagem, tipoReparo:c.tipoReparo,
       categoria:m.categoria, material:m.material, quantidade_kg:m.quantidade_kg
     })));
@@ -801,13 +966,14 @@ function carregarHistorico(){
     if(item.adicional>0) det += ` | ${item.tipo==='Reparo Estrutural'?'Tecido':'Diluidor'}: ${fmt(item.adicional)} kg`;
     const resp = (item.tecnico||item.dataPesagem)
       ? `<br><span style="font-size:.78rem;color:var(--gray)">${item.tecnico?'<i class="fas fa-user"></i> '+item.tecnico:''}${item.dataPesagem?'&nbsp;&nbsp;|&nbsp;&nbsp;<i class="fas fa-calendar-day"></i> '+item.dataPesagem:''}</span>` : '';
+    const tipoLabel = item.tipo + (item.produto ? ' ('+item.produto+')' : '');
     return `<div class="history-item">
       <div class="history-item-header">
-        <span class="history-type">${item.tipo}</span>
+        <span class="history-type">${tipoLabel}</span>
         <span class="history-date">${item.data}</span>
       </div>
       <div class="history-details" style="margin-bottom:6px;border-bottom:1px solid #eee;padding-bottom:6px;font-size:.85rem">
-        <strong>${item.projeto||'N/A'}</strong> | WTG: ${item.wtg||'N/A'} | Pá: ${item.blade||'N/A'}${item.tipoReparo?' | Reparo '+item.tipoReparo:''}${resp}
+        <strong>${item.projeto||'N/A'}</strong> | WTG: ${item.wtg||'N/A'} | Pá: ${item.blade||'N/A'}${item.cliente?' | Cliente: '+item.cliente:''}${item.tipoReparo?' | Reparo '+item.tipoReparo:''}${resp}
       </div>
       <div class="history-details">
         ${det}<br>
@@ -837,6 +1003,13 @@ function duplicarItem(id){
   const it = history.find(h => h.id === id);
   if(!it){ showNotification('Item não encontrado','error'); return; }
   const set = (eid,val)=>{ const el=document.getElementById(eid); if(el) el.value = val||''; };
+  if(it.cliente){
+    const mapCliente = { 'Nordex':'cliente-nordex', 'GE':'cliente-ge', 'Siemens':'cliente-siemens' };
+    const rc = document.getElementById(mapCliente[it.cliente]); if(rc) rc.checked = true;
+    CLIENTE_SELECIONADO = it.cliente;
+    document.querySelectorAll('.display-cliente').forEach(el => el.textContent = it.cliente);
+    document.querySelectorAll('.display-cliente-badge').forEach(el => el.textContent = 'Cliente: ' + it.cliente);
+  }
   set('projeto-input', it.projeto); set('wtg-input', it.wtg); set('blade-input', it.blade);
   set('tecnico-input', it.tecnico); set('data-pesagem', it.dataPesagem);
   if(it.tipoReparo){
@@ -872,12 +1045,12 @@ function limparHistorico(){
 
 function exportarHistorico(){
   if(history.length===0){ showNotification('Sem dados para exportar','error'); return; }
-  const cab = 'Projeto;WTG;Blade;Tecnico;DataPesagem;TipoReparo;Nucleo;MatNucleo;PesoNucleo(kg);TecidosUtilizados(kg);Tipo;Base;Endurecedor;Tecido/Diluidor;Total;Data\n';
+  const cab = 'Cliente;Projeto;WTG;Blade;Tecnico;DataPesagem;TipoReparo;Nucleo;MatNucleo;PesoNucleo(kg);TecidosUtilizados(kg);Tipo;Produto;Base;Endurecedor;Tecido/Diluidor;Total;Data\n';
   const linhas = history.map(i => {
     const tecidosStr = (i.tecidos||[]).map(t => t.tecido+' ('+fmt(t.qtdKg)+'kg)').join(' | ');
-    return `"${i.projeto||''}"; "${i.wtg||''}"; "${i.blade||''}"; "${i.tecnico||''}"; "${i.dataPesagem||''}"; ` +
+    return `"${i.cliente||''}"; "${i.projeto||''}"; "${i.wtg||''}"; "${i.blade||''}"; "${i.tecnico||''}"; "${i.dataPesagem||''}"; ` +
     `"${i.tipoReparo||''}"; "${i.nucleo?'Sim':'Não'}"; "${i.matNucleo||''}"; "${fmt(i.pesoNucleoKg||0)}"; "${tecidosStr}"; ` +
-    `"${i.tipo}"; "${fmt(i.base)}"; "${fmt(i.endurecedor)}"; "${fmt(i.adicional)}"; "${fmt(i.total)}"; "${i.data}"`;
+    `"${i.tipo}"; "${i.produto||''}"; "${fmt(i.base)}"; "${fmt(i.endurecedor)}"; "${fmt(i.adicional)}"; "${fmt(i.total)}"; "${i.data}"`;
   }).join('\n');
   const blob = new Blob(['﻿'+cab+linhas],{type:'text/csv;charset=utf-8'});
   const url  = URL.createObjectURL(blob);
