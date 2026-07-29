@@ -1,0 +1,20 @@
+{
+  "name": "Extreme Wind — Calculadora de Reparos",
+  "short_name": "Extreme Wind",
+  "description": "Extreme Wind Blade Services — Calculadora de consumo de químicos para reparos em pás eólicas (PR-20-ENG&CQ)",
+  "lang": "pt-BR",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f7fa",
+  "theme_color": "#004aad",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
