@@ -1,0 +1,14 @@
+name = "ew-dropbox-proxy"
+main = "src/worker.js"
+compatibility_date = "2024-11-01"
+
+# Variáveis públicas (NÃO são segredo).
+# Troque ALLOWED_ORIGIN pela URL do seu app no GitHub Pages.
+# Pode listar mais de uma origem separando por vírgula.
+[vars]
+ALLOWED_ORIGIN = "https://ramiroew.github.io"
+MAX_MB = "30"
+
+# Os SEGREDOS (DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN,
+# APP_TOKEN) NÃO ficam aqui. São definidos por:
+#   wrangler secret put NOME_DO_SEGREDO
