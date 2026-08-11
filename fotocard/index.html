@@ -595,6 +595,20 @@ function memInit(){
     });
   });
 
+  /* Rede de segurança da gravação.
+     A gravação normal é adiada em 300 ms (digitar chama isso a cada tecla e
+     localStorage é síncrono) e acontece na hora em que o campo trava. Mas se o
+     técnico digita e SAI do app no mesmo instante — troca de aplicativo, botão
+     de início, a tela apaga —, o campo nunca perde o foco e o celular pode
+     congelar a página antes dos 300 ms, levando junto as últimas teclas.
+     Aqui a gravação é forçada no momento em que o app sai de vista.
+     "visibilitychange" é o único evento confiável no celular: "beforeunload" e
+     "unload" não disparam direito no iOS. */
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='hidden') memGravaAgora();
+  });
+  window.addEventListener('pagehide',memGravaAgora);
+
   memInfoPadrao();
 }
 

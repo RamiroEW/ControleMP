@@ -70,6 +70,23 @@ nem com a mão apoiada no celular. Mudar exige **dois toques**:
 
 Ao sair do campo ele grava e trava de novo sozinho. Campo vazio nunca trava.
 
+### Quando a gravação acontece
+
+Em três momentos, para não depender de um só:
+
+1. **300 ms depois da última tecla** — gravação normal (adiada porque digitar
+   dispararia isso a cada tecla e `localStorage` é síncrono);
+2. **na hora em que o campo trava** (ao sair dele) — gravação imediata;
+3. **na hora em que o app sai de vista** (`visibilitychange` / `pagehide`) —
+   rede de segurança para quem digita e troca de aplicativo no mesmo instante,
+   sem tirar o dedo do campo. Sem isso, o celular pode congelar a página antes
+   dos 300 ms e levar junto as últimas teclas.
+
+O dado sobrevive a fechar o app, matar o app na lista de recentes, reiniciar o
+celular e ficar offline. **Some** se limpar os dados do site no navegador, se
+desinstalar o app da tela inicial, ou em aba anônima. É por aparelho e por
+navegador — não sincroniza entre celulares.
+
 Na barra acima do formulário há ainda **🔓 Liberar todos** (destrava tudo de uma
 vez, para quando muda a pá inteira — cada campo volta a travar assim que você
 sai dele) e **🗑️ Limpar campos** (apaga o que está gravado no aparelho, com
