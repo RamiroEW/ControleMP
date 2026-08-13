@@ -50,6 +50,16 @@ textarea{resize:vertical;min-height:52px;line-height:1.5}
   white-space:nowrap;font-family:inherit;-webkit-tap-highlight-color:transparent}
 .fld.armed .edit-btn{display:inline-block}
 
+/* ── Campos obrigatórios ──
+   Campo em branco fica com moldura vermelha e o rótulo em vermelho. Os botões
+   ficam apagados, mas NÃO desabilitados de propósito: botão morto não explica
+   nada: aqui o toque continua funcionando e responde dizendo o que falta. */
+.fld.faltando .ctrl,#box-etapa.faltando{outline:1.5px solid #f85149;outline-offset:2px;border-radius:8px}
+.fld.faltando .lbl,#box-etapa.faltando .lbl{color:#f85149}
+.btn.bloqueado{opacity:.45}
+#falta-aviso{display:none;margin-bottom:8px;padding:8px 10px;border-radius:7px;
+  background:#2d1416;border:1px solid #6e2226;color:#ff9a92;font-size:11px;line-height:1.5}
+
 /* Barra da memória (liberar / limpar + aviso) */
 #mem-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px}
 .mem-btn{padding:5px 11px;border:1px solid #30363d;border-radius:6px;background:#161b22;color:#8b949e;
@@ -131,6 +141,15 @@ canvas.fc{display:block;flex-shrink:0}
 #cam-size-range::-moz-range-thumb{width:28px;height:28px;border:none;border-radius:50%;background:#fff}
 #cam-size-lbl{color:#fff;font-size:12px;font-weight:bold;min-width:82px;text-align:right;flex-shrink:0;
   text-shadow:0 1px 3px rgba(0,0,0,.9);cursor:pointer}
+/* ── Carimbo de data/hora ao vivo ──
+   Ancorado pelo canto superior esquerdo (top/left 0 + translate no JS), igual
+   ao card, para poder girar junto com o celular. z-index 21 = ACIMA da barra
+   dos botões (20): o degradê escuro dela apagaria o texto branco. Ocupa só a
+   faixa de ~28 px do rodapé, abaixo dos botões, e é pointer-events:none —
+   não cobre nenhum lugar de toque. */
+#cam-stamp{position:absolute;top:0;left:0;transform-origin:center center;
+  pointer-events:none;z-index:21;transition:transform .18s ease}
+#cam-stamp canvas{display:block}
 #cam-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:30;transition:opacity .15s}
 #cam-toast{position:absolute;bottom:176px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;white-space:nowrap;z-index:40;opacity:0;transition:opacity .3s;pointer-events:none}
 #cam-toast.show{opacity:1}
@@ -183,7 +202,7 @@ canvas.fc{display:block;flex-shrink:0}
   </div>
 </div>
 
-<div style="margin-bottom:8px"><label class="lbl">Etapa do Processo</label>
+<div style="margin-bottom:8px" id="box-etapa"><label class="lbl">Etapa do Processo</label>
   <select id="f-etapa" onchange="etapaChange()">
     <option>ID</option><option>Inspeção</option><option>BOD</option><option>Procedimento</option>
     <option>Laminação do Núcleo</option><option>Núcleo Ajustado + Medição de GAP</option>
@@ -238,8 +257,11 @@ canvas.fc{display:block;flex-shrink:0}
 </div>
 
 <div class="divider"></div>
-<button class="btn btn-cam" onclick="openCamera()">📷  Abrir Câmera com Fotocard</button>
-<button class="btn btn-save" onclick="saveCardOnly()">💾  Salvar Fotocard (sem foto)</button>
+<!-- Aviso do que ainda falta. Fica sempre visível enquanto houver campo em
+     branco, então o técnico descobre a pendência ANTES de tocar no botão. -->
+<div id="falta-aviso"></div>
+<button class="btn btn-cam" id="btn-cam" onclick="openCamera()">📷  Abrir Câmera com Fotocard</button>
+<button class="btn btn-save" id="btn-save" onclick="saveCardOnly()">💾  Salvar Fotocard (sem foto)</button>
 <div class="status" id="st"></div>
 
 <!-- ── Dropbox: nada para configurar ──
@@ -259,6 +281,9 @@ canvas.fc{display:block;flex-shrink:0}
   <video id="cam-video" autoplay playsinline muted></video>
   <div id="cam-offline-badge">📡 OFFLINE — câmera local</div>
   <div id="cam-overlay-wrap"><canvas class="fc" id="fc-cam"></canvas></div>
+  <!-- Carimbo de data/hora ao vivo: mesmo canto e mesmo tamanho que ele vai
+       ter na foto, e o relógio anda de segundo em segundo. -->
+  <div id="cam-stamp"><canvas id="fc-stamp"></canvas></div>
   <div id="cam-flash"></div>
   <div id="cam-toast"></div>
   <!-- Ajuste do card na foto:
@@ -370,6 +395,109 @@ function getState(){
     int:document.getElementById('c-int').checked,ext:document.getElementById('c-ext').checked,
     equipe:document.getElementById('f-equipe').value
   };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CAMPOS OBRIGATÓRIOS
+   ───────────────────────────────────────────────────────────────────────────
+   Foto com campo em branco vira retrabalho: o card sai com um "—" no lugar do
+   dado e, semanas depois, ninguém lembra qual era a torre ou a medida. Por
+   isso a câmera e o "Salvar" só liberam com o fotocard inteiro preenchido.
+
+   A ordem da lista é a mesma do formulário — é ela que decide para onde a
+   tela rola quando falta alguma coisa.
+
+   Dois campos não são um <input> comum:
+     • Etapa do Processo — o <select> nunca fica vazio; só a opção "Outra"
+       precisa do texto ao lado;
+     • Lado / Localização — é um grupo de caixas: preenchido = pelo menos uma
+       marcada.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var OBRIG=[
+  {rotulo:'Parque Eólico', id:'f-parque'},
+  {rotulo:'Torre (WTG)',   id:'f-turbina'},
+  {rotulo:'Cliente',       id:'f-cliente'},
+  {rotulo:'Modelo',        id:'f-modelo'},
+  {rotulo:'N/S Blade',     id:'f-ns'},
+  {rotulo:'Etapa do Processo', id:'f-etapa-outra', box:'#box-etapa',
+   pula:function(){ return document.getElementById('f-etapa').value!=='Outra'; }},
+  {rotulo:'Dano',          id:'f-dano'},
+  {rotulo:'Zi (mm)',       id:'f-z1'},
+  {rotulo:'Zf (mm)',       id:'f-z2'},
+  {rotulo:'Xi (mm)',       id:'f-x1'},
+  {rotulo:'Xf (mm)',       id:'f-x2'},
+  {rotulo:'Lado / Localização', grupo:['c-ps','c-ba','c-ss','c-bf','c-int','c-ext'],
+   box:'.fld[data-fld="lado"]'},
+  {rotulo:'Equipe',        id:'f-equipe'}
+];
+
+/* Só marca os campos de vermelho depois da primeira tentativa: formulário
+   vermelho antes de a pessoa digitar qualquer coisa é ruído, não ajuda. */
+var jaValidou=false;
+
+function faltaPreencher(){
+  var falta=[];
+  OBRIG.forEach(function(c){
+    if(c.pula&&c.pula()) return;
+    var vazio = c.grupo
+      ? !c.grupo.some(function(id){ return document.getElementById(id).checked; })
+      : document.getElementById(c.id).value.trim()==='';
+    if(!vazio) return;
+    falta.push({
+      rotulo:c.rotulo,
+      box: c.box ? document.querySelector(c.box)
+                 : document.getElementById(c.id).closest('.fld'),
+      foco: document.getElementById(c.grupo?c.grupo[0]:c.id)
+    });
+  });
+  return falta;
+}
+
+function apontaFaltas(falta,rolar){
+  var marcados=document.querySelectorAll('.faltando');
+  Array.prototype.forEach.call(marcados,function(e){ e.classList.remove('faltando'); });
+  falta.forEach(function(f){ if(f.box) f.box.classList.add('faltando'); });
+  if(rolar&&falta.length&&falta[0].box){
+    try{ falta[0].box.scrollIntoView({block:'center',behavior:'smooth'}); }
+    catch(e){ falta[0].box.scrollIntoView(); }
+  }
+}
+
+/* Resumo curto: a lista inteira com 13 nomes não cabe e ninguém lê */
+function resumoFaltas(falta){
+  var n=falta.map(function(f){ return f.rotulo; });
+  return n.length<=3 ? n.join(', ')
+                     : n.slice(0,3).join(', ')+' e mais '+(n.length-3);
+}
+
+/* Chamado antes de abrir a câmera e antes de salvar. true = pode seguir. */
+function exigePreenchimento(acao){
+  var falta=faltaPreencher();
+  jaValidou=true;
+  apontaFaltas(falta,true);
+  atualizaBotoes();
+  if(!falta.length) return true;
+  var st=document.getElementById('st');
+  st.className='status er';
+  st.textContent='Preencha '+falta.length+' campo(s) para '+acao;
+  return false;
+}
+
+/* Estado ao vivo dos botões e do aviso — roda a cada tecla, via render() */
+function atualizaBotoes(){
+  var falta=faltaPreencher();
+  ['btn-cam','btn-save'].forEach(function(id){
+    var b=document.getElementById(id);
+    if(b) b.classList.toggle('bloqueado',falta.length>0);
+  });
+  var av=document.getElementById('falta-aviso');
+  if(av){
+    av.style.display = falta.length ? 'block' : 'none';
+    av.textContent = falta.length
+      ? '🔒 Faltam '+falta.length+' campo(s) para liberar a câmera: '+resumoFaltas(falta)
+      : '';
+  }
+  if(jaValidou) apontaFaltas(falta,false);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1001,6 +1129,7 @@ function render(){
      desenho jogado fora a cada tecla digitada no formulário. */
   if(document.getElementById('cam-view').classList.contains('on')) paintCamCard();
   updateScale(h);
+  atualizaBotoes();     /* libera ou trava a câmera conforme o que falta */
 }
 
 function updateScale(h){
@@ -1246,10 +1375,14 @@ function toast(msg,dur){
 
 /* ─── Câmera ─── */
 async function openCamera(){
+  /* Sem o fotocard inteiro preenchido não abre: a foto é o registro, e campo
+     em branco na foto não tem como ser corrigido depois. */
+  if(!exigePreenchimento('abrir a câmera')) return;
   document.getElementById('cam-view').classList.add('on');
   paintCamCard();          // card do overlay, já translúcido
   mostraTamanho();
   scaleCamOverlay();
+  ligaCarimboCam();        // carimbo ao vivo, com o relógio andando
   await startStream();
   ligarListenerOrientacao();
 }
@@ -1278,6 +1411,7 @@ async function startStream(){
          que o card vai ter na foto e mostra esse tamanho em pixels */
       mostraTamanho();
       scaleCamOverlay();
+      pintaCarimboCam();   /* idem para o carimbo: agora dá para usar a escala real */
       setTimeout(dicaGesto,2400);   /* depois do aviso de resolução */
     };
     if(!isOnline)document.getElementById('cam-offline-badge').classList.add('show');
@@ -1300,6 +1434,7 @@ function stopStream(){
 
 function closeCamera(){
   stopStream();
+  desligaCarimboCam();     /* sem câmera aberta não há relógio para atualizar */
   document.getElementById('cam-view').classList.remove('on');
   desligarListenerOrientacao();
 }
@@ -1311,9 +1446,10 @@ var orientMQ=(window.matchMedia?window.matchMedia('(orientation: landscape)'):nu
 function onMudaOrientacao(){
   // O navegador leva alguns ms para atualizar o ângulo e o tamanho da tela —
   // reposiciona de novo depois, senão o card gira com as medidas antigas.
-  scaleCamOverlay();
-  setTimeout(scaleCamOverlay,120);
-  setTimeout(scaleCamOverlay,400);
+  var repoe=function(){ scaleCamOverlay(); pintaCarimboCam(); };
+  repoe();
+  setTimeout(repoe,120);
+  setTimeout(repoe,400);
   if(document.getElementById('cam-view').classList.contains('on')&&camStream) startStream();
 }
 function ligarListenerOrientacao(){
@@ -1359,8 +1495,13 @@ function partesNome(vs){
    disparou, com segundos, e ninguém precisa preencher.
 
    Gira junto com o celular, pelo mesmo ângulo do card, para nunca sair deitado
-   numa foto tirada com o aparelho na horizontal. */
+   numa foto tirada com o aparelho na horizontal.
+
+   Aparece TAMBÉM ao vivo na tela da câmera (pintaCarimboCam, mais abaixo), no
+   mesmo canto e no mesmo tamanho que vai ter na foto — o técnico confere a
+   hora antes de disparar, não depois. */
 var MES_ABREV=['jan.','fev.','mar.','abr.','mai.','jun.','jul.','ago.','set.','out.','nov.','dez.'];
+var CARIMBO_FAM='Arial, Helvetica, sans-serif';
 
 function textoCarimbo(d){
   d=d||new Date();
@@ -1369,35 +1510,124 @@ function textoCarimbo(d){
          ' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
 }
 
-function desenhaCarimbo(ctx,vw,vh,ang){
-  var lado=Math.min(vw,vh);
-  /* Proporcional ao lado MENOR da foto, como o card: mesma presença em foto em
-     pé ou deitada, e o texto cresce junto com a resolução (em 4K sai com ~82
-     px, aguenta zoom no relatório). O piso de 16 px salva aparelho antigo. */
-  var size=Math.max(16, Math.round(lado*0.038));
-  var txt=textoCarimbo();
+/* Corpo da fonte e folga, proporcionais ao lado MENOR da foto — como o card:
+   mesma presença em foto em pé ou deitada, e o texto cresce junto com a
+   resolução (em 4K sai com ~82 px, aguenta zoom no relatório). O piso de
+   16 px salva aparelho antigo. */
+function corpoCarimbo(lado){ return Math.max(16, Math.round(lado*0.038)); }
+function margemCarimbo(lado){ return Math.round(lado*0.02); }
 
-  ctx.save();
-  ctx.font='bold '+size+'px Arial, Helvetica, sans-serif';
+/* Medida do bloco de texto para um dado corpo de fonte */
+function medeCarimbo(ctx,size,txt){
+  ctx.font='bold '+size+'px '+CARIMBO_FAM;
+  return {w:ctx.measureText(txt).width, h:size*1.25};
+}
+
+/* Escreve o carimbo com o CENTRO do texto na origem (0,0) do contexto.
+   Contorno primeiro, preenchimento por cima: o traço escuro fica só na borda
+   das letras e não engrossa o branco. */
+function escreveCarimbo(ctx,size,txt){
+  ctx.font='bold '+size+'px '+CARIMBO_FAM;
   ctx.textAlign='center'; ctx.textBaseline='middle';
-
-  var w=ctx.measureText(txt).width, h=size*1.25;
-  var mg=Math.round(lado*0.02);
-  var deitado=(ang===90||ang===270);
-  var bbW=deitado?h:w, bbH=deitado?w:h;         /* espaço ocupado DEPOIS de girar */
-
-  ctx.translate(vw-mg-bbW/2, vh-mg-bbH/2);      /* canto inferior direito */
-  ctx.rotate(-ang*Math.PI/180);
-
-  /* Contorno primeiro, preenchimento por cima: o traço escuro fica só na borda
-     das letras e não engrossa o branco. */
   ctx.lineJoin='round'; ctx.lineWidth=Math.max(2, size*0.17);
   ctx.strokeStyle='rgba(0,0,0,.7)';
   ctx.strokeText(txt,0,0);
   ctx.fillStyle='#fff';
   ctx.fillText(txt,0,0);
+}
+
+/* Grava o carimbo na foto, no canto inferior direito */
+function desenhaCarimbo(ctx,vw,vh,ang){
+  var lado=Math.min(vw,vh);
+  var size=corpoCarimbo(lado), mg=margemCarimbo(lado), txt=textoCarimbo();
+  ctx.save();
+  var m=medeCarimbo(ctx,size,txt);
+  var deitado=(ang===90||ang===270);
+  var bbW=deitado?m.h:m.w, bbH=deitado?m.w:m.h;   /* ocupado DEPOIS de girar */
+  ctx.translate(vw-mg-bbW/2, vh-mg-bbH/2);
+  ctx.rotate(-ang*Math.PI/180);
+  escreveCarimbo(ctx,size,txt);
   ctx.restore();
 }
+
+/* ─── Carimbo ao vivo na tela da câmera ───
+   Mesmo canto, mesmo tamanho e mesmo giro que ele vai ter na foto: o tamanho
+   em pixels da foto é convertido para pixels de tela pela escala do
+   object-fit:cover do vídeo — a mesma conta do overlay do card. Assim o que
+   se vê é o que grava.
+
+   Fica ACIMA da barra dos botões (z-index) porque o degradê escuro dela
+   apagaria o texto branco; e ocupa só a faixa de ~28 px do rodapé, abaixo do
+   botão de virar a câmera, então não cobre nenhum lugar de toque. */
+var tCarimboCam=null;
+
+function pintaCarimboCam(){
+  var wrap=document.getElementById('cam-stamp');
+  var cv=document.getElementById('fc-stamp');
+  if(!wrap||!cv) return;
+
+  var video=document.getElementById('cam-video');
+  var size, mg;
+  if(video&&video.videoWidth){
+    var cover=Math.max(window.innerWidth/video.videoWidth, window.innerHeight/video.videoHeight);
+    var lado=Math.min(video.videoWidth,video.videoHeight);
+    size=corpoCarimbo(lado)*cover;
+    mg=margemCarimbo(lado)*cover;
+  } else {
+    /* antes de o vídeo abrir: estima pela tela */
+    var ladoTela=Math.min(window.innerWidth,window.innerHeight);
+    size=corpoCarimbo(ladoTela); mg=margemCarimbo(ladoTela);
+  }
+
+  var txt=textoCarimbo();
+  var ctx=cv.getContext('2d');
+  var m=medeCarimbo(ctx,size,txt);
+
+  var ang=anguloOrientacao();
+  var deitado=(ang===90||ang===270);
+
+  /* Teto de tela. Ao girar o celular, alguns aparelhos demoram para a câmera
+     renegociar a orientação — nesse intervalo o vídeo ainda vem em pé, a
+     escala do cover dispara e o texto girado sairia mais comprido que a tela.
+     O encolhimento vale SÓ para a pré-visualização: na foto o carimbo é
+     gravado no tamanho cheio, onde sempre cabe (o texto mede ~50% do lado
+     menor e é deitado ao longo do lado maior). Mesma ideia do teto de 70% que
+     o overlay do card já usa. */
+  var cabe=(deitado?window.innerHeight:window.innerWidth)-2*mg;
+  if(m.w>cabe && cabe>0){
+    size*=cabe/m.w;
+    m=medeCarimbo(ctx,size,txt);
+  }
+
+  /* folga em volta para o contorno das letras não ser cortado pela borda do
+     canvas — é simétrica, então o centro do canvas segue sendo o do texto */
+  var pad=Math.ceil(size*0.4);
+  var w=Math.ceil(m.w)+2*pad, h=Math.ceil(m.h)+2*pad;
+
+  cv.width=Math.ceil(w*SS); cv.height=Math.ceil(h*SS);
+  cv.style.width=w+'px'; cv.style.height=h+'px';
+  ctx.setTransform(SS,0,0,SS,0,0);
+  ctx.clearRect(0,0,w,h);
+  ctx.translate(w/2,h/2);
+  escreveCarimbo(ctx,size,txt);
+  ctx.setTransform(1,0,0,1,0,0);
+
+  /* Posição pelo bloco de TEXTO (sem a folga), senão o carimbo sairia do canto
+     deslocado do tanto do pad. O giro é em torno do centro do elemento, que
+     coincide com o centro do texto. */
+  var bbW=deitado?m.h:m.w, bbH=deitado?m.w:m.h;
+  var cx=window.innerWidth -mg-bbW/2;
+  var cy=window.innerHeight-mg-bbH/2;
+  wrap.style.transform='translate('+(cx-w/2)+'px,'+(cy-h/2)+'px) rotate('+(-ang)+'deg)';
+}
+
+/* O relógio anda: repinta a cada segundo enquanto a câmera estiver aberta */
+function ligaCarimboCam(){
+  pintaCarimboCam();
+  clearInterval(tCarimboCam);
+  tCarimboCam=setInterval(pintaCarimboCam,1000);
+}
+function desligaCarimboCam(){ clearInterval(tCarimboCam); tCarimboCam=null; }
 
 /* ─── Captura foto + overlay ─── */
 async function capturePhoto(){
@@ -1471,6 +1701,7 @@ async function capturePhoto(){
    OPACO em 4× — vetor rasterizado a 1840 px de largura, aguenta zoom e
    impressão. A opacidade de 0,85 vale só para o card sobre a foto. */
 function saveCardOnly(){
+  if(!exigePreenchimento('salvar o fotocard')) return;
   var st=document.getElementById('st');
   st.textContent='Gerando...';st.className='status';
   try{
@@ -1691,7 +1922,10 @@ window.addEventListener('resize',function(){
   var dpr=window.devicePixelRatio||1;
   if(dpr!==lastDPR){ lastDPR=dpr; SS=ssTela(); render(); }
   else updateScale();
-  if(document.getElementById('cam-view').classList.contains('on'))scaleCamOverlay();
+  if(document.getElementById('cam-view').classList.contains('on')){
+    scaleCamOverlay();
+    pintaCarimboCam();
+  }
 });
 </script>
 </body>

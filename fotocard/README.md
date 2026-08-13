@@ -44,6 +44,31 @@ Visitas seguintes (com ou sem internet)
             └─ Foto salva na galeria do dispositivo
 ```
 
+## Campos obrigatórios
+
+A câmera e o `💾 Salvar Fotocard` **só liberam com o fotocard inteiro
+preenchido**. Foto com campo em branco vira retrabalho: o card sai com um "—"
+no lugar do dado e, semanas depois, ninguém lembra qual era a torre ou a medida.
+
+Enquanto faltar alguma coisa:
+
+- um aviso vermelho acima dos botões diz **quantos** campos faltam e nomeia os
+  três primeiros;
+- os botões ficam apagados — mas **continuam clicáveis** de propósito: botão
+  morto não explica nada, aqui o toque responde dizendo o que falta;
+- ao tocar, os campos em branco ganham moldura vermelha e a tela rola até o
+  primeiro deles.
+
+Dois campos não são um `<input>` comum:
+
+| Campo | O que conta como preenchido |
+|---|---|
+| Etapa do Processo | o `<select>` nunca fica vazio; só a opção **"Outra"** exige o texto ao lado |
+| Lado / Localização | pelo menos **uma** caixa marcada |
+
+O **Cliente** também nunca fica vazio (começa em GE), então nunca aparece na
+lista de pendências.
+
 ## Memória dos campos
 
 Em campo o técnico tira dezenas de fotos da **mesma pá**: parque, torre,
@@ -183,6 +208,18 @@ câmeras de campo:
 Branco com contorno escuro — lê sobre céu estourado e sobre o interior escuro da
 pá, sem precisar de tarja de fundo. Gira junto com o celular, pelo mesmo ângulo
 do fotocard, então nunca sai deitado numa foto tirada na horizontal.
+
+O carimbo aparece **ao vivo na tela da câmera**, no mesmo canto e no mesmo
+tamanho que vai ter na foto — a conversão usa a escala do `object-fit:cover` do
+vídeo, a mesma do overlay do card, então o que se vê é o que grava. O relógio
+anda de segundo em segundo enquanto a câmera está aberta (e o `setInterval` é
+desligado ao fechar). Ele fica na faixa de ~30 px do rodapé, **abaixo** dos
+botões, e é `pointer-events:none` — não cobre nenhum lugar de toque.
+
+Só na pré-visualização existe um teto de tamanho: ao girar o celular, alguns
+aparelhos demoram para a câmera renegociar a orientação e, nesse intervalo, o
+texto girado ficaria mais comprido que a tela. Na foto o carimbo sai sempre no
+tamanho cheio — lá ele sempre cabe.
 
 É a **única** marcação de tempo do app: o campo "Data / Hora" saiu do card e do
 formulário. Ele era preenchido na abertura do app e, num dia inteiro de pá,
