@@ -149,10 +149,11 @@ canvas.fc{display:block;flex-shrink:0}
 <!-- FORMULÁRIO
      ── Memória ──
      Os campos marcados com class="fld" ficam GRAVADOS no aparelho e voltam
-     preenchidos no próximo acesso, já travados (🔒). Ficam de fora, de
-     propósito, "Data / Hora" (é o carimbo da foto, tem de ser sempre o atual)
-     e "Etapa do Processo" (muda a cada etapa fotografada) — esses dois não
-     têm .fld nem botão de editar. -->
+     preenchidos no próximo acesso, já travados (🔒). Fica de fora, de
+     propósito, só a "Etapa do Processo" — muda a cada etapa fotografada, então
+     não tem .fld nem botão de editar.
+     Não existe mais campo de data: quem marca o tempo é o carimbo gravado no
+     rodapé da foto, com a hora real da captura. -->
 <div id="mem-bar">
   <button type="button" class="mem-btn" onclick="liberaTudo()">🔓 Liberar todos</button>
   <button type="button" class="mem-btn" onclick="limpaMemoria()">🗑️ Limpar campos</button>
@@ -172,15 +173,14 @@ canvas.fc{display:block;flex-shrink:0}
     <div class="lbl"><span class="t">Cliente</span><button type="button" class="edit-btn">✏️ Editar</button></div>
     <div class="ctrl"><select id="f-cliente" onchange="render()"><option>GE</option><option>Nordex</option><option>Siemens</option></select><span class="shield"></span></div>
   </div>
-  <div class="full fld" data-fld="modelo">
+  <div class="fld" data-fld="modelo">
     <div class="lbl"><span class="t">Modelo</span><button type="button" class="edit-btn">✏️ Editar</button></div>
-    <div class="ctrl"><input id="f-modelo" type="text" placeholder="Ex: GE 50.2, N117..." oninput="render()"><span class="shield"></span></div>
+    <div class="ctrl"><input id="f-modelo" type="text" placeholder="Ex: GE 50.2" oninput="render()"><span class="shield"></span></div>
   </div>
   <div class="fld" data-fld="ns">
     <div class="lbl"><span class="t">N/S Blade</span><button type="button" class="edit-btn">✏️ Editar</button></div>
     <div class="ctrl"><input id="f-ns" type="text" placeholder="Ex: 4121" oninput="render()"><span class="shield"></span></div>
   </div>
-  <div><label class="lbl">Data / Hora</label><input id="f-data" type="text" oninput="render()"></div>
 </div>
 
 <div style="margin-bottom:8px"><label class="lbl">Etapa do Processo</label>
@@ -344,12 +344,6 @@ var curState={}, camStream=null, facingMode='environment', isOnline=navigator.on
   updateNetStatus();
 })();
 
-/* ─── Data de hoje ─── */
-(function(){
-  var d=new Date(),p=function(n){return String(n).padStart(2,'0')};
-  document.getElementById('f-data').value=p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());
-})();
-
 /* ─── Etapa outra ─── */
 function etapaChange(){
   var s=document.getElementById('f-etapa').value;
@@ -367,7 +361,6 @@ function getState(){
     cliente:document.getElementById('f-cliente').value,
     modelo:document.getElementById('f-modelo').value,
     ns:document.getElementById('f-ns').value,
-    data:document.getElementById('f-data').value,
     etapa:etapa,
     dano:document.getElementById('f-dano').value,
     z1:document.getElementById('f-z1').value,z2:document.getElementById('f-z2').value,
@@ -388,9 +381,9 @@ function getState(){
    voltam preenchidos no próximo acesso — inclusive no dia seguinte, e mesmo
    sem internet.
 
-   FICAM DE FORA, de propósito:
-     • Data / Hora — é o carimbo da foto: tem de ser sempre o momento atual;
-     • Etapa do Processo (e o campo "Outra") — muda a cada etapa fotografada.
+   FICA DE FORA, de propósito, só a Etapa do Processo (e o campo "Outra"):
+   muda a cada etapa fotografada. Data e hora não são mais campo nenhum — vêm
+   do carimbo gravado no rodapé da foto, na hora exata da captura.
 
    O campo gravado nasce TRAVADO. Mudar exige DOIS toques:
      1º toque no campo  → aparece o botão ✏️ Editar ao lado do rótulo;
@@ -787,20 +780,21 @@ function ruler(ctx,x,y,w){
 function layout(s){
   var B=[];
 
-  /* 1 ─ Logo | Data-Hora | Modelo */
-  var lgW=92, rest=IW-lgW, cA=rest*1.2/3.6, cB=rest-cA, lgH=logoH();
+  /* 1 ─ Logo | Modelo
+     A Data / Hora saiu do card. Quem marca o tempo agora é só o carimbo gravado
+     no rodapé da foto, que traz a hora REAL da captura, com segundos — o campo
+     do card era preenchido na abertura do app e ficava horas atrasado num dia
+     inteiro de pá. Com a coluna a menos, o Modelo fica com toda a faixa ao lado
+     do logo. */
+  var lgW=92, cB=IW-lgW, lgH=logoH();
   B.push({
-    h:Math.max(48, lgH+10+HAIR,
-                   cellLVh(cA-HAIR,s.data,10)+HAIR,
-                   cellLVh(cB,s.modelo,11)+HAIR),
+    h:Math.max(48, lgH+10+HAIR, cellLVh(cB,s.modelo,11)+HAIR),
     draw:function(ctx,y,h){
-      var ch=h-HAIR, x2=OUT+lgW, x3=x2+cA;
-      bg(ctx,x3,y,cB,ch,CYAN);                       /* Modelo em ciano */
+      var ch=h-HAIR, x2=OUT+lgW;
+      bg(ctx,x2,y,cB,ch,CYAN);                       /* Modelo em ciano */
       fill(ctx,x2-HAIR,y,HAIR,ch,INK);
-      fill(ctx,x3-HAIR,y,HAIR,ch,INK);
       if(logoOk) ctx.drawImage(logo,OUT+(lgW-HAIR-84)/2,y+(ch-lgH)/2,84,lgH);
-      cellLV(ctx,x2,y,cA-HAIR,'Data / Hora',s.data,10);
-      cellLV(ctx,x3,y,cB,'Modelo',s.modelo,11);
+      cellLV(ctx,x2,y,cB,'Modelo',s.modelo,11);
     }
   });
 
@@ -1354,6 +1348,57 @@ function partesNome(vs){
   }).filter(Boolean).join('_') || 'sem_dados';
 }
 
+/* ─── Carimbo de data e hora no rodapé da foto ───
+   O mesmo carimbo que as câmeras de campo gravam: canto inferior direito, em
+   branco com contorno escuro — lê tanto sobre céu claro quanto sobre pá escura,
+   sem precisar de tarja de fundo.
+
+   É a ÚNICA marcação de tempo do fotocard: o campo "Data / Hora" saiu do card
+   e do formulário. Ele era preenchido quando o app abria e, num dia inteiro de
+   pá, ficava horas atrasado — este aqui é a hora exata em que o obturador
+   disparou, com segundos, e ninguém precisa preencher.
+
+   Gira junto com o celular, pelo mesmo ângulo do card, para nunca sair deitado
+   numa foto tirada com o aparelho na horizontal. */
+var MES_ABREV=['jan.','fev.','mar.','abr.','mai.','jun.','jul.','ago.','set.','out.','nov.','dez.'];
+
+function textoCarimbo(d){
+  d=d||new Date();
+  var p=function(n){ return String(n).padStart(2,'0'); };
+  return d.getDate()+' de '+MES_ABREV[d.getMonth()]+' de '+d.getFullYear()+
+         ' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+}
+
+function desenhaCarimbo(ctx,vw,vh,ang){
+  var lado=Math.min(vw,vh);
+  /* Proporcional ao lado MENOR da foto, como o card: mesma presença em foto em
+     pé ou deitada, e o texto cresce junto com a resolução (em 4K sai com ~82
+     px, aguenta zoom no relatório). O piso de 16 px salva aparelho antigo. */
+  var size=Math.max(16, Math.round(lado*0.038));
+  var txt=textoCarimbo();
+
+  ctx.save();
+  ctx.font='bold '+size+'px Arial, Helvetica, sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+
+  var w=ctx.measureText(txt).width, h=size*1.25;
+  var mg=Math.round(lado*0.02);
+  var deitado=(ang===90||ang===270);
+  var bbW=deitado?h:w, bbH=deitado?w:h;         /* espaço ocupado DEPOIS de girar */
+
+  ctx.translate(vw-mg-bbW/2, vh-mg-bbH/2);      /* canto inferior direito */
+  ctx.rotate(-ang*Math.PI/180);
+
+  /* Contorno primeiro, preenchimento por cima: o traço escuro fica só na borda
+     das letras e não engrossa o branco. */
+  ctx.lineJoin='round'; ctx.lineWidth=Math.max(2, size*0.17);
+  ctx.strokeStyle='rgba(0,0,0,.7)';
+  ctx.strokeText(txt,0,0);
+  ctx.fillStyle='#fff';
+  ctx.fillText(txt,0,0);
+  ctx.restore();
+}
+
 /* ─── Captura foto + overlay ─── */
 async function capturePhoto(){
   var video=document.getElementById('cam-video');
@@ -1397,6 +1442,9 @@ async function capturePhoto(){
     ctx.rotate(-angCard*Math.PI/180);
     ctx.drawImage(cardCv, -cw/2, -ch/2, cw, ch);
     ctx.restore();
+
+    // Carimbo de data/hora no rodapé, como nas câmeras de campo
+    desenhaCarimbo(ctx, vw, vh, angCard);
 
     // Nome do arquivo. Com o Pitch fora, quem identifica a pá é o N/S — que é
     // o número da própria pá, não da posição no rotor. Pedaço vazio some do

@@ -52,12 +52,10 @@ até a última foto. Esses campos ficam gravados no aparelho (`localStorage`,
 chave `ew_fotocard_campos`) e voltam preenchidos no próximo acesso — inclusive
 no dia seguinte e sem internet.
 
-**Ficam de fora, de propósito:**
+**Fica de fora, de propósito,** só a **Etapa do Processo** (e o "Outra"): muda a
+cada etapa fotografada, então começa sempre no padrão.
 
-| Campo | Por quê |
-|---|---|
-| Data / Hora | é o carimbo da foto: tem de ser sempre o momento atual |
-| Etapa do Processo (e o "Outra") | muda a cada etapa fotografada |
+Data e hora não são campo nenhum — vêm do carimbo gravado no rodapé da foto.
 
 ### Como mudar um campo gravado
 
@@ -172,6 +170,38 @@ Chaves gravadas no aparelho: `ew_card_frac` (tamanho) e `ew_card_pos`
 
 Os três valores vieram do fotocard de referência usado em campo. Usar o lado
 menor (e não a largura) mantém a mesma presença em foto em pé ou deitada.
+
+## Carimbo de data e hora
+
+Toda foto sai com o carimbo no **canto inferior direito**, no mesmo formato das
+câmeras de campo:
+
+```
+21 de abr. de 2026 16:36:08
+```
+
+Branco com contorno escuro — lê sobre céu estourado e sobre o interior escuro da
+pá, sem precisar de tarja de fundo. Gira junto com o celular, pelo mesmo ângulo
+do fotocard, então nunca sai deitado numa foto tirada na horizontal.
+
+É a **única** marcação de tempo do app: o campo "Data / Hora" saiu do card e do
+formulário. Ele era preenchido na abertura do app e, num dia inteiro de pá,
+ficava horas atrasado — o carimbo é a hora exata em que o obturador disparou,
+com segundos, e ninguém precisa preencher.
+
+Com a coluna a menos, o **Modelo** passou a ocupar toda a faixa ao lado do logo,
+na primeira linha do card.
+
+O tamanho acompanha a resolução (3,8 % do lado menor da foto), igual ao card:
+
+| Foto | Carimbo |
+|---|---|
+| 1280×720 | 27 px |
+| 3840×2160 | 82 px |
+
+Se o card for arrastado para o canto inferior direito, ele encosta no carimbo —
+com o card na posição padrão (canto superior direito) sobra a foto inteira entre
+os dois.
 
 ## Resolução da foto
 
