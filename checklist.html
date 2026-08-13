@@ -714,34 +714,40 @@ function enviarPlanilha(){
   const itens = coletados();
   if(!itens.length){ toast('Preencha ao menos uma QTD antes de enviar','error'); return; }
   const id = safeParseObj(IDKEY);
-  // O Parque é OBRIGATÓRIO: é ele que vira a aba da planilha. Sem ele o registro
-  // fica órfão e a análise semanal não consegue usar (nem criar a aba).
-  if(!(id.parque||'').trim()){
-    toast('Informe o Parque / Projeto antes de enviar','error');
-    const campo=document.getElementById('i-parque');
+  /* Cabeçalho completo é OBRIGATÓRIO. O Parque vira a aba da planilha (sem ele
+     o registro fica órfão e a análise semanal nem consegue criar a aba), e
+     responsável e data são o que permite voltar e perguntar depois. */
+  const faltaCab=[];
+  if(!(id.parque||'').trim()) faltaCab.push(['i-parque','Parque / Projeto']);
+  if(!(id.resp  ||'').trim()) faltaCab.push(['i-resp','Responsável']);
+  if(!(id.data  ||'').trim()) faltaCab.push(['i-data','Data']);
+  if(faltaCab.length){
+    toast('Preencha '+faltaCab.map(f=>f[1]).join(', ')+' antes de enviar','error');
+    const campo=document.getElementById(faltaCab[0][0]);
     campo.style.borderColor='#d1495b'; campo.focus();
     campo.scrollIntoView({block:'center'});
     setTimeout(()=>{campo.style.borderColor='';},2500);
     return;
   }
-  /* Entrada de perecível sem lote/validade: avisa e deixa decidir. Não bloqueia
-     porque em campo acontece rótulo ilegível ou tambor já transferido — mas
-     ninguém envia sem ver o que está faltando. */
+  /* Entrada de perecível SEM lote/validade não sai daqui.
+     ATENÇÃO ao mexer nisto: antes era só um aviso, porque em campo acontece
+     rótulo ilegível ou tambor já transferido. Passou a bloquear a pedido da
+     engenharia — lote e validade são o que permite rastrear um lote vencido
+     depois. Se voltar a travar gente em campo, o caminho é voltar ao confirm()
+     e não afrouxar a regra pela metade. */
   if(modoAtual==='entrada'){
     const faltando = pendenciasLote();
     if(faltando.length){
       const lista = faltando.slice(0,8).map(n=>'• '+n).join('\n')
         + (faltando.length>8 ? `\n… e mais ${faltando.length-8}` : '');
-      const ok = confirm(
+      alert(
         `${faltando.length} material(is) perecível(is) sem LOTE ou VALIDADE:\n\n${lista}\n\n`
-        + 'Enviar assim mesmo? (Cancelar volta para preencher)');
-      if(!ok){
-        renderLista();
-        document.getElementById('soPreenchidos').checked = true;
-        aplicarFiltro();
-        toast('Preencha lote e validade dos itens em âmbar','error');
-        return;
-      }
+        + 'Preencha lote e validade dos itens em âmbar para poder enviar.');
+      renderLista();
+      document.getElementById('soPreenchidos').checked = true;
+      aplicarFiltro();
+      toast('Falta lote/validade em '+faltando.length+' item(ns)','error');
+      return;
     }
   }
 

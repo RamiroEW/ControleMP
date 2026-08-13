@@ -529,6 +529,11 @@ function toast(msg,type){ const t=$('toast'); t.className='toast '+(type||''); t
 /* ══ INIT ══ */
 document.addEventListener('DOMContentLoaded',()=>{
   $('year').textContent = new Date().getFullYear();
+  /* Data já vem com hoje: o campo virou obrigatório, e obrigar a abrir o
+     seletor de data para digitar a data de hoje só atrasa quem está na torre.
+     Montada em hora LOCAL — toISOString() é UTC e viraria o dia depois das 21h. */
+  (function(){ const e=$('i-data'); if(e && !e.value){ const h=new Date(), z=n=>String(n).padStart(2,'0');
+    e.value = h.getFullYear()+'-'+z(h.getMonth()+1)+'-'+z(h.getDate()); } })();
   aplicarTema(localStorage.getItem('ge_theme'));
   atualizarNotaTipo();
   ['estrutural-resina','nucleo-resina','adesivo-base','filler-base','pintura-base','i-peso-nucleo','i-tecido-qtd']
@@ -595,14 +600,35 @@ function voltar(){
   if(navHist.length){ goTab(navHist.pop(), true); }
   else { window.location.href='calculadora.html'; }
 }
+/* Aponta o campo que falta: aviso, moldura vermelha, foco e rolagem até ele.
+   Devolve undefined de propósito, para poder ser usado como
+   `if(!x) return faltaCampo(...)` e encerrar a função na mesma linha. */
+function faltaCampo(id,msg){
+  toast(msg,'error');
+  const e=$(id); if(!e) return;
+  e.style.borderColor='#d1495b';
+  try{ e.focus({preventScroll:true}); }catch(err){ try{ e.focus(); }catch(err2){} }
+  try{ e.scrollIntoView({block:'center',behavior:'smooth'}); }catch(err){ e.scrollIntoView(); }
+  setTimeout(function(){ e.style.borderColor=''; },2600);
+}
+
 function continuarId(){
+  /* Nenhum campo da Identificação é opcional. O registro vai para a planilha e
+     alimenta a análise semanal: linha sem técnico ou sem data não serve para
+     nada lá na frente, e em campo ninguém volta para completar. */
   const p=v('i-projeto').trim(), w=v('i-wtg').trim(), b=v('i-blade').trim();
-  if(!p){ toast('Informe o Projeto / Parque','error'); return; }
-  if(!w){ toast('Informe a WTG','error'); return; }
-  if(!b){ toast('Informe o N° da Pá','error'); return; }
+  const tec=v('i-tecnico').trim(), dt=v('i-data').trim();
+  if(!p)  return faltaCampo('i-projeto','Informe o Projeto / Parque');
+  if(!w)  return faltaCampo('i-wtg','Informe a WTG');
+  if(!b)  return faltaCampo('i-blade','Informe o N° da Pá');
+  if(!tec)return faltaCampo('i-tecnico','Informe o Técnico Responsável');
+  if(!dt) return faltaCampo('i-data','Informe a Data');
   const nucleo = getRadio('nucleo')==='sim';
-  if(nucleo && !v('i-mat-nucleo')){ toast('Selecione o material do núcleo','error'); return; }
-  if(nucleo && !v('i-peso-nucleo')){ toast('Informe o peso do núcleo (g)','error'); return; }
+  if(nucleo && !v('i-mat-nucleo'))  return faltaCampo('i-mat-nucleo','Selecione o material do núcleo');
+  if(nucleo && !v('i-peso-nucleo')) return faltaCampo('i-peso-nucleo','Informe o peso do núcleo (g)');
+  /* Sem tecido não há laminação para calcular, e o registro iria para a
+     planilha sem o material aplicado. */
+  if(!TECIDOS.length) return faltaCampo('i-tecido','Adicione pelo menos um tecido');
   ID = { cliente:CFG.cliente, projeto:p, wtg:w, blade:b, tecnico:v('i-tecnico'), data:v('i-data'),
     tipo:getTipo(), nucleo, matNucleo:v('i-mat-nucleo'), pesoNucleoG:v('i-peso-nucleo'), tecidos:TECIDOS.slice() };
   nucleoTecidoRegistrado=false;
@@ -697,7 +723,9 @@ function renderResult(elId,titulo,itens,consumo){
 
 /* ══ HISTÓRICO + SINCRONIZAÇÃO ══ */
 function salvar(arg){
-  if(!ID.projeto){ toast('Preencha a Identificação primeiro','error'); goTab('id'); return; }
+  /* Não envia nada com a Identificação pela metade */
+  if(!ID.projeto || !ID.wtg || !ID.blade || !ID.tecnico || !ID.data){
+    toast('Complete a Identificação antes de salvar','error'); goTab('id'); return; }
   const c=JSON.parse(decodeURIComponent(arg));
   const registro={
     id:Date.now(), cliente:CFG.cliente, projeto:ID.projeto, wtg:ID.wtg, blade:ID.blade,
