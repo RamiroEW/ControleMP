@@ -247,7 +247,7 @@ canvas.fc{display:block;flex-shrink:0}
     <div class="ck-grid">
       <label class="ck"><input type="checkbox" id="c-ps" onchange="render()"> PS / UP</label>
       <label class="ck"><input type="checkbox" id="c-ba" onchange="render()"> BA / LE</label>
-      <label class="ck"><input type="checkbox" id="c-ss" onchange="render()"> SS / DW</label>
+      <label class="ck"><input type="checkbox" id="c-ss" onchange="render()"> SS / Down</label>
       <label class="ck"><input type="checkbox" id="c-bf" onchange="render()"> BF / TE</label>
       <label class="ck"><input type="checkbox" id="c-int" onchange="render()"> Interno</label>
       <label class="ck"><input type="checkbox" id="c-ext" onchange="render()"> Externo</label>
@@ -325,14 +325,21 @@ var LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnsAAAEtCAYAAABwC6bgAA
 /* ─── Estado ─── */
 var curState={}, camStream=null, facingMode='environment', isOnline=navigator.onLine;
 
+/* Versão do app, mostrada embaixo do título. Serve para saber, em 2 segundos e
+   olhando o celular, se o aparelho já está com o código novo — foi por não ter
+   isso que um upload defasado passou batido. Ao alterar este arquivo, mude aqui
+   e no CACHE do sw.js. */
+var APP_VERSAO = 'v26 · 17/08/2026';
+
 /* ─── Service Worker ─── */
 (function(){
   var swEl=document.getElementById('sw-status');
   var banner=document.getElementById('net-banner');
+  var marca=function(txt){ swEl.textContent = txt + '  ·  ' + APP_VERSAO; };
 
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('./sw.js').then(function(reg){
-      swEl.textContent='✓ Modo offline disponível após primeiro acesso';
+      marca('✓ Modo offline disponível após primeiro acesso');
       swEl.style.color='#3fb950';
 
       // Detecta nova versão disponível
@@ -347,11 +354,11 @@ var curState={}, camStream=null, facingMode='environment', isOnline=navigator.on
         });
       });
     }).catch(function(){
-      swEl.textContent='Service Worker não disponível neste ambiente';
+      marca('Service Worker não disponível neste ambiente');
       swEl.style.color='#8b949e';
     });
   } else {
-    swEl.textContent='Navegador sem suporte a offline';
+    marca('Navegador sem suporte a offline');
     swEl.style.color='#8b949e';
   }
 
@@ -1022,7 +1029,7 @@ function layout(s){
 
   /* 8 ─ Lado/Localização (6 caixas) | Equipe */
   var cbW=152, eqW=IW-cbW, eqO={padX:6,padY:4,mb:3,lhf:1.6,upper:true};
-  var CB=[['PS/UP',s.ps],['BA/LE',s.ba],['SS/DW',s.ss],
+  var CB=[['PS/UP',s.ps],['BA/LE',s.ba],['SS/Down',s.ss],
           ['BF/TE',s.bf],['Interno',s.int],['Externo',s.ext]];
   var gridH=3*11+2*4;                               /* 3 linhas de 11px + gaps */
   B.push({
@@ -1698,8 +1705,9 @@ async function capturePhoto(){
 
     main.toBlob(function(blob){
       if(!blob){toast('Erro ao gerar imagem');return}
-      salvarBlob(blob,fname,'image/jpeg',function(ok){
-        toast(ok ? '✓ Foto salva no celular' : '⚠ Não consegui salvar no celular');
+      salvarBlob(blob,fname,'image/jpeg',function(ok,via){
+        toast(ok ? ('✓ Foto salva no celular' + (via==='compartilhado' ? '' : ' (Downloads)'))
+                 : '⚠ FOTO NÃO SALVA — toque de novo e escolha onde salvar', ok?2500:5000);
       });
       enviarDropbox(blob,fname,s);
     },'image/jpeg',0.92);   /* 0,92 em 4K = arquivo ~3× menor que 1,0, sem
@@ -1723,8 +1731,9 @@ function saveCardOnly(){
     var s=curState;
     var fname='EW_card_'+partesNome([s.parque,s.turbina,s.ns])+'.png';
     canvas.toBlob(function(blob){
-      salvarBlob(blob,fname,'image/png',function(ok){
-        st.textContent = ok ? '✓ Salvo no celular!' : '⚠ Não consegui salvar no celular';
+      salvarBlob(blob,fname,'image/png',function(ok,via){
+        st.textContent = ok ? ('✓ Salvo no celular' + (via==='compartilhado' ? '' : ' (Downloads)'))
+                            : '⚠ Não salvou — tente de novo e escolha onde salvar';
         st.className = 'status ' + (ok ? 'ok' : 'er');
       });
       enviarDropbox(blob,fname,s);
@@ -1749,18 +1758,42 @@ function saveCardOnly(){
 var EH_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
           || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-function salvarBlob(blob,fname,type,cb){
-  var gravou = downloadBlob(blob,fname);      /* 1) cópia no aparelho, sempre */
+/* App instalado na tela inicial (standalone). Importa porque, instalado, o
+   download por <a download> no Android muitas vezes não chega a lugar nenhum:
+   não abre notificação, não aparece na galeria, e falha CALADO. Nesse caso a
+   folha de compartilhamento é o único caminho confiável — o "Salvar em Fotos"
+   dela põe a imagem no rolo da câmera de verdade. */
+var EH_STANDALONE = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+                 || window.navigator.standalone === true;
 
-  if(EH_IOS && navigator.canShare){           /* 2) iPhone: oferece o rolo da câmera */
-    try{
-      var file = new File([blob],fname,{type:type});
-      if(navigator.canShare({files:[file]})){
-        navigator.share({files:[file],title:'Fotocard EW'}).catch(function(){});
-      }
-    }catch(e){}
+function podeCompartilharArquivo(blob,fname,type){
+  try{
+    if(!navigator.canShare || !navigator.share) return null;
+    var file = new File([blob],fname,{type:type});
+    return navigator.canShare({files:[file]}) ? file : null;
+  }catch(e){ return null; }
+}
+
+function salvarBlob(blob,fname,type,cb){
+  var gravou = downloadBlob(blob,fname);      /* 1) tenta a cópia silenciosa */
+
+  /* 2) Onde o download não é confiável (app instalado ou iPhone), ou onde ele
+        falhou, abre a folha de compartilhamento. É um toque a mais por foto,
+        mas é o que garante a imagem no aparelho. */
+  var precisaFolha = !gravou || EH_IOS || EH_STANDALONE;
+  var file = precisaFolha ? podeCompartilharArquivo(blob,fname,type) : null;
+
+  if(file){
+    navigator.share({files:[file], title:'Fotocard EW'})
+      .then(function(){ if(cb) cb(true, 'compartilhado'); })
+      .catch(function(e){
+        /* Cancelou a folha: se o download silencioso tinha funcionado, ainda
+           existe cópia. Se não, avisa — antes esse caso ficava SEM foto. */
+        if(cb) cb(gravou, gravou ? 'download' : 'cancelado');
+      });
+    return;
   }
-  if(cb) cb(gravou);
+  if(cb) cb(gravou, gravou ? 'download' : 'falhou');
 }
 
 /* true se conseguiu disparar a gravação no aparelho */
