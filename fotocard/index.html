@@ -204,11 +204,16 @@ canvas.fc{display:block;flex-shrink:0}
 
 <div style="margin-bottom:8px" id="box-etapa"><label class="lbl">Etapa do Processo</label>
   <select id="f-etapa" onchange="etapaChange()">
-    <option>ID</option><option>Inspeção</option><option>BOD</option><option>Procedimento</option>
+    <!-- Ordem segue o andamento do reparo: identificação e inspeção, preparação,
+         laminação, acabamento, ensaios e fechamento. -->
+    <option>ID</option><option>Inspeção</option><option>Inspeção MCU</option><option>BOD</option>
+    <option>Colagem Anteparo</option>
     <option>Laminação do Núcleo</option><option>Núcleo Ajustado + Medição de GAP</option>
     <option>Chanfro</option><option>Laminação</option><option>Laminado Curado</option>
     <option>Pós-cura</option><option>Laminado Pós-curado</option><option>Shore-D</option>
-    <option>Pré-pintura</option><option>Pintura</option><option>Químicos</option><option>Outra</option>
+    <option>Pré-pintura</option><option>Pintura</option><option>Marcação SBI</option>
+    <option>Teste de condutividade</option>
+    <option>Químicos</option><option>Housekeeping</option><option>Outra</option>
   </select>
   <input id="f-etapa-outra" type="text" placeholder="Descreva a etapa..." style="margin-top:6px;display:none" oninput="render()">
 </div>
@@ -240,9 +245,9 @@ canvas.fc{display:block;flex-shrink:0}
   <div class="lbl"><span class="t">Lado / Localização</span><button type="button" class="edit-btn">✏️ Editar</button></div>
   <div class="ctrl">
     <div class="ck-grid">
-      <label class="ck"><input type="checkbox" id="c-ps" onchange="render()"> PS / WW</label>
+      <label class="ck"><input type="checkbox" id="c-ps" onchange="render()"> PS / UP</label>
       <label class="ck"><input type="checkbox" id="c-ba" onchange="render()"> BA / LE</label>
-      <label class="ck"><input type="checkbox" id="c-ss" onchange="render()"> SS / LW</label>
+      <label class="ck"><input type="checkbox" id="c-ss" onchange="render()"> SS / DW</label>
       <label class="ck"><input type="checkbox" id="c-bf" onchange="render()"> BF / TE</label>
       <label class="ck"><input type="checkbox" id="c-int" onchange="render()"> Interno</label>
       <label class="ck"><input type="checkbox" id="c-ext" onchange="render()"> Externo</label>
@@ -768,11 +773,20 @@ var FRAC0=0.38;              /* padrão: card = 38% do lado menor da foto */
 var FRAC=FRAC0;              /* em uso — o slider da câmera ajusta (0,20 a 0,70) */
 var fracManual=false;        /* true quando o tamanho foi escolhido à mão */
 var MARGIN=0.01;             /* folga até o canto = 1% do lado menor */
-var MINW=400;                /* piso: em foto de baixa resolução (aparelho sem
-                                4K) a proporção sozinha deixaria o card com
-                                rótulos de 4 px — aí ele cresce para caber a
-                                leitura. Só vale no automático: se a pessoa
-                                escolheu o tamanho, a escolha dela manda. */
+var MINW=520;                /* Piso de legibilidade. O card é desenhado como
+                                FRAÇÃO da foto, então em foto de baixa
+                                resolução ele encolhe junto — e como os rótulos
+                                do card têm 7 px no tamanho de projeto (460 px
+                                de largura), abaixo disso eles saem com menos
+                                de 7 px e viram borrão.
+                                Com 520 o card nunca é rasterizado abaixo do
+                                tamanho de projeto: os rótulos ficam em 7,9 px
+                                e os valores em 12,4 px, que é o mínimo que
+                                aguenta zoom no relatório. Era 400, que dava
+                                6,1 px de rótulo em 720p — a causa do card
+                                "mal renderizado".
+                                Só vale no automático: se a pessoa escolheu o
+                                tamanho à mão, a escolha dela manda. */
 var PX=5, PY=3;              /* padding das células de dado (era 3px 5px) */
 var LBL=7, LBLH=8, LBLM=1;   /* rótulo: fonte 7px, caixa 8px, margem 1px */
 var A=1;                     /* opacidade em uso no desenho corrente */
@@ -1008,7 +1022,7 @@ function layout(s){
 
   /* 8 ─ Lado/Localização (6 caixas) | Equipe */
   var cbW=152, eqW=IW-cbW, eqO={padX:6,padY:4,mb:3,lhf:1.6,upper:true};
-  var CB=[['PS/WW',s.ps],['BA/LE',s.ba],['SS/LW',s.ss],
+  var CB=[['PS/UP',s.ps],['BA/LE',s.ba],['SS/DW',s.ss],
           ['BF/TE',s.bf],['Interno',s.int],['Externo',s.ext]];
   var gridH=3*11+2*4;                               /* 3 linhas de 11px + gaps */
   B.push({
@@ -1685,7 +1699,7 @@ async function capturePhoto(){
     main.toBlob(function(blob){
       if(!blob){toast('Erro ao gerar imagem');return}
       salvarBlob(blob,fname,'image/jpeg',function(ok){
-        toast(ok?'✓ Foto salva na galeria!':'✓ Foto baixada!');
+        toast(ok ? '✓ Foto salva no celular' : '⚠ Não consegui salvar no celular');
       });
       enviarDropbox(blob,fname,s);
     },'image/jpeg',0.92);   /* 0,92 em 4K = arquivo ~3× menor que 1,0, sem
@@ -1710,7 +1724,8 @@ function saveCardOnly(){
     var fname='EW_card_'+partesNome([s.parque,s.turbina,s.ns])+'.png';
     canvas.toBlob(function(blob){
       salvarBlob(blob,fname,'image/png',function(ok){
-        st.textContent='✓ Salvo!';st.className='status ok';
+        st.textContent = ok ? '✓ Salvo no celular!' : '⚠ Não consegui salvar no celular';
+        st.className = 'status ' + (ok ? 'ok' : 'er');
       });
       enviarDropbox(blob,fname,s);
     },'image/png');
@@ -1719,27 +1734,47 @@ function saveCardOnly(){
   }
 }
 
-/* ─── Salvar blob: Web Share → download ─── */
+/* ═══ SALVAR NO PRÓPRIO CELULAR ═══
+   Regra de campo: TODA foto tem de ficar gravada no aparelho — mesmo se o
+   Dropbox falhar, mesmo sem internet.
+
+   Antes o app abria a folha de compartilhamento e só baixava se ela falhasse.
+   Isso tinha um buraco: quem apertava "cancelar" na folha ficava SEM cópia
+   nenhuma — a foto sumia. Agora a gravação vem primeiro e sempre acontece.
+
+   Android: o download cai direto na pasta Downloads, sem perguntar, e a
+   galeria indexa essa pasta. iPhone: o download vai para o app Arquivos, e por
+   isso lá a folha de compartilhamento continua sendo oferecida — é o
+   "Salvar Imagem" dela que põe a foto no rolo da câmera. */
+var EH_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+          || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 function salvarBlob(blob,fname,type,cb){
-  if(navigator.canShare){
-    var file=new File([blob],fname,{type:type});
-    if(navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:'Fotocard EW'})
-        .then(function(){if(cb)cb(true)})
-        .catch(function(e){if(e.name!=='AbortError')downloadBlob(blob,fname,cb);else if(cb)cb(false)});
-      return;
-    }
+  var gravou = downloadBlob(blob,fname);      /* 1) cópia no aparelho, sempre */
+
+  if(EH_IOS && navigator.canShare){           /* 2) iPhone: oferece o rolo da câmera */
+    try{
+      var file = new File([blob],fname,{type:type});
+      if(navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:'Fotocard EW'}).catch(function(){});
+      }
+    }catch(e){}
   }
-  downloadBlob(blob,fname,cb);
+  if(cb) cb(gravou);
 }
 
-function downloadBlob(blob,fname,cb){
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url;a.download=fname;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(function(){URL.revokeObjectURL(url)},1500);
-  if(cb)cb(false);
+/* true se conseguiu disparar a gravação no aparelho */
+function downloadBlob(blob,fname){
+  try{
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download=fname; a.rel='noopener';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url)},1500);
+    return true;
+  }catch(e){
+    return false;
+  }
 }
 
 /* ═══ DROPBOX (via Cloudflare Worker) ═══

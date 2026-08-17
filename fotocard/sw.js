@@ -1,4 +1,4 @@
-const CACHE = 'ew-fotocard-v24';
+const CACHE = 'ew-fotocard-v25';
 const PRECACHE = [
   './',
   './index.html',
