@@ -82,6 +82,7 @@ textarea{resize:vertical;min-height:52px;line-height:1.5}
 .btn{display:block;width:100%;padding:12px;border:none;border-radius:7px;font-weight:bold;font-size:14px;cursor:pointer;margin-bottom:7px;-webkit-tap-highlight-color:transparent;letter-spacing:.3px}
 .btn-cam{background:#1f6feb;color:#fff}
 .btn-save{background:#238636;color:#fff}
+.btn-galeria{background:#6e40c9;color:#fff}
 .status{font-size:12px;text-align:center;min-height:18px;margin-bottom:4px}
 .ok{color:#3fb950}.er{color:#f85149}
 
@@ -150,6 +151,19 @@ canvas.fc{display:block;flex-shrink:0}
 #cam-stamp{position:absolute;top:0;left:0;transform-origin:center center;
   pointer-events:none;z-index:21;transition:transform .18s ease}
 #cam-stamp canvas{display:block}
+/* ── Tela de revisão: a foto pronta, antes de gravar e enviar ──
+   Nada é salvo nem sobe para o Dropbox enquanto o técnico não aprovar. */
+#rev-view{position:fixed;inset:0;background:#000;z-index:1100;display:none;flex-direction:column}
+#rev-view.on{display:flex}
+#rev-img{flex:1;min-height:0;width:100%;object-fit:contain;background:#000}
+#rev-info{position:absolute;top:0;left:0;right:0;padding:10px 14px;color:#fff;font-size:12px;
+  background:linear-gradient(rgba(0,0,0,.75),transparent);z-index:2;text-align:center;font-weight:bold}
+#rev-controls{padding:14px 16px 30px;display:flex;gap:12px;background:#0d1117;border-top:1px solid #21262d}
+.rev-btn{flex:1;padding:16px 10px;border:none;border-radius:12px;font-weight:bold;font-size:15px;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;letter-spacing:.3px}
+.rev-refaz{background:#21262d;color:#c9d1d9;border:1px solid #30363d}
+.rev-usa{background:#238636;color:#fff}
+.rev-btn:disabled{opacity:.5}
 #cam-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:30;transition:opacity .15s}
 #cam-toast{position:absolute;bottom:176px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;white-space:nowrap;z-index:40;opacity:0;transition:opacity .3s;pointer-events:none}
 #cam-toast.show{opacity:1}
@@ -266,6 +280,7 @@ canvas.fc{display:block;flex-shrink:0}
      branco, então o técnico descobre a pendência ANTES de tocar no botão. -->
 <div id="falta-aviso"></div>
 <button class="btn btn-cam" id="btn-cam" onclick="openCamera()">📷  Abrir Câmera com Fotocard</button>
+<button class="btn btn-galeria" id="btn-galeria" onclick="abrirGaleria()">🖼️  Carregar foto da galeria</button>
 <button class="btn btn-save" id="btn-save" onclick="saveCardOnly()">💾  Salvar Fotocard (sem foto)</button>
 <div class="status" id="st"></div>
 
@@ -312,6 +327,19 @@ canvas.fc{display:block;flex-shrink:0}
   </div>
 </div>
 
+<!-- ── Revisão: mostra a foto montada e só grava/envia se for aprovada ── -->
+<div id="rev-view">
+  <div id="rev-info"></div>
+  <img id="rev-img" alt="Foto para conferência">
+  <div id="rev-controls">
+    <button class="rev-btn rev-refaz" id="rev-btn-refaz" onclick="refazerFoto()">↺  Refazer</button>
+    <button class="rev-btn rev-usa"   id="rev-btn-usa"   onclick="aprovarFoto()">✓  Usar esta foto</button>
+  </div>
+</div>
+
+<!-- Seletor da galeria: sem "capture", então abre as fotos do aparelho -->
+<input type="file" id="f-galeria" accept="image/*" style="display:none" onchange="importarDaGaleria(this)">
+
 <!-- Não existe mais card oculto para captura: a foto recebe o card
      desenhado direto no canvas, já no tamanho final (FC.toCanvas). -->
 
@@ -329,7 +357,7 @@ var curState={}, camStream=null, facingMode='environment', isOnline=navigator.on
    olhando o celular, se o aparelho já está com o código novo — foi por não ter
    isso que um upload defasado passou batido. Ao alterar este arquivo, mude aqui
    e no CACHE do sw.js. */
-var APP_VERSAO = 'v30 · 18/08/2026';
+var APP_VERSAO = 'v32 · 18/08/2026';
 
 /* ─── Service Worker ─── */
 (function(){
@@ -498,7 +526,7 @@ function exigePreenchimento(acao){
 /* Estado ao vivo dos botões e do aviso — roda a cada tecla, via render() */
 function atualizaBotoes(){
   var falta=faltaPreencher();
-  ['btn-cam','btn-save'].forEach(function(id){
+  ['btn-cam','btn-galeria','btn-save'].forEach(function(id){
     var b=document.getElementById(id);
     if(b) b.classList.toggle('bloqueado',falta.length>0);
   });
@@ -795,7 +823,10 @@ var MINW=520;                /* Piso de legibilidade. O card é desenhado como
                                 Só vale no automático: se a pessoa escolheu o
                                 tamanho à mão, a escolha dela manda. */
 var PX=5, PY=3;              /* padding das células de dado (era 3px 5px) */
-var LBL=8, LBLH=9, LBLM=1;   /* rótulo: 8px NEGRITO, caixa 9px, margem 1px */
+var LBL=13, LBLH=15, LBLM=1; /* rótulo: 13px NEGRITO, caixa 15px, margem 1px.
+                                Ficava em 8px enquanto o valor ia a 26/36 — de
+                                longe, na foto, o título sumia e sobrava só o
+                                número solto, sem dizer do que era. */
 var A=1;                     /* opacidade em uso no desenho corrente */
 
 /* ── Utilitários ── */
@@ -951,10 +982,10 @@ function ruler(ctx,x,y,w){
   for(i=0;i<=n;i++){
     var cx=x+i*px, big=(i%5===0), lw=big?1:0.5;
     fill(ctx,cx-lw/2,y,lw,big?13:8,INK);
-    line(ctx,String(i),cx,y+16,7,false,'center',lhx(7));
+    line(ctx,String(i),cx,y+17,9,true,'center',lhx(9));
     if(i<n) for(j=1;j<=4;j++) fill(ctx,cx+j*px/5-0.15,y,0.3,4,INK);
   }
-  line(ctx,'cm',x+w+10,y+7,8,false,'left',lhx(8));
+  line(ctx,'cm',x+w+10,y+6,10,true,'left',lhx(10));
 }
 
 /* ═══ LAYOUT ═══
@@ -973,7 +1004,7 @@ function layout(s){
 
      A HORA continua fora do card — quem marca hora é o carimbo do rodapé da
      foto, que tem a hora real da captura, com segundos. */
-  var dataCard=dataDeHoje();
+  var dataCard=str(s.data)||dataDeHoje();   /* foto da galeria manda a data do arquivo */
   var lgW=92, dW=120, cB=IW-lgW-dW, lgH=logoH();
   B.push({
     h:Math.max(48, lgH+10+HAIR,
@@ -1096,7 +1127,7 @@ function layout(s){
   });
 
   /* 9 ─ Régua — último bloco, sem divisória embaixo (a borda externa fecha) */
-  B.push({ h:5+28+6, noline:true, draw:function(ctx,y){ ruler(ctx,OUT+8,y+5,296); } });
+  B.push({ h:5+30+6, noline:true, draw:function(ctx,y){ ruler(ctx,OUT+8,y+5,296); } });
 
   var H=OUT*2; B.forEach(function(b){ H+=b.h; });
   return {w:W,h:H,blocks:B};
@@ -1626,9 +1657,11 @@ function escreveCarimbo(ctx,size,txt){
 }
 
 /* Grava o carimbo na foto, no canto inferior direito */
-function desenhaCarimbo(ctx,vw,vh,ang){
+function desenhaCarimbo(ctx,vw,vh,ang,data){
   var lado=Math.min(vw,vh);
-  var size=corpoCarimbo(lado), mg=margemCarimbo(lado), txt=textoCarimbo();
+  /* "data" só vem na foto importada da galeria: ali o carimbo tem de mostrar
+     quando a foto foi TIRADA, não a hora em que ela foi carregada no app. */
+  var size=corpoCarimbo(lado), mg=margemCarimbo(lado), txt=textoCarimbo(data);
   ctx.save();
   var m=medeCarimbo(ctx,size,txt);
   var deitado=(ang===90||ang===270);
@@ -1771,19 +1804,138 @@ async function capturePhoto(){
     var s=curState;
     var fname='EW_'+partesNome([s.parque,s.turbina,s.ns,s.etapa])+'_'+carimboArquivo()+'.jpg';
 
+    /* Nada é gravado nem enviado aqui: a foto vai para a tela de revisão e só
+       segue depois do "Usar esta foto". Antes ela ia direto, e foto tremida ou
+       com o card em cima do dano só era descoberta no relatório. */
     main.toBlob(function(blob){
       if(!blob){toast('Erro ao gerar imagem');return}
-      dicaGaleria();
-      salvarBlob(blob,fname,'image/jpeg',function(ok,via){
-        toast(ok ? (via==='galeria' ? '✓ Foto salva na galeria' : '✓ Foto salva em Downloads')
-                 : '⚠ FOTO NÃO SALVA — toque na câmera de novo', ok?2500:5000);
-      });
-      enviarDropbox(blob,fname,s);
+      revisarFoto(blob, fname, s, 'camera');
     },'image/jpeg',0.92);   /* 0,92 em 4K = arquivo ~3× menor que 1,0, sem
                                diferença visível nem no texto do card */
 
   }catch(e){
     toast('Erro: '+e.message);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REVISÃO — a foto é conferida antes de virar arquivo
+   ───────────────────────────────────────────────────────────────────────────
+   Nada é gravado no celular nem enviado ao Dropbox enquanto o técnico não
+   aprovar. Antes a foto ia direto: tremida, desenquadrada ou com o card em
+   cima do dano, o problema só aparecia no relatório, com a equipe já fora da
+   pá. Agora dá para refazer na hora.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var revBlob=null, revNome='', revEstado=null, revOrigem='camera', revUrl='';
+
+function revisarFoto(blob, fname, estado, origem){
+  revBlob=blob; revNome=fname; revEstado=estado; revOrigem=origem||'camera';
+  if(revUrl) URL.revokeObjectURL(revUrl);
+  revUrl=URL.createObjectURL(blob);
+
+  document.getElementById('rev-img').src=revUrl;
+  var kb=Math.round(blob.size/1024);
+  document.getElementById('rev-info').textContent =
+    (origem==='galeria' ? 'Foto da galeria · ' : 'Foto tirada agora · ')
+    + (kb>1024 ? (kb/1024).toFixed(1)+' MB' : kb+' KB');
+  document.getElementById('rev-btn-refaz').textContent =
+    (origem==='galeria' ? '↺  Escolher outra' : '↺  Refazer');
+  habilitaRevisao(true);
+  document.getElementById('rev-view').classList.add('on');
+}
+
+function habilitaRevisao(ok){
+  document.getElementById('rev-btn-usa').disabled=!ok;
+  document.getElementById('rev-btn-refaz').disabled=!ok;
+}
+
+function fechaRevisao(){
+  document.getElementById('rev-view').classList.remove('on');
+  if(revUrl){ URL.revokeObjectURL(revUrl); revUrl=''; }
+  document.getElementById('rev-img').removeAttribute('src');
+  revBlob=null; revEstado=null;
+}
+
+/* Descarta e volta para onde a foto veio */
+function refazerFoto(){
+  var origem=revOrigem;
+  fechaRevisao();
+  if(origem==='galeria'){ abrirGaleria(); }
+  else if(!document.getElementById('cam-view').classList.contains('on')){ openCamera(); }
+  /* vindo da câmera, ela continua aberta atrás — é só voltar a mirar */
+}
+
+/* Só aqui a foto vira arquivo no celular e entra na fila do Dropbox */
+function aprovarFoto(){
+  if(!revBlob) return;
+  var blob=revBlob, fname=revNome, est=revEstado;
+  habilitaRevisao(false);
+  dicaGaleria();
+  salvarBlob(blob,fname,'image/jpeg',function(ok,via){
+    toast(ok ? (via==='galeria' ? '✓ Foto salva na galeria' : '✓ Foto salva em Downloads')
+             : '⚠ FOTO NÃO SALVA — toque em Usar de novo', ok?2500:5000);
+  });
+  enviarDropbox(blob,fname,est);
+  fechaRevisao();
+}
+
+/* ═══ CARREGAR FOTO DA GALERIA ═══
+   Para a foto que já foi tirada pela câmera do celular: recebe o mesmo card e
+   o mesmo carimbo, e segue pelo mesmo caminho de revisão e envio.
+   A data usada é a do ARQUIVO, não a de hoje — foto de ontem sai com a data de
+   ontem, no card e no carimbo. */
+function abrirGaleria(){
+  if(!exigePreenchimento('carregar uma foto')) return;
+  var inp=document.getElementById('f-galeria');
+  inp.value='';           /* permite escolher o mesmo arquivo de novo */
+  inp.click();
+}
+
+async function importarDaGaleria(input){
+  var file=input.files && input.files[0];
+  if(!file) return;
+  var st=document.getElementById('st');
+  st.textContent='Montando a foto...'; st.className='status';
+
+  try{
+    /* imageOrientation from-image: respeita o EXIF, senão foto em pé vem deitada */
+    var bmp;
+    try{ bmp=await createImageBitmap(file,{imageOrientation:'from-image'}); }
+    catch(e){ bmp=await createImageBitmap(file); }
+
+    var vw=bmp.width, vh=bmp.height;
+    var main=document.createElement('canvas');
+    main.width=vw; main.height=vh;
+    var ctx=main.getContext('2d');
+    ctx.drawImage(bmp,0,0,vw,vh);
+
+    /* Data do arquivo — no card e no carimbo */
+    var d=file.lastModified ? new Date(file.lastModified) : new Date();
+    var p2=function(n){ return n<10?'0'+n:''+n; };
+    var estado=Object.assign({},curState,{data:p2(d.getDate())+'/'+p2(d.getMonth()+1)+'/'+d.getFullYear()});
+
+    /* Card sem giro: a foto já vem na orientação final, não há tela girando */
+    var lado=Math.min(vw,vh);
+    var mg=Math.round(lado*FC.MARGIN);
+    var cw=FC.larguraNaFoto(lado);
+    var cardCv=FC.toCanvas(estado, cw/FC.W, FC.OPACITY);
+    cw=cardCv.width;
+    var ch=cardCv.height;
+    var livreW=Math.max(0,vw-2*mg-cw), livreH=Math.max(0,vh-2*mg-ch);
+    ctx.drawImage(cardCv, mg+posX*livreW, mg+posY*livreH, cw, ch);
+
+    desenhaCarimbo(ctx, vw, vh, 0, d);
+
+    var fname='EW_'+partesNome([estado.parque,estado.turbina,estado.ns,estado.etapa])
+             +'_'+carimboArquivo()+'.jpg';
+    main.toBlob(function(blob){
+      st.textContent=''; st.className='status';
+      if(!blob){ toast('Não consegui montar a foto'); return; }
+      revisarFoto(blob, fname, estado, 'galeria');
+    },'image/jpeg',0.92);
+
+  }catch(e){
+    st.textContent='Erro ao ler a foto: '+e.message; st.className='status er';
   }
 }
 
