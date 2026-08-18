@@ -357,7 +357,7 @@ var curState={}, camStream=null, facingMode='environment', isOnline=navigator.on
    olhando o celular, se o aparelho já está com o código novo — foi por não ter
    isso que um upload defasado passou batido. Ao alterar este arquivo, mude aqui
    e no CACHE do sw.js. */
-var APP_VERSAO = 'v33 · 18/08/2026';
+var APP_VERSAO = 'v34 · 18/08/2026';
 
 /* ─── Service Worker ─── */
 (function(){
@@ -797,18 +797,29 @@ function memInit(){
 var FC = (function(){
 
 /* ── Constantes de layout ── */
-var W=460, OUT=2.5, HAIR=1, IW=W-2*OUT;    /* 455 px úteis dentro da borda */
+/* Largura de trabalho do card. Foi de 460 para 900: com 460 o card virava um
+   bloco ALTO (proporção 0.9 — mais alto que largo), porque a informação só
+   tinha para onde crescer para baixo. Com 900 as células ficam largas, o
+   ajuste automático de fonte sobe os valores, e o card fecha como uma FAIXA
+   horizontal (proporção ~1.9) — cobre menos pá na vertical.
+   As medidas proporcionais (IW/2, IW/4) acompanham sozinhas; as fixas abaixo
+   (logo, data, coluna dos checkboxes, régua) foram escaladas na mão. */
+var W=900, OUT=3, HAIR=1.5, IW=W-2*OUT;    /* 894 px úteis dentro da borda */
 var INK='#000', PAPER=[255,255,255], CYAN=[159,217,229];   /* #9fd9e5 */
 var FAM='Arial, Helvetica, sans-serif';
 /* Proporções e opacidade tiradas do fotocard de referência usado em campo
    (foto CLE 5-12 / São Clemente): card com ~38% do lado MENOR da foto,
    quase encostado no canto, e fundo bem opaco para leitura no relatório. */
 var OPACITY=0.85;            /* opacidade do fundo do card sobre a foto */
-var FRAC0=0.38;              /* padrão: card = 38% do lado menor da foto */
+var FRAC0=0.50;              /* padrão: card = 50% do lado menor da foto.
+                                Era 38% quando o card era um bloco alto. Como
+                                agora ele é faixa (900x530), 50% dá texto MAIOR
+                                que o card antigo e ainda cobre 25% menos altura
+                                da pá. O slider na câmera segue mandando. */
 var FRAC=FRAC0;              /* em uso — o slider da câmera ajusta (0,20 a 0,70) */
 var fracManual=false;        /* true quando o tamanho foi escolhido à mão */
 var MARGIN=0.01;             /* folga até o canto = 1% do lado menor */
-var MINW=520;                /* Piso de legibilidade. O card é desenhado como
+var MINW=760;                /* Piso de legibilidade. O card é desenhado como
                                 FRAÇÃO da foto, então em foto de baixa
                                 resolução ele encolhe junto — e como os rótulos
                                 do card têm 7 px no tamanho de projeto (460 px
@@ -822,8 +833,8 @@ var MINW=520;                /* Piso de legibilidade. O card é desenhado como
                                 "mal renderizado".
                                 Só vale no automático: se a pessoa escolheu o
                                 tamanho à mão, a escolha dela manda. */
-var PX=5, PY=3;              /* padding das células de dado (era 3px 5px) */
-var LBL=13, LBLH=15, LBLM=1; /* rótulo: 13px NEGRITO, caixa 15px, margem 1px.
+var PX=9, PY=5;              /* padding das células de dado (era 3px 5px) */
+var LBL=19, LBLH=22, LBLM=2; /* rótulo: 13px NEGRITO, caixa 15px, margem 1px.
                                 Ficava em 8px enquanto o valor ia a 26/36 — de
                                 longe, na foto, o título sumia e sobrava só o
                                 número solto, sem dizer do que era. */
@@ -843,7 +854,7 @@ var mc=document.createElement('canvas').getContext('2d');
 var logo=new Image(), logoOk=false;
 logo.onload=function(){ logoOk=true; if(typeof render==='function') render(); };
 logo.src=LOGO;
-function logoH(){ return logoOk ? 84*(logo.naturalHeight/logo.naturalWidth) : 40; }
+function logoH(){ return logoOk ? 164*(logo.naturalHeight/logo.naturalWidth) : 78; }
 
 /* ── Primitivas de desenho ── */
 function fill(ctx,x,y,w,h,c){ ctx.fillStyle=c; ctx.fillRect(x,y,w,h); }
@@ -981,11 +992,11 @@ function ruler(ctx,x,y,w){
   var n=15, px=w/n, i, j;
   for(i=0;i<=n;i++){
     var cx=x+i*px, big=(i%5===0), lw=big?1:0.5;
-    fill(ctx,cx-lw/2,y,lw,big?13:8,INK);
-    line(ctx,String(i),cx,y+17,9,true,'center',lhx(9));
-    if(i<n) for(j=1;j<=4;j++) fill(ctx,cx+j*px/5-0.15,y,0.3,4,INK);
+    fill(ctx,cx-lw*0.9,y,lw*1.8,big?18:11,INK);
+    line(ctx,String(i),cx,y+21,13,true,'center',lhx(13));
+    if(i<n) for(j=1;j<=4;j++) fill(ctx,cx+j*px/5-0.3,y,0.6,6,INK);
   }
-  line(ctx,'cm',x+w+10,y+6,10,true,'left',lhx(10));
+  line(ctx,'cm',x+w+14,y+8,14,true,'left',lhx(14));
 }
 
 /* ═══ LAYOUT ═══
@@ -993,144 +1004,122 @@ function ruler(ctx,x,y,w){
    cada bloco cresce se o texto quebrar em mais linhas, igual ao HTML. */
 function layout(s){
   var B=[];
+  var dataCard=str(s.data)||dataDeHoje();
 
-  /* 1 ─ Logo | Data | Modelo
-     A data volta ao card, SÓ o dia (sem hora), preenchida sozinha.
+  /* ═══ FAIXA HORIZONTAL ═══
+     O card era um bloco alto: 9 linhas empilhadas, uma para cada campo, e a
+     largura sobrando à direita de quase todas. Cobria pá demais na vertical.
 
-     Ela tinha saído porque era lida na ABERTURA do app e, num dia inteiro de
-     pá, o card saía com a data de ontem. Agora é gerada aqui, no instante em
-     que o card é desenhado: a foto das 17h leva a data certa mesmo com o app
-     aberto desde as 7h, e vira o dia sem ninguém precisar reabrir nada.
+     Agora a largura é a que trabalha: os campos curtos entram lado a lado na
+     mesma faixa, e o card fecha em ~7 linhas em vez de 9. A altura que sobra
+     virou tamanho de fonte — cada valor cresce até encostar na célula.
+     O par de cada eixo continua na vertical (Zf embaixo de Zi, Xf embaixo de
+     Xi), como na ficha de papel. */
 
-     A HORA continua fora do card — quem marca hora é o carimbo do rodapé da
-     foto, que tem a hora real da captura, com segundos. */
-  var dataCard=str(s.data)||dataDeHoje();   /* foto da galeria manda a data do arquivo */
-  var lgW=92, dW=120, cB=IW-lgW-dW, lgH=logoH();
+  /* 1 ─ Logo | Data | Modelo | Cliente | N/S */
+  var lgW=168, dtW=196, clW=150, nsW=136, moW=IW-lgW-dtW-clW-nsW, lgH=logoH();
   B.push({
-    h:Math.max(48, lgH+10+HAIR,
-                   cellLVh(dW-HAIR,dataCard,12,{max:23})+HAIR,
-                   cellLVh(cB,s.modelo,11,{max:26})+HAIR),
+    h:Math.max(56, lgH+12+HAIR,
+                   cellLVh(dtW-HAIR,dataCard,12,{max:32})+HAIR,
+                   cellLVh(moW-HAIR,s.modelo,11,{max:34})+HAIR,
+                   cellLVh(clW-HAIR,s.cliente,11,{max:32})+HAIR,
+                   cellLVh(nsW,s.ns,11,{max:32})+HAIR),
     draw:function(ctx,y,h){
-      var ch=h-HAIR, x2=OUT+lgW, x3=x2+dW;
-      bg(ctx,x3,y,cB,ch,CYAN);                       /* Modelo em ciano */
-      fill(ctx,x2-HAIR,y,HAIR,ch,INK);
-      fill(ctx,x3-HAIR,y,HAIR,ch,INK);
-      if(logoOk) ctx.drawImage(logo,OUT+(lgW-HAIR-84)/2,y+(ch-lgH)/2,84,lgH);
-      cellLV(ctx,x2,y,dW-HAIR,'Data',dataCard,12,{max:23});
-      cellLV(ctx,x3,y,cB,'Modelo',s.modelo,11,{max:26});
+      var ch=h-HAIR, x2=OUT+lgW, x3=x2+dtW, x4=x3+moW, x5=x4+clW;
+      bg(ctx,x3,y,moW,ch,CYAN);                    /* Modelo destacado */
+      bg(ctx,x5,y,nsW,ch,CYAN);                    /* N/S destacado */
+      [x2,x3,x4,x5].forEach(function(x){ fill(ctx,x-HAIR,y,HAIR,ch,INK); });
+      if(logoOk) ctx.drawImage(logo,OUT+(lgW-HAIR-152)/2,y+(ch-lgH)/2,152,lgH);
+      cellLV(ctx,x2,y,dtW-HAIR,'Data',dataCard,12,{max:32});
+      cellLV(ctx,x3,y,moW-HAIR,'Modelo',s.modelo,11,{max:34});
+      cellLV(ctx,x4,y,clW-HAIR,'Cliente',s.cliente,11,{max:32});
+      cellLV(ctx,x5,y,nsW,'N/S',s.ns,11,{max:32});
     }
   });
 
-  /* 2 ─ Parque eólico */
+  /* 2 ─ Parque eólico: a identificação principal, sozinha na faixa */
   var pqTxt=up(s.parque)||'—';
-  var pqTam=tamanhoCentral(pqTxt,IW-12,15,36,1.5);
-  var pqL=wrap(pqTxt,IW-12,fnt(pqTam,true),1.5), pqLH=lhx(pqTam,1.3);
+  var pqTam=tamanhoCentral(pqTxt,IW-20,15,54,2.5);
+  var pqL=wrap(pqTxt,IW-20,fnt(pqTam,true),2.5), pqLH=lhx(pqTam,1.25);
   B.push({
-    h:2+LBLH+LBLM+Math.max(20,pqL.length*pqLH)+4+HAIR,
+    h:3+LBLH+LBLM+Math.max(24,pqL.length*pqLH)+5+HAIR,
     draw:function(ctx,y){
-      line(ctx,'Parque eólico (Local)',OUT+6,y+2,LBL,true,'left',LBLH);
-      var ty=y+2+LBLH+LBLM;
-      pqL.forEach(function(t){ line(ctx,t,W/2,ty,pqTam,true,'center',pqLH,1.5); ty+=pqLH; });
+      line(ctx,'Parque eólico (Local)',OUT+10,y+3,LBL,true,'left',LBLH);
+      var ty=y+3+LBLH+LBLM;
+      pqL.forEach(function(t){ line(ctx,t,W/2,ty,pqTam,true,'center',pqLH,2.5); ty+=pqLH; });
     }
   });
 
-  /* 3 ─ Torre | Cliente | N/S */
-  var q=IW/4, w31=q*2;
-  B.push({
-    h:Math.max(32, cellLVh(w31-HAIR,s.turbina,11,{max:26})+HAIR,
-                   cellLVh(q-HAIR,s.cliente,11,{max:24})+HAIR,
-                   cellLVh(q,s.ns,11,{max:24})+HAIR),
-    draw:function(ctx,y,h){
-      var ch=h-HAIR, x2=OUT+w31, x3=x2+q;
-      bg(ctx,x2,y,q,ch,CYAN);                        /* Cliente em ciano */
-      fill(ctx,x2-HAIR,y,HAIR,ch,INK);
-      fill(ctx,x3-HAIR,y,HAIR,ch,INK);
-      cellLV(ctx,OUT,y,w31-HAIR,'Torre',s.turbina,11,{max:26});
-      cellLV(ctx,x2,y,q-HAIR,'Cliente',s.cliente,11,{max:24});
-      cellLV(ctx,x3,y,q,'N/S',s.ns,11,{max:24});
-    }
-  });
-
-  /* 4 ─ Detalhes (etapa do processo) */
+  /* 3 ─ Torre | Detalhes (a etapa do processo) */
+  var toW=Math.round(IW*0.32), etW=IW-toW;
   var etTxt=up(s.etapa)||'—';
-  var etTam=tamanhoCentral(etTxt,IW-12,13,32,0.5);
-  var etL=wrap(etTxt,IW-12,fnt(etTam,true),0.5), etLH=lhx(etTam,1.3);
+  var etTam=tamanhoCentral(etTxt,etW-20,13,42,1);
+  var etL=wrap(etTxt,etW-20,fnt(etTam,true),1), etLH=lhx(etTam,1.25);
   B.push({
-    h:2+LBLH+LBLM+Math.max(18,etL.length*etLH)+4+HAIR,
-    draw:function(ctx,y){
-      line(ctx,'Detalhes',OUT+6,y+2,LBL,true,'left',LBLH);
-      var ty=y+2+LBLH+LBLM;
-      etL.forEach(function(t){ line(ctx,t,W/2,ty,etTam,true,'center',etLH,0.5); ty+=etLH; });
-    }
-  });
-
-  /* 5 ─ Zi | Xi   (as iniciais dos dois eixos)
-     6 ─ Zf | Xf   (as finais, cada uma logo ABAIXO da sua inicial)
-
-     Cada coluna é um eixo lido de cima para baixo — Zf embaixo de Zi, Xf
-     embaixo de Xi — igual à ficha de papel preenchida na pá. Antes o card
-     agrupava por linha (Zi|Zf em cima, Xi|Xf embaixo), o que obrigava a ler
-     na diagonal para achar o par de um mesmo eixo. */
-  var m=IW/2;
-  B.push({
-    h:Math.max(30, cellLVh(m-HAIR,s.z1,12,{max:26})+HAIR,
-                   cellLVh(m,s.x1,12,{max:26})+HAIR),
+    h:Math.max(56, cellLVh(toW-HAIR,s.turbina,11,{max:36})+HAIR,
+                   3+LBLH+LBLM+etL.length*etLH+5+HAIR),
     draw:function(ctx,y,h){
-      var ch=h-HAIR, x2=OUT+m;
-      bg(ctx,x2,y,m,ch,CYAN);                        /* coluna X destacada */
+      var ch=h-HAIR, x2=OUT+toW;
       fill(ctx,x2-HAIR,y,HAIR,ch,INK);
-      cellLV(ctx,OUT,y,m-HAIR,'Zi (mm)',s.z1,12,{max:26});
-      cellLV(ctx,x2,y,m,'Xi (mm)',s.x1,12,{max:26});
+      cellLV(ctx,OUT,y,toW-HAIR,'Torre',s.turbina,11,{max:36});
+      line(ctx,'Detalhes',x2+10,y+3,LBL,true,'left',LBLH);
+      var ty=y+3+LBLH+LBLM, cx=x2+etW/2;
+      etL.forEach(function(t){ line(ctx,t,cx,ty,etTam,true,'center',etLH,1); ty+=etLH; });
     }
   });
 
+  /* 4 e 5 ─ Coordenadas em 2 colunas (Zf embaixo de Zi, Xf embaixo de Xi)
+     e o Dano ocupando a terça parte da direita nas duas faixas. */
+  var cdW=Math.round(IW*0.66), coW=cdW/2, dnW=IW-cdW;
+  var dano={lhf:1.25,max:30};
+  var hCoord=Math.max(52, cellLVh(coW-HAIR,s.z1,12,{max:36})+HAIR,
+                          cellLVh(coW-HAIR,s.x1,12,{max:36})+HAIR,
+                          cellLVh(coW-HAIR,s.z2,12,{max:36})+HAIR,
+                          cellLVh(coW-HAIR,s.x2,12,{max:36})+HAIR);
+  var hDano=cellLVh(dnW,s.dano,11,dano)+HAIR;
+  var hBloco=Math.max(hCoord*2, hDano);
   B.push({
-    h:Math.max(30, cellLVh(m-HAIR,s.z2,12,{max:26})+HAIR,
-                   cellLVh(m,s.x2,12,{max:26})+HAIR),
+    h:hBloco,
     draw:function(ctx,y,h){
-      var ch=h-HAIR, x2=OUT+m;
-      fill(ctx,x2-HAIR,y,HAIR,ch,INK);
-      cellLV(ctx,OUT,y,m-HAIR,'Zf (mm)',s.z2,12,{max:26});
-      cellLV(ctx,x2,y,m,'Xf (mm)',s.x2,12,{max:26});
+      var meia=h/2, x2=OUT+coW, x3=OUT+cdW;
+      bg(ctx,x2,y,coW,meia,CYAN);                       /* coluna X no topo */
+      fill(ctx,x2-HAIR,y,HAIR,h-HAIR,INK);              /* divisória Z | X */
+      fill(ctx,x3-HAIR,y,HAIR,h-HAIR,INK);              /* divisória | Dano */
+      fill(ctx,OUT,y+meia-HAIR,cdW-HAIR,HAIR,INK);      /* meia-linha só nas coordenadas */
+      cellLV(ctx,OUT,y,coW-HAIR,'Zi (mm)',s.z1,12,{max:36});
+      cellLV(ctx,x2,y,coW-HAIR,'Xi (mm)',s.x1,12,{max:36});
+      cellLV(ctx,OUT,y+meia,coW-HAIR,'Zf (mm)',s.z2,12,{max:36});
+      cellLV(ctx,x2,y+meia,coW-HAIR,'Xf (mm)',s.x2,12,{max:36});
+      cellLV(ctx,x3,y,dnW,'Dano',s.dano,11,dano);
     }
   });
 
-  /* 7 ─ Dano — linha inteira.
-     Antes dividia o terço final com Xi/Xf e saía em 9 px, quebrando em três ou
-     quatro linhas; com a largura toda o texto cabe em 11 px e lê na foto. */
-  var dano={lhf:1.3,max:22};
-  B.push({
-    h:Math.max(28, cellLVh(IW,s.dano,11,dano)+HAIR),
-    draw:function(ctx,y){
-      cellLV(ctx,OUT,y,IW,'Dano',s.dano,11,dano);
-    }
-  });
-
-  /* 8 ─ Lado/Localização (6 caixas) | Equipe */
-  var cbW=178, eqW=IW-cbW, eqO={padX:6,padY:4,mb:3,lhf:1.6,upper:true,max:16};
+  /* 6 ─ Lado/Localização | Equipe | Régua, tudo na mesma faixa */
+  var cbW=Math.round(IW*0.30), rgW=Math.round(IW*0.34), eqW=IW-cbW-rgW;
+  var eqO={padX:10,padY:5,mb:2,lhf:1.5,upper:true,max:22};
   var CB=[['PS/UP',s.ps],['BA/LE',s.ba],['SS/Down',s.ss],
           ['BF/TE',s.bf],['Interno',s.int],['Externo',s.ext]];
-  var CBTAM=15, CBFONTE=13, CBPASSO=20;             /* caixa, fonte e passo entre linhas */
-  var gridH=3*CBTAM+2*(CBPASSO-CBTAM);            /* 3 linhas + 2 vaos */
+  var CBTAM=20, CBFONTE=17, CBPASSO=26;
+  var gridH=3*CBTAM+2*(CBPASSO-CBTAM);
   B.push({
-    h:Math.max(76, gridH+8+HAIR, cellLVh(eqW,s.equipe,9,eqO)+HAIR),
+    h:Math.max(92, gridH+14+HAIR, cellLVh(eqW,s.equipe,9,eqO)+HAIR), noline:true,
     draw:function(ctx,y,h){
-      var ch=h-HAIR, x2=OUT+cbW;
+      var ch=h-HAIR, x2=OUT+cbW, x3=x2+eqW;
       fill(ctx,x2-HAIR,y,HAIR,ch,INK);
-      var colW=(cbW-HAIR-12-4)/2, gy=y+(ch-gridH)/2;   /* align-content:center */
+      fill(ctx,x3-HAIR,y,HAIR,ch,INK);
+      var colW=(cbW-HAIR-20-6)/2, gy=y+(ch-gridH)/2;
       CB.forEach(function(it,i){
-        var cx=OUT+6+(i%2)*(colW+4), cy=gy+Math.floor(i/2)*CBPASSO;
+        var cx=OUT+10+(i%2)*(colW+6), cy=gy+Math.floor(i/2)*CBPASSO;
         checkbox(ctx,cx,cy,!!it[1],CBTAM);
-        line(ctx,it[0],cx+CBTAM+4,cy,CBFONTE,true,'left',CBTAM);
+        line(ctx,it[0],cx+CBTAM+6,cy,CBFONTE,true,'left',CBTAM);
       });
       cellLV(ctx,x2,y,eqW,'Equipe',s.equipe,9,eqO);
+      ruler(ctx,x3+12,y+(ch-42)/2+6,rgW-40);
     }
   });
 
-  /* 9 ─ Régua — último bloco, sem divisória embaixo (a borda externa fecha) */
-  B.push({ h:5+30+6, noline:true, draw:function(ctx,y){ ruler(ctx,OUT+8,y+5,296); } });
-
   var H=OUT*2; B.forEach(function(b){ H+=b.h; });
+
   return {w:W,h:H,blocks:B};
 }
 
