@@ -362,7 +362,7 @@ var curState={}, camStream=null, facingMode='environment', isOnline=navigator.on
    olhando o celular, se o aparelho já está com o código novo — foi por não ter
    isso que um upload defasado passou batido. Ao alterar este arquivo, mude aqui
    e no CACHE do sw.js. */
-var APP_VERSAO = 'v37 · 18/08/2026';
+var APP_VERSAO = 'v38 · 18/08/2026';
 
 /* ─── Service Worker ─── */
 (function(){
@@ -1877,8 +1877,8 @@ function aprovarFoto(){
 /* ═══ CARREGAR FOTO DA GALERIA ═══
    Para a foto que já foi tirada pela câmera do celular: recebe o mesmo card e
    o mesmo carimbo, e segue pelo mesmo caminho de revisão e envio.
-   A data usada é a do ARQUIVO, não a de hoje — foto de ontem sai com a data de
-   ontem, no card e no carimbo. */
+   O carimbo e a Data do card usam o RELÓGIO DO CELULAR no instante em que a
+   foto é escolhida — não a data de criação do arquivo. */
 function abrirGaleria(){
   if(!exigePreenchimento('carregar uma foto')) return;
   var inp=document.getElementById('f-galeria');
@@ -1904,8 +1904,12 @@ async function importarDaGaleria(input){
     var ctx=main.getContext('2d');
     ctx.drawImage(bmp,0,0,vw,vh);
 
-    /* Data do arquivo — no card e no carimbo */
-    var d=file.lastModified ? new Date(file.lastModified) : new Date();
+    /* Data e hora do RELÓGIO DO CELULAR, no momento em que a foto é escolhida.
+       Não é a data do arquivo nem hora de servidor: é exatamente o que o
+       aparelho está marcando agora — o mesmo new Date() que a câmera do app já
+       usa, então foto tirada no app e foto trazida da galeria carimbam do mesmo
+       jeito. Vale para o carimbo do rodapé e para a Data do card. */
+    var d=new Date();
     var p2=function(n){ return n<10?'0'+n:''+n; };
     var estado=Object.assign({},curState,{data:p2(d.getDate())+'/'+p2(d.getMonth()+1)+'/'+d.getFullYear()});
 
